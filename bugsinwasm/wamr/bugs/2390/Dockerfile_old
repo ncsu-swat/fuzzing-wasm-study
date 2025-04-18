@@ -1,0 +1,39 @@
+FROM localhost:5000/img-wamr
+
+# Set llvm path
+ENV PATH=${LLVM_14_INSTALL}/bin:$PATH
+
+# Set the working directory
+WORKDIR /wasm-micro-runtime
+
+# Checkout specific commit
+RUN git checkout 1cafa37
+
+# Build WAMR
+RUN (cd product-mini/platforms/linux && \
+    mkdir build && \
+    cd build && \
+    cmake  -DWAMR_BUILD_INTERP=1 -DWAMR_BUILD_REF_TYPES=1 -DWASM_ENABLE_SIMD=1 -DWASM_ENABLE_BULK_MEMORY=1 -DWAMR_BUILD_AOT=0 -DCMAKE_BUILD_TYPE=Debug -DWAMR_BUILD_FAST_INTERP=0 -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_BUILTIN=1 .. && \
+    make -j)
+
+# Build WAMRC
+RUN (cd wamr-compiler && \
+    mkdir build && \
+    cd build && \
+    cmake -DWAMR_BUILD_WITH_CUSTOM_LLVM=1 .. && \
+    make -j)
+
+# Copy bug files
+COPY ./ /bugs/2390
+
+# Setup workspace
+RUN mkdir -p /testcases
+RUN mkdir -p /repro
+COPY --from=reprodir /crash_analyzer.sh /repro
+COPY --from=reprodir /dedup/* /repro
+
+# Setup workspace
+WORKDIR /repro
+
+# By default, run the entry script and keep container running for later inspection
+CMD ["bash", "-c", "./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null"]

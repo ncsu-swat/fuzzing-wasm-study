@@ -1,0 +1,1 @@
+wasmedge --reactor /bugs/2743/memory.init_WasmEdge_crash.wasm to_test

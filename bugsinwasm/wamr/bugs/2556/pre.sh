@@ -1,0 +1,1 @@
+wamrc -o file7.wasm.aot /bugs/2556/file7.wasm

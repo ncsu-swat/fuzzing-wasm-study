@@ -1,0 +1,1 @@
+iwasm --stack-size=160000 -f main <testcase>
