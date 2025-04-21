@@ -1,0 +1,1 @@
+wasmer --singlepass /bugs/2159/test.wasm

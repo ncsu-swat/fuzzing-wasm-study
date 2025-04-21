@@ -1,0 +1,1 @@
+wasmtime -W all-proposals=y --invoke main /bugs/9669/test.wasm
