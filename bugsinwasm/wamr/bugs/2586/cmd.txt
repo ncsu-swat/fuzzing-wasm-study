@@ -1,0 +1,1 @@
+iwasm -f main /bugs/2586/crash.wasm 0 0 0

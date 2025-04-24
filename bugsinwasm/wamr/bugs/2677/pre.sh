@@ -1,0 +1,1 @@
+wamrc --bounds-checks=1 -o filea8.aot /bugs/2677/filea8.wasm

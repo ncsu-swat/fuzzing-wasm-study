@@ -1,0 +1,1 @@
+iwasm /bugs/2577/shrunk.wasm 

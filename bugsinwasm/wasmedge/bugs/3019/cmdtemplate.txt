@@ -1,0 +1,2 @@
+wasmedge compile <testcase> <testcase>.aot
+wasmedge --reactor <testcase>.aot main
