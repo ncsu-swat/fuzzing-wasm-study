@@ -1,0 +1,1 @@
+wasmer run --enable-all --mapdir /dir:. /bugs/4899/symlink/target/wasm32-wasip1/debug/symlink.wasm

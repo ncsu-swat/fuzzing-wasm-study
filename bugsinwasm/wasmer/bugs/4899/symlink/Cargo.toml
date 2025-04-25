@@ -1,0 +1,7 @@
+[package]
+name = "symlink"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wasi = { version = "0.11.0", features = ["std"] }
