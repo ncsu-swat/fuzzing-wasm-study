@@ -1,0 +1,7 @@
+Error: failed to run main module `test.wasm`
+
+Caused by:
+    0: failed to instantiate "test.wasm"
+    1: error while executing at wasm backtrace:
+           0:   0x28 - <unknown>!char
+    2: wasm trap: allocation size too large
