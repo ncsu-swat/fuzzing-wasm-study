@@ -1,0 +1,1 @@
+iwasm --heap-size=0 --llvm-jit -f main <testcase>

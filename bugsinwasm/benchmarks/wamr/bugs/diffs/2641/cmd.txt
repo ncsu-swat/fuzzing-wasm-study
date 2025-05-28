@@ -1,0 +1,1 @@
+iwasm --llvm-jit /bugs/2641/case.wasm

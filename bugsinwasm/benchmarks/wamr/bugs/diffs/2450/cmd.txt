@@ -1,0 +1,1 @@
+iwasm --heap-size=0 -f main /bugs/2450/file1.wasm

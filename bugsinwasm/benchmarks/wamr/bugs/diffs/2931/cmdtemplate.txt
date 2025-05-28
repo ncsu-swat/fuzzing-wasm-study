@@ -1,0 +1,2 @@
+iwasm --fast-jit <testcase>
+echo $?
