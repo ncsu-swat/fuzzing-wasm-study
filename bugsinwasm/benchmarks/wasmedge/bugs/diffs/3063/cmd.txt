@@ -1,0 +1,1 @@
+wasmedge --reactor filea29176_1.aot main

@@ -1,0 +1,5 @@
+execution failed: out of bounds memory access, Code: 0x408
+Accessing offset from: 0xfffffffa to: 0x100000001 , Out of boundary: 0xffffffff
+In instruction: i64.store (0x32) , Bytecode offset: 0x00000059
+calling stack:0
+When executing function name: "main"
