@@ -1,0 +1,478 @@
+{
+  "wasmtime": {
+    "2754": {
+
+    },
+    "9669": {
+
+    },
+    "10182": {
+
+    },
+    "10397": {
+
+    },
+    "10398": {
+
+    },
+    "10399": {
+
+    },
+    "10459": {
+
+    },
+    "10464": {
+
+    }
+  },
+  "wasmer": {
+    "2159": {
+
+    },
+    "2187": {
+      
+    },
+    "4899": {
+
+    },
+    "5309": {
+
+    }
+  },
+  "wamr": {
+    "212": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/212",
+      "testcase": "main4.wasm",
+      "commit": "01e8514",
+      "pre": [
+
+      ],
+      "cmd": "iwasm --stack-size=160000 -f main /bugs/212/main4.wasm 0 0",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "iwasm --stack-size=160000 -f main <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2390": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2390",
+      "testcase": "table.fill_247.wasm",
+      "commit": "1cafa37",
+      "pre": [
+
+      ],
+      "cmd": "iwasm --heap-size=0 -f to_test /bugs/2390/table.fill_247.wasm",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "iwasm --heap-size=0 -f main <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug -DWAMR_BUILD_INTERP=1 -DWAMR_BUILD_REF_TYPES=1 -DWASM_ENABLE_SIMD=1 -DWASM_ENABLE_BULK_MEMORY=1 -DWAMR_BUILD_AOT=0 -DWAMR_BUILD_FAST_INTERP=0 -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_BUILTIN=1 ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2556": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2556",
+      "testcase": "file7.wasm",
+      "commit": "d0fb271",
+      "pre": [
+        "wamrc -o file7.wasm.aot /bugs/2556/file7.wasm"
+      ],
+      "cmd": "iwasm --heap-size=0 -f main file7.wasm.aot",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "wamrc -o <testcase>.aot <testcase>",
+        "iwasm --heap-size=0  -f main <testcase>.aot"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug ..",
+          "RUN make -j",
+          "WORKDIR /wasm-micro-runtime/wamr-compiler",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/wamr-compiler/build",
+          "RUN cmake -DWAMR_BUILD_WITH_CUSTOM_LLVM=1 ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2577": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2577",
+      "testcase": "shrunk.wasm",
+      "commit": "d0fb271",
+      "pre": [
+        
+      ],
+      "cmd": "iwasm /bugs/2577/shrunk.wasm",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "iwasm <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2586": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2586",
+      "testcase": "crash.wasm",
+      "commit": "d0fb271",
+      "pre": [
+        
+      ],
+      "cmd": "iwasm -f main /bugs/2586/crash.wasm 0 0 0",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "iwasm -f main <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2646": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2646",
+      "testcase": "case.wasm",
+      "commit": "f69ff70",
+      "pre": [
+        
+      ],
+      "cmd": "iwasm --llvm-jit /bugs/2646/case.wasm",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "iwasm --llvm-jit -f main <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=/opt/llvm-14 -DWAMR_BUILD_JIT=1 ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2677": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2677",
+      "testcase": "filea8.wasm",
+      "commit": "f69ff70",
+      "pre": [
+        "wamrc --bounds-checks=1 -o filea8.aot /bugs/2677/filea8.wasm"
+      ],
+      "cmd": "iwasm --heap-size=0 -f main /bugs/2677/filea8.aot",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "wamrc --bounds-checks=1 -o <testcase>.aot <testcase>",
+        "iwasm --heap-size=0 -f main <testcase>.aot"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug ..",
+          "RUN make -j",
+          "WORKDIR /wasm-micro-runtime/wamr-compiler",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/wamr-compiler/build",
+          "RUN cmake -DWAMR_BUILD_WITH_CUSTOM_LLVM=1 ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2942": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2942",
+      "testcase": "iwasm_jit_without_exception.wasm",
+      "commit": "fa2f29f",
+      "pre": [
+        
+      ],
+      "cmd": "iwasm --heap-size=0 --llvm-jit -f to_test /bugs/2942/iwasm_jit_without_exception.wasm",
+      "error": "Segmentation fault",
+      "testcmd": [
+        "iwasm --heap-size=0 --llvm-jit -f main <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=/opt/llvm-14 -DWAMR_BUILD_AOT=1 -DWAMR_BUILD_JIT=1 -DWAMR_BUILD_FAST_JIT=0  -DWAMR_BUILD_REF_TYPES=1 -DWASM_ENABLE_BULK_MEMORY=1 -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_BUILTIN=1 -DWAMR_BUILD_SIMD=1 ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    },
+    "2945": {
+      "path": "${BUGSINWASM_HOME}/wamr/bugs/2945",
+      "testcase": "iwasm_fast_interp_moob_unhandled.wasm",
+      "commit": "92bf854",
+      "pre": [
+        
+      ],
+      "cmd": "iwasm --heap-size=0 -f to_test /bugs/2945/iwasm_fast_interp_moob_unhandled.wasm",
+      "error": "Aborted",
+      "testcmd": [
+        "iwasm --heap-size=0 -f main <testcase>"
+      ],
+      "timeout": "2",
+      "docker": {
+        "preamble": [
+          "FROM localhost:5000/img-wamr",
+          "ENV PATH=${LLVM_14_INSTALL}/bin:$PATH"
+        ],
+        "setup_runtime": [
+          "WORKDIR /wasm-micro-runtime",
+          "RUN git checkout <commit_sha>"
+        ],
+        "build_runtime": [
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux",
+          "RUN mkdir build",
+          "WORKDIR /wasm-micro-runtime/product-mini/platforms/linux/build",
+          "RUN cmake -DCMAKE_BUILD_TYPE=Debug -DWAMR_BUILD_INTERP=1 -DWAMR_BUILD_REF_TYPES=1 -DWAMR_BUILD_SIMD=1 -DWASM_ENABLE_BULK_MEMORY=1 -DWAMR_BUILD_AOT=0 -DWAMR_BUILD_FAST_INTERP=1 -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_BUILTIN=1 ..",
+          "RUN make -j"
+        ],
+        "setup_bug": [
+          "COPY <bug_path_host> <bug_path_container>"
+        ],
+        "setup_workspace": [
+          "RUN mkdir -p /testcases",
+          "RUN mkdir -p /repro",
+          "COPY --from=reprodir /crash_analyzer.sh /repro",
+          "COPY --from=reprodir /dedup/* /repro",
+          "COPY --from=reprodir /crashes.json /repro",
+          "WORKDIR /repro"
+        ],
+        "init_cmd": [
+          "CMD [\"bash\", \"-c\", \"./crash_analyzer.sh; echo '[info] Finished running crash_analyzer.sh'; exec tail -f /dev/null\"]"
+        ]
+      }
+    }
+  },
+  "wasmedge": {
+    "2743": {
+
+    },
+    "2744": {
+
+    },
+    "2745": {
+      
+    },
+    "3019": {
+
+    },
+    "3040": {
+
+    }
+  }
+}

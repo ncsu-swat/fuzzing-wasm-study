@@ -1,0 +1,1 @@
+wasmer run test-implicit.wasm --enable-all --invoke _start
