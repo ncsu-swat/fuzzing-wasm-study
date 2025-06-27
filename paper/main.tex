@@ -1,0 +1,31 @@
+The fuzzer (6 fuzzer)
+Specification-driven: WaDiff
+Mutational: Wasmaker, Wapplique // AFL++, libFuzzer, hongFuzz
+  %% Regression Tests from Other Languages (e.g. C, C++, Rust, Go, Python)
+  %% WasmBench
+  %% BugBench
+  %% GlueBasedWasms (wasmtime, wasmer, wamr, wasmedge, browsers)
+Generational (structure-aware): WasmSmith
+LLM-based: DrWasi, LwDiff
+===
+
+RQ1: Can existing fuzzers find real-world bugs?
+(i.e., reproduce known bugs from various runtimes)
+
+RQ2: How fuzzers compare with respect to standard performance metrics?
+(i.e., coverage and number of unique crashes)
+
+%% Longitudinal study (we run all the fuzzers and pre-generate all the testcases - every 2 weeks, we test the runtime HEADs on these test cases)
+
+Discussion:
+
+What are the contrasting features from real-world bugs (RQ1) compared
+to bug-revealing inputs (RQ2)?
+
+
+--- Food for thought
+What maintainers think of bug-revealing input produced by fuzzers?
+(Why real-world bugs look different?)
+
+Can an LLM guided by discriminating features from real-world bugs
+perform better (in terms of developer acceptance of bug reports)?
