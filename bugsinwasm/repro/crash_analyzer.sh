@@ -5,55 +5,57 @@ shopt -s nullglob
 
 run_command() {
   local cmd="$1"
+  local timeout_s="$2"
   local cmdname="${cmd%% *}"
   
   local output
-  output=$(timeout -s SIGKILL --foreground 10 bash -c "$cmd" 2>&1)
+  output=$(timeout -s SIGKILL --foreground $timeout_s bash -c "$cmd" & 2>&1)
   local exit_status=$?
 
   if [[ $exit_status -eq 124 ]]; then
     # Exit code 124 indicates the timeout was reached
     output="timeout"
   elif [[ $exit_status -eq 139 ]]; then
-    output="Segmentation fault"
+    if [[ -z "$output" || "$output" == *"dumped core"* ]]; then
+      output="Segmentation fault"
+    fi
   elif [[ $exit_status -eq 134 ]]; then
-    output="Aborted"
+    if [[ -z "$output" || "$output" == *"dumped core"* ]]; then
+      output="Aborted"
+    fi
+  elif [[ $exit_status -eq 132 ]]; then
+    if [[ -z "$output" || "$output" == *"dumped core"* ]]; then
+      output="Illegal instruction"
+    fi
   elif [[ $exit_status -ne 0 ]]; then
     # echo "Error: Command failed"
     :
   fi
 
-  echo "$output"
+  postprocess_common "$cmdname" "$output"
 }
 export -f run_command
 
-# Main
-cmdfile="$1"
+# ==================================================================================================================
 
-rm -rf output 2&>/dev/null && mkdir -p output
+get_progpath() {
+  cmd="$1"
+  prog_path="$(echo $cmd | tail -n 1 | awk '{print $1}')"
 
-# fuzzers=("WaDiff" "Wapplique" "WASMaker")
-fuzzers=("WASMaker")
+  echo "$prog_path"
+}
 
-for bug in /bugs/*; do
-  echo -e "\n============================================================================"
-  echo -e "Bug: $bug"
-  echo -e "============================================================================\n"
+get_progargs() {
+  cmd="$1"
+  prog_ref_args="$(echo $cmd | tail -n 1 | awk '{$1=""; sub(/^ /, ""); print}')"
 
-  bugnum="${bug##*/}"
+  echo "$prog_ref_args"
+}
 
-  mkdir -p /repro/output/$bugnum
+get_progpathfilter() {
+  prog_path="$1"
 
-  # satisfy preconditions if any
-  if [ -f "$bug/pre.sh" ]; then
-    bash "$bug/pre.sh"
-  fi
-
-  # set variables for running trace.sh later
-  prog_path="$(cat $bug/cmd.txt | tail -n 1 | awk '{print $1}')"
-  prog_ref_args="$(cat $bug/cmd.txt | tail -n 1 | awk '{$1=""; sub(/^ /, ""); print}')"
   prog_path_filter=""
-  trace_out_file="$bugnum-ref.txt"
   if [[ $prog_path == "wasmtime" ]]; then
     prog_path_filter="/wasmtime"
   elif [[ $prog_path == "wasmer" ]]; then
@@ -64,8 +66,17 @@ for bug in /bugs/*; do
     prog_path_filter="/WasmEdge"
   fi
 
-  # generate reference stack trace
-  ref_trace=""  
+  echo "$prog_path_filter"
+}
+
+ref_trace() {
+  cmd="$1"
+  bugnum="$2"
+
+  prog_path=$(get_progpath "$cmd")
+  prog_ref_args=$(get_progargs "$cmd")
+  prog_path_filter=$(get_progpathfilter "$prog_path")
+  trace_out_file="$bugnum-ref.txt"
 
   # echo $prog_path
   # echo $prog_ref_args
@@ -74,42 +85,99 @@ for bug in /bugs/*; do
 
   bash trace.sh "$prog_path" "$prog_ref_args" "$prog_path_filter" "$trace_out_file"
   ref_trace=$(cat $trace_out_file)
-  echo -e "\nREF TRACE:\n===========\n$ref_trace\n"
+  
+  echo "$ref_trace"
+}
+export -f ref_trace
 
-  # run testcases from each fuzzer
-  echo -e "\n============================================================================"
-  echo -e "\n RUNNING FUZZ-CASES"
-  echo -e "\n============================================================================"
+test_trace() {
+  cmd="$1"
+  cmdtemplate="$2"
+  bugnum="$3"
 
-  for fuzzer in "${fuzzers[@]}"; do
-    mkdir -p /repro/output/$bugnum/$fuzzer
-    for testcase in /testcases/$fuzzer/*.wasm; do
-      testcase_filename="${testcase##*/}"
-      testcase_filename="${testcase_filename/.wasm/}"
-      
-      echo -e "\nTestcase: $testcase_filename\n"
-      while IFS= read -r line || [[ -n "$line" ]]; do
-        cmdtemplate="${line//<testcase>/$testcase}"
-        out=$(run_command "$cmdtemplate")
+  prog_path=$(get_progpath "$cmd")
+  prog_test_args=$(get_progargs "$cmdtemplate")
+  prog_path_filter=$(get_progpathfilter "$prog_path")
+  trace_out_file="$bugnum-$fuzzer-$testcase_filename.txt"
 
-        if [[ "$out" == *"Aborted"* || "$out" == *"Segmentation fault"* || "$out" == *"panic"* ]]; then
-          echo -e "\nMatch"
+  bash trace.sh "$prog_path" "$prog_test_args" "$prog_path_filter" "$trace_out_file"
+  test_trace=$(cat $trace_out_file)
+  
+  echo "$test_trace"
+}
+export -f test_trace
 
-          # generate the stack trace for this test case
-          prog_test_args=$(echo $cmdtemplate | tail -n 1 | awk '{$1=""; sub(/^ /, ""); print}')
-          trace_out_file="$bugnum-$fuzzer-$testcase_filename.txt"
+# ==================================================================================================================
 
-          bash trace.sh "$prog_path" "$prog_test_args" "$prog_path_filter" "$trace_out_file"
-          trace=$(cat $trace_out_file)
-          echo -e "\nTRACE:\n=======\n$trace\n"
+# Main
+cmdfile="$1"
+crash_config_file="crashes.json"
+runtime=`cat /identity/runtime.txt`
+bugnum=`cat /identity/bugnum.txt`
 
-          if [[ "$ref_trace" == "$trace" ]]; then
-            echo $out > /repro/output/$bugnum/$fuzzer/$testcase_filename.txt
-            echo -e "\nTrace:\n$trace" >> /repro/output/$bugnum/$fuzzer/$testcase_filename.txt
-            echo -e "\nTrace match. Reproduction successful.\n"
-          fi
+readarray -t pre < <(jq -r --arg runtime "$runtime" --arg bugnum "$bugnum" '.[$runtime][$bugnum].pre[]' $diff_config_file)
+cmd=`jq -r --arg runtime "$runtime" --arg bugnum "$bugnum" '.[$runtime][$bugnum].cmd' $diff_config_file`
+error=`jq -r --arg runtime "$runtime" --arg bugnum "$bugnum" '.[$runtime][$bugnum].error' $diff_config_file`
+readarray -t testcmd < <(jq -r --arg runtime "$runtime" --arg bugnum "$bugnum" '.[$runtime][$bugnum].test_cmd[]' $diff_config_file)
+timeout_s=`jq -r --arg runtime "$runtime" --arg bugnum "$bugnum" '.[$runtime][$bugnum].timeout' $diff_config_file`
+
+# echo "Pre: ${pre[@]}"
+# echo "Command: $cmd"
+# echo "Error: $error"
+# echo "Test Command: ${testcmd[@]}"
+# echo "Timeout: $timeout_s"
+
+# Satisfy preconditions
+for pre_cmd in "${pre[@]}"; do
+  _pre_cmd="${pre_cmd//<bugnum>/$bugnum}"
+  eval "$_pre_cmd"
+done
+
+rm -rf output 2&>/dev/null && mkdir -p output
+
+# ==================================================================================================================
+
+# fuzzers=("WaDiff" "Wapplique" "WASMaker" "WasmSmith")
+fuzzers=("WASMaker")
+
+echo -e "\n============================================================================"
+echo -e "Bug: $bugnum"
+echo -e "============================================================================\n"
+
+# run testcases from each fuzzer
+echo -e "\n============================================================================"
+echo -e "\n RUNNING FUZZ-CASES"
+echo -e "\n============================================================================"
+
+for fuzzer in "${fuzzers[@]}"; do
+  shortlist_path="/repro/output/$fuzzer"
+  mkdir -p $shortlist_path
+  for testcase in /testcases/$fuzzer/*.wasm; do
+    testcase_filename="${testcase##*/}"
+    testcase_filename="${testcase_filename/.wasm/}"
+    
+    echo -e "\nTestcase: $testcase_filename\n"
+    for i in "${!testcmd[@]}"; do
+      _testcmd="${testcmd[i]//<testcase>/$testcase}"
+      # echo "TESTCMD: $_testcmd"
+      test_out=$(run_command "$_testcmd" "$timeout_s")
+      # echo "TESTOUT: $test_out"
+
+      if [[ "$test_out" == *"Aborted"* || "$test_out" == *"Segmentation fault"* || "$test_out" == *"panic"* ]]; then
+        echo -e "\nMatch"
+        
+        # # shortlist for later triage
+        # echo "$_testcmd" > $shortlist_path/$testcase_filename.txt
+
+        ref_trace=$(ref_trace "$cmd" "$bugnum")
+        test_trace=$(test_trace "$cmd" "$_testcmd" "$bugnum")
+
+        if [[ "$ref_trace" == "$test_trace" ]]; then
+          echo $test_out > /repro/output/$bugnum/$fuzzer/$testcase_filename.txt
+          echo -e "\nTrace:\n$test_trace" >> /repro/output/$bugnum/$fuzzer/$testcase_filename.txt
+          echo -e "\nTrace match. Reproduction successful.\n"
         fi
-      done < "$bug/cmdtemplate.txt"
+      fi
     done
   done
 done
