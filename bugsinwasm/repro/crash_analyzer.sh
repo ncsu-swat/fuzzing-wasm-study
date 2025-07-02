@@ -144,6 +144,9 @@ echo -e "\n=====================================================================
 echo -e "Bug: $bugnum"
 echo -e "============================================================================\n"
 
+# Generate reference stack trace only once at the beginning
+ref_trace=$(ref_trace "$cmd" "$bugnum")
+
 # run testcases from each fuzzer
 echo -e "\n============================================================================"
 echo -e "\n RUNNING FUZZ-CASES"
@@ -169,7 +172,6 @@ for fuzzer in "${fuzzers[@]}"; do
         # # shortlist for later triage
         # echo "$_testcmd" > $shortlist_path/$testcase_filename.txt
 
-        ref_trace=$(ref_trace "$cmd" "$bugnum")
         test_trace=$(test_trace "$cmd" "$_testcmd" "$bugnum")
 
         if [[ "$ref_trace" == "$test_trace" ]]; then
