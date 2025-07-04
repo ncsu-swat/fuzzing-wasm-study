@@ -1,0 +1,5 @@
+claripy==9.2.33
+leb128==1.0.8
+numpy==2.2.6
+chardet==5.2.0
+tqdm==4.4.1

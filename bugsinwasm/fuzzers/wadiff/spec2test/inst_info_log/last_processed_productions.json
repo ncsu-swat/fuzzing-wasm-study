@@ -1,0 +1,330 @@
+{
+    "nn": [
+        "32",
+        "64"
+    ],
+    "mm": [
+        "32",
+        "64"
+    ],
+    "sx": [
+        "u",
+        "s"
+    ],
+    "iunop": [
+        "clz",
+        "ctz",
+        "popcnt"
+    ],
+    "ibinop": [
+        "add",
+        "sub",
+        "mul",
+        "div_u",
+        "div_s",
+        "rem_u",
+        "rem_s",
+        "and",
+        "or",
+        "xor",
+        "shl",
+        "shr_u",
+        "shr_s",
+        "rotl",
+        "rotr"
+    ],
+    "funop": [
+        "abs",
+        "neg",
+        "sqrt",
+        "ceil",
+        "floor",
+        "trunc",
+        "nearest"
+    ],
+    "fbinop": [
+        "add",
+        "sub",
+        "mul",
+        "div",
+        "min",
+        "max",
+        "copysign"
+    ],
+    "itestop": [
+        "eqz"
+    ],
+    "irelop": [
+        "eq",
+        "ne",
+        "lt_u",
+        "lt_s",
+        "gt_u",
+        "gt_s",
+        "le_u",
+        "le_s",
+        "ge_u",
+        "ge_s"
+    ],
+    "frelop": [
+        "eq",
+        "ne",
+        "lt",
+        "gt",
+        "le",
+        "ge"
+    ],
+    "unop": [
+        "clz",
+        "ctz",
+        "popcnt",
+        "abs",
+        "neg",
+        "sqrt",
+        "ceil",
+        "floor",
+        "trunc",
+        "nearest",
+        "extend8_s",
+        "extend16_s",
+        "extend32_s"
+    ],
+    "binop": [
+        "add",
+        "sub",
+        "mul",
+        "div_u",
+        "div_s",
+        "rem_u",
+        "rem_s",
+        "and",
+        "or",
+        "xor",
+        "shl",
+        "shr_u",
+        "shr_s",
+        "rotl",
+        "rotr",
+        "add",
+        "sub",
+        "mul",
+        "div",
+        "min",
+        "max",
+        "copysign"
+    ],
+    "testop": [
+        "eqz"
+    ],
+    "relop": [
+        "eq",
+        "ne",
+        "lt_u",
+        "lt_s",
+        "gt_u",
+        "gt_s",
+        "le_u",
+        "le_s",
+        "ge_u",
+        "ge_s",
+        "eq",
+        "ne",
+        "lt",
+        "gt",
+        "le",
+        "ge"
+    ],
+    "cvtop": [
+        "wrap",
+        "extend",
+        "trunc",
+        "trunc_sat",
+        "convert",
+        "demote",
+        "promote",
+        "reinterpret"
+    ],
+    "ishape": [
+        "i8x16",
+        "i16x8",
+        "i32x4",
+        "i64x2"
+    ],
+    "fshape": [
+        "f32x4",
+        "f64x2"
+    ],
+    "shape": [
+        "i8x16",
+        "i16x8",
+        "i32x4",
+        "i64x2",
+        "f32x4",
+        "f64x2"
+    ],
+    "half": [
+        "low",
+        "high"
+    ],
+    "laneidx": [
+        "u8"
+    ],
+    "vvunop": [
+        "not"
+    ],
+    "vvbinop": [
+        "and",
+        "andnot",
+        "or",
+        "xor"
+    ],
+    "vvternop": [
+        "bitselect"
+    ],
+    "vvtestop": [
+        "any_true"
+    ],
+    "vitestop": [
+        "all_true"
+    ],
+    "virelop": [
+        "eq",
+        "ne",
+        "lt_u",
+        "lt_s",
+        "gt_u",
+        "gt_s",
+        "le_u",
+        "le_s",
+        "ge_u",
+        "ge_s"
+    ],
+    "vfrelop": [
+        "eq",
+        "ne",
+        "lt",
+        "gt",
+        "le",
+        "ge"
+    ],
+    "viunop": [
+        "abs",
+        "neg"
+    ],
+    "vibinop": [
+        "add",
+        "sub"
+    ],
+    "viminmaxop": [
+        "min_u",
+        "min_s",
+        "max_u",
+        "max_s"
+    ],
+    "visatbinop": [
+        "add_sat_u",
+        "add_sat_s",
+        "sub_sat_u",
+        "sub_sat_s"
+    ],
+    "vishiftop": [
+        "shl",
+        "shr_u",
+        "shr_s"
+    ],
+    "vfunop": [
+        "abs",
+        "neg",
+        "sqrt",
+        "ceil",
+        "floor",
+        "trunc",
+        "nearest"
+    ],
+    "vfbinop": [
+        "add",
+        "sub",
+        "mul",
+        "div",
+        "min",
+        "max",
+        "pmin",
+        "pmax"
+    ],
+    "vunop": [
+        "abs",
+        "neg",
+        "abs",
+        "neg",
+        "sqrt",
+        "ceil",
+        "floor",
+        "trunc",
+        "nearest",
+        "popcnt"
+    ],
+    "vbinop": [
+        "add",
+        "sub",
+        "add",
+        "sub",
+        "mul",
+        "div",
+        "min",
+        "max",
+        "pmin",
+        "pmax",
+        "min_u",
+        "min_s",
+        "max_u",
+        "max_s",
+        "add_sat_u",
+        "add_sat_s",
+        "sub_sat_u",
+        "sub_sat_s",
+        "mul",
+        "avgr_u",
+        "q15mulr_sat_s"
+    ],
+    "vtestop": [
+        "all_true"
+    ],
+    "vrelop": [
+        "eq",
+        "ne",
+        "lt_u",
+        "lt_s",
+        "gt_u",
+        "gt_s",
+        "le_u",
+        "le_s",
+        "ge_u",
+        "ge_s",
+        "eq",
+        "ne",
+        "lt",
+        "gt",
+        "le",
+        "ge"
+    ],
+    "vcvtop": [
+        "extend",
+        "trunc_sat",
+        "convert",
+        "demote",
+        "promote"
+    ],
+    "memarg": [
+        "\\ offset~u32, align~u32 \\"
+    ],
+    "ww": [
+        "8",
+        "16",
+        "32",
+        "64"
+    ],
+    "blocktype": [
+        "typeidx",
+        "valtype^?"
+    ]
+}
