@@ -1,3 +1,32 @@
+\documentclass[sigconf,review,anonymous]{acmart} 
+
+%%%%%
+%% We will need to add this in camera-ready
+%%%%%
+%% \setcopyright{none} % to remove the copyright notice
+%% \settopmatter{printacmref=false} % to remove the ACM Reference Format
+%% \renewcommand\footnotetextcopyrightpermission[1]{} % to remove copyright box
+
+\input{macros}
+
+%% add page numbers
+\pagestyle{plain}
+
+\begin{document}
+
+\title{???}
+
+\begin{abstract}
+...
+\end{abstract}
+
+\keywords{compilers, bug histories, mutational fuzzing}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
 The fuzzer (6 fuzzer)
 Specification-driven: WaDiff
 Mutational: Wasmaker, Wapplique // AFL++, libFuzzer, hongFuzz
@@ -29,3 +58,20 @@ What maintainers think of bug-revealing input produced by fuzzers?
 
 Can an LLM guided by discriminating features from real-world bugs
 perform better (in terms of developer acceptance of bug reports)?
+
+
+\section{Conclusions}
+\label{sec:conclusions}
+...
+
+\section*{Data Availability}
+...
+
+\onecolumn \begin{multicols}{2}
+%\balance
+\bibliographystyle{ACM-Reference-Format}
+%% \bibliography{references}
+\bibliography{ref,fuzzing}
+\end{multicols}
+
+\end{document}

@@ -1,0 +1,349 @@
+%%%%%%%%% PACKAGES
+%\usepackage{balance} % For balanced columns on the last page
+
+%%\usepackage{cite} <~~~ DO NOT USE THIS!!!
+%%% instead, use this to compress citations ~~~>
+\setcitestyle{numbers,sort&compress}
+
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{graphicx}
+\usepackage{rotate}
+%% \usepackage{url}
+%% \usepackage[hidelinks]{hyperref}
+\usepackage{breakurl}
+\usepackage{flushend}
+\usepackage{xspace}
+\usepackage[round-mode=places,round-precision=1,group-separator={,},group-minimum-digits={3},output-decimal-marker={.}, round-pad=false, exponent-mode = threshold, exponent-thresholds = -3:5, tight-spacing=true]{siunitx}
+\usepackage{subcaption}
+\usepackage{pgf}
+\usepackage{pgf-pie}
+\usepackage{bbding}
+\usepackage{pifont}
+\usepackage{seqsplit}
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm,compat=1.8}
+\usepackage{datetime2}
+
+% Tikz Figs
+\usepackage{tikz}
+\tikzset{>=latex}
+%\usepackage{pgf-umlsd} % for flow diagram
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{positioning}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,fill=black,text=white,inner sep=0.4pt] (char) {#1};}}
+
+\usepackage[framemethod=tikz]{mdframed}
+\mdfdefinestyle{mpdframe}{
+    frametitlebackgroundcolor   =black!15,
+    frametitlerule              =true,
+    roundcorner                 =3pt,
+    middlelinewidth             =1pt,
+    innermargin                 =0.6cm, % smaller makes box bigger
+    outermargin                 =-0.5cm,
+    innerleftmargin             =0.1cm,
+    innerrightmargin            =0cm,
+    innertopmargin              =0.1cm,
+    innerbottommargin           =0.1cm,
+    align=center
+}
+
+%%%%%%%%%% CHECKMARKS
+
+\newcommand{\cmark}{\color{blue}{\ding{51}}}
+\newcommand{\xmark}{\color{red}{\ding{55}}}
+
+%%%%%%%%%% CODE and MACROS
+
+\input{defs-code}
+\input{defs-logic}
+
+%%%%%%%%%% UNCLASSIFIED
+\newcommand{\Caption}[1]{\caption{#1}}
+\newcommand{\NA}{-}
+\newcommand{\specialcell}[2][c]{\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\newcommand{\DefMacro}[2]{%
+   \expandafter\newcommand\csname rmk-#1\endcsname{#2}%
+}
+\newcommand{\UseMacro}[1]{\csname rmk-#1\endcsname}
+
+\newcommand{\YC}{\textcolor{blue}{\textbf{+}}} %{$\checkmark$}}
+\newcommand{\NC}{\textcolor{red}{\textbf{-}}} %\textbf{$\times$}}}
+\newcommand{\MC}{\textcolor{magenta}{\textbf{$\pm$}}}
+
+
+
+\newcommand{\Comment}[1]{}
+\newcommand{\Boldface}[1]{\textbf{#1}}
+\newcommand{\Space}[1]{}
+
+\newcommand{\TODO}[1]{{\color{orange}{\bf TODO:} #1}}
+\newcommand{\Fix}[1]{\textcolor{red}{[[#1]]}}
+\newcommand{\Lingjun}[1]{\textcolor{purple}{[[Lingjun: #1]]}}
+\newcommand{\Mar}[1]{\textcolor{blue}{[[Marcelo: #1]]}}
+\newcommand{\ol}[1]{\textcolor{red}{[[Owolabi: #1]]}}
+\newcommand{\Alex}[1]{\textcolor{green}{[[Alex: #1]]}}
+
+\newcommand{\edit}[1]{#1}
+
+\newcommand{\MeanStd}[2]{#1$\pm$#2}
+\newcommand{\MeanStdSec}[2]{#1$\pm$#2 seconds}
+\newcommand{\plus}{$+$}
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+
+\newcommand{\MyPara}[1]{\vspace{1pt}\noindent\textbf{#1}.}
+\newcommand{\MyParaOnly}[1]{\noindent\textbf{#1}}
+\newcommand{\MyItPara}[1]{\noindent\textit{#1}.}
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+%\newcommand{\InputWithSpace}[1]{\bgroup\def\arraystretch{1.1}\input{#1}\egroup}
+\newcommand{\Code}[1]{{\small\ifmmode{\texttt{#1}}\else$\texttt{#1}$\fi}}
+\newcommand{\CodeIn}[1]{{\small\ifmmode{\mathtt{#1}}\else$\mathtt{#1}$\fi}}
+\newcommand{\ColorBack}[1]{%
+  \begingroup \setlength{\fboxsep}{0pt}% \colorbox{purple!20}{\reducedstrut#1\/}% \endgroup
+}
+
+%% % ----------
+%% % THIS BELOW COPIED FROM vkuncak/doc/vmcai09/defs.tex
+\definecolor{gray}{RGB}{211,211,211}
+
+%% % ----------
+%% % PAPER TEXT
+
+%% \newcommand{\PaperTitle}{Optimizing Runtime Verification during Software Testing by\Space{ Identifying and} De-Instrumenting Idempotently Monitored Methods}
+
+%% \newcommand{\PaperTitle}{Optimizing Runtime Verification during Software Testing by Finding and De-Instrumenting Idempotently Monitored Methods}
+
+%% \newcommand{\PaperTitle}{Understanding and De-instrumenting Idempotently Monitored Methods for Faster Runtime Verification}
+
+%% \newcommand{\PaperTitle}{Understanding and Exploiting Idempotently-Monitored Methods for Faster Runtime Verification during\Space{ Software} Testing}
+
+\newcommand{\PaperTitle}{Exploiting Idempotently Monitored Methods for Faster Runtime Verification during Software Testing}
+
+
+\newcommand{\RV}{RV\xspace}
+\newcommand{\specification}{spec\xspace}
+\newcommand{\specifications}{specs\xspace}
+\newcommand{\Specification}{Spec\xspace}
+\newcommand{\Specifications}{Specs\xspace}
+\newcommand{\spec}{spec\xspace}
+\newcommand{\specs}{specs\xspace}
+\newcommand{\Spec}{Spec\xspace}
+\newcommand{\Specs}{Specs\xspace}
+\newcommand{\oss}{open-source projects\xspace}
+\newcommand{\javamop}{JavaMOP\xspace}
+\newcommand{\github}{GitHub\xspace}
+%% \newcommand{\Tool}{\textsc{DEIMON}\xspace}
+%% \newcommand{\Tool}{\textsc{DEIDMON}\xspace}
+\newcommand{\x}{x\xspace}
+\newcommand{\Contrib}[1]{$\star$~#1}
+\newcommand{\CSC}{CSC\xspace}
+\newcommand{\CSCFull}{SynchronizedCollection\xspace}
+\newcommand{\MUI}{MUI\xspace}
+\newcommand{\MUIFull}{Map\_UnsafeIterator\xspace}
+\newcommand{\STHM}{STHM\xspace}
+\newcommand{\STHMFull}{StringTokenizer\_HasMoreElements\xspace}
+\newcommand{\RTS}{RTS\xspace}
+\newcommand{\RVTool}{RV tool\xspace}
+\newcommand{\version}{revision\xspace}
+\newcommand{\versions}{revisions\xspace}
+\newcommand{\IMM}{IMM\xspace}
+\newcommand{\IMMs}{IMMs\xspace}
+\newcommand{\Isolated}{\textsc{Isolated}\xspace}
+\newcommand{\NonIsolated}{\textsc{Non-Isolated}\xspace}
+\newcommand{\OneUnique}{\textsc{One Unique}\xspace}
+\newcommand{\MultipleUnique}{\textsc{Multiple Unique}\xspace}
+\newcommand{\SingleTrace}{\textsc{Single}\xspace}
+\newcommand{\Raw}{\textsc{Raw}\xspace}
+\newcommand{\NoRedundant}{\textsc{No Redundant}\xspace}
+\newcommand{\Sensitive}{\textsc{Sensitive}\xspace}
+
+\newcommand{\SQ}[1]{SQ#1\xspace}
+\newcommand{\SQs}{SQs\xspace}
+\newcommand{\RQ}[1]{RQ#1\xspace}
+\newcommand{\RQs}{RQs\xspace}
+
+\newcommand{\numTestMethods}{\#tests\xspace}
+\newcommand{\timeWithoutRV}{time\xspace}
+\newcommand{\timeWithRV}{$t^\textit{mop}$\xspace}
+\newcommand{\sloc}{SLOC\xspace}
+\newcommand{\scov}{$cov^s$\xspace}
+\newcommand{\bcov}{$cov^b$\xspace}
+\newcommand{\numCommits}{\#SHAs\xspace}
+\newcommand{\projectAge}{age\xspace}
+\newcommand{\numMonitors}{\#Mon\xspace}
+\newcommand{\numEvents}{\#Event\xspace}
+\newcommand{\numStars}{\#\FiveStar\xspace}
+\newcommand{\RepoURL}{{\small\url{https://anonymous.4open.science/r/IssueMut-ICSE2026-50E0/}}}
+\newcommand{\Identifier}{\textsc{\IMM Indentifier}\xspace}
+\newcommand{\Classifier}{\textsc{\IMM Classifier}\xspace}
+\newcommand{\Generator}{\textsc{Policy Generator}\xspace}
+\newcommand{\Transformer}{\textsc{Code Tranformer}\xspace}
+\newcommand{\instructions}{instrumentation configurations\xspace}
+
+\newenvironment{packed_itemize}{
+\vspace{-1ex}
+\begin{list}{\labelitemi}{\leftmargin=2.7em}
+ \setlength{\itemsep}{0pt}
+ \setlength{\parskip}{0pt}
+ \setlength{\parsep}{0pt}
+ \setlength{\headsep}{0pt}
+ \setlength{\topskip}{0pt}
+ \setlength{\topmargin}{0pt}
+ \setlength{\topsep}{0pt}
+ \setlength{\partopsep}{0pt}
+ }{\end{list}
+\vspace{-0.1ex}
+}
+
+\newenvironment{packed_enumerate}{
+\vspace{-0.7ex}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.3em]%{\leftmargin=0.5em}
+ \setlength{\itemsep}{0.7pt}
+ \setlength{\parskip}{0pt}
+ \setlength{\parsep}{0pt}
+ \setlength{\headsep}{0pt}
+ \setlength{\topskip}{0pt}
+ \setlength{\topmargin}{0pt}
+ \setlength{\topsep}{0pt}
+ \setlength{\partopsep}{0pt}
+}{\end{enumerate}
+\vspace{-0.7ex}
+}
+
+
+%% HELPER
+\newcommand{\calcSum}[2]{\pgfmathsetmacro{\result}{int(#1 +
+#2)}\result}
+\newcommand{\calcDiv}[2]{\pgfmathsetmacro{\result}{int(100*(#1 / #2))}\result}
+
+%% NUMBERS
+\newcommand{\nummutators}{348}
+\newcommand{\numGCCmutators}{236}
+\newcommand{\numLLVMmutators}{112}
+\newcommand{\numtotalminedmutators}{364}
+\newcommand{\numduplicatemutators}{16}
+\newcommand{\numGCCduplicatemutators}{14}
+\newcommand{\numLLVMduplicatemutators}{2}
+%% NUMBER OF MUTATORS (ISSUEMUT + METAMUT)
+\newcommand{\numallmutators}{466}
+\newcommand{\numsuccessfulmutators}{79}
+% not sure the difference between "numsuccessfulmutatororsTool" and "numsuccessfulissuemut"
+\newcommand{\numsuccessfulmutatororsTool}{31}
+\newcommand{\numsuccessfulissuemut}{33}
+\newcommand{\numsuccessfulmetamut}{46}
+\newcommand{\numrepr}{30}
+\newcommand{\numfiles}{35,472}
+\newcommand{\numagents}{30}
+\newcommand{\basetime}{24 hours}
+
+% \newcommand{\totalnumberofUNIQUEbugsALL}{65}
+\newcommand{\totalNumberCrashesUNIONTool}{45}
+\newcommand{\totalNumberCrashesUNIONmetamut}{59}
+
+%%% NUMBER OF UNIQUE CRASHES IN INTERSECTION
+\newcommand{\numberofUNIQUEcrashesINTERSECTIONTool}{17}
+\newcommand{\numberofUNIQUEcrashesINTERSECTIONmus}{10}
+\newcommand{\numberofUNIQUEcrashesINTERSECTIONmuu}{8}
+
+%%% NUMBER OF UNIQUE CRASHES IN UNION
+\newcommand{\numberofUNIQUEcrashesUNIONTool}{33}
+\newcommand{\numberofUNIQUEcrashesUNIONmus}{25}
+\newcommand{\numberofUNIQUEcrashesUNIONmuu}{15}
+
+%%% 8h
+\newcommand{\totalnumberofcrashesUNIONToolAVG}{34.6}
+\newcommand{\totalnumberofcrashesUNIONmusAVG}{27.8}
+\newcommand{\totalnumberofcrashesUNIONmuuAVG}{18.6}
+\newcommand{\totalnumberofcrashesUNIONmetamutAVG}{27.8}
+
+%%% 2h
+\newcommand{\numberofcrashesUNIONToolAVGtwohour}{21.4}
+\newcommand{\numberofcrashesUNIONmusAVGtwohour}{16.4}
+\newcommand{\numberofcrashesUNIONmuuAVGtwohour}{11.6}
+\newcommand{\numberofcrashesUNIONsuccessfulAVGtwohour}{42.6}
+
+%%% NUMBER OF CRASHES SINGLE MUTATION
+\newcommand{\numberofcrashesSINGLEMUTATIONTool}{43}
+\newcommand{\numberofcrashesSINGLEMUTATIONmetamut}{55}
+
+%%% NUMBER OF "UNIQUE" BUGS manifested by our tool
+\newcommand{\totalnumberofUNIQUEbugsToolLLVM}{20}
+\newcommand{\totalnumberofUNIQUEbugsToolGCC}{10}
+\newcommand{\totalnumberofUNIQUEbugsTool}{\calcSum{\totalnumberofUNIQUEbugsToolLLVM}{\totalnumberofUNIQUEbugsToolGCC}}
+
+%% NUMBER OF BUGS OUR TOOL manifested
+\newcommand{\totalnumberofbugsToolLLVM}{30}
+\newcommand{\totalnumberofbugsToolGCC}{12}
+\newcommand{\totalnumberofbugsTool}{\calcSum{\totalnumberofbugsToolLLVM}{\totalnumberofbugsToolGCC}}
+%% NUMBER OF BUGS OUR TOOL FIXED-CONFIRMED
+\newcommand{\totalnumberofbugsToolCONFIRMEDorFIXED}{38}
+
+%%%
+\newcommand{\numberofUNIQUEcrashesUNIONsuccessful}{10}
+\newcommand{\numberofUNIQUEcrashesUNIONsuccessfulFROMTool}{4}
+
+%% NUMBER OF BUG REPORT
+\newcommand{\numberofissuesGCC}{1457}
+\newcommand{\numberofissuesLLVM}{303}
+\newcommand{\numberofissuesMined}{\calcSum{\numberofissuesGCC}{\numberofissuesLLVM}}
+
+%% NUMBER OF FILES GENERATED
+\newcommand{\numberoffilesTool}{1,200,000}
+\newcommand{\numberoffilesFuzzforall}{450,000}
+
+%% NUMBER OF CRASHES FUZZ4ALL
+\newcommand{\totalnumberofcrashesFuzzforall}{11}
+\newcommand{\numberofUNIQUEcrashesFuzzforall}{9}
+\newcommand{\numberofUNIQUEcrashesFuzzforallGCC}{4}
+\newcommand{\numberofUNIQUEcrashesFuzzforallLLVM}{7}
+\newcommand{\numberofUNIQUEcrashesDETECTEDBYISSUEMUT}{4}
+
+\newcommand{\numberofRUNSFuzzforall}{7}
+\newcommand{\numberofRUNSRealFuzzforall}{14}
+%% DATES
+\newcommand{\Startdateissue}{January 2023}
+\newcommand{\Enddateissue}{October 2024}
+
+%% NAMES
+\newcommand{\mmut}{\textsc{MetaMut}}
+\newcommand{\grayc}{\textsc{GrayC}}
+\newcommand{\grammarinator}{\textsc{Grammarinator}}
+\newcommand{\kitten}{\textsc{Kitten}}
+\newcommand{\ffall}{\textsc{Fuzz4All}}
+\newcommand{\tname}{\textsc{IssueMut}\xspace}
+\newcommand{\bh}{bhis}
+\newcommand{\bhis}{bhis}
+\newcommand{\mmuts}{mu.s}
+\newcommand{\mmutu}{mu.u}
+\newcommand{\all}{\textbf{all}}
+\newcommand{\sota}{SoTA}
+\newcommand{\etal}{\emph{et al.}}
+
+
+%% FANCY TEXT
+% \newcommand\encircle[1]{%
+%   \tikz[baseline=(X.base)] 
+%     \node (X) [draw, shape=circle, inner sep=0, fill=black, text=white] {\scriptsize\strut #1};%
+% }
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, fill=black, text=white, minimum size=1em, inner sep=1pt] {\scriptsize\strut\makebox[1em][c]{#1}};%
+}
+
+
+\definecolor{bhisRowColor}{HTML}{64b5cd}

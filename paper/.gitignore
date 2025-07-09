@@ -1,0 +1,14 @@
+main.aux
+main.bbl
+main.blg
+main.fdb_latexmk
+main.fls
+main.out
+main.pdf
+main.tex~
+*~
+.RData
+.Rhistory
+*.log
+main.synctex.gz
+main.synctex*
