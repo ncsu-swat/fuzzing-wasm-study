@@ -116,7 +116,7 @@ def wasm_validate(tc_path=None):
     if not result or 'error' in result.stdout:
       is_valid = False
 
-  if not is_valid:
-    os.remove(tc_path)
+  # if not is_valid:
+  #   os.remove(tc_path)
 
   return is_valid

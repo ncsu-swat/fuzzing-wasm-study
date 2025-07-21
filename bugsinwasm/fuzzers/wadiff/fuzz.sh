@@ -7,6 +7,7 @@ test_cases_path=$2
 
 # Specify fuzzing time (in minutes)
 time_limit=$3
+time_limit_s=$((time_limit * 60))
 
 # Spin up container
 docker_file_path=$4
@@ -17,13 +18,14 @@ docker exec container-wadiff-$seed_corpora_name bash -c "mkdir /testcases"
 docker exec container-wadiff-$seed_corpora_name bash -c "mkdir /testcases_tmp"
 docker exec container-wadiff-$seed_corpora_name bash -c "rm -rf /testcases_tmp/*"
 docker exec container-wadiff-$seed_corpora_name bash -c "(cd /home/wadiff/spec2test && python3 -m pip install -r requirements.txt)"
+docker cp $seed_corpora_path/. container-wadiff-$seed_corpora_name:/home/wadiff/spec2test/generated_tcs/v19/tcs
 
 echo -e "\nRunning WaDiff Fuzzer. Please wait.\n"
 
 start_time=$(date +%s)
 # docker exec container-wadiff-$seed_corpora_name bash -c "(cd /home/wadiff/spec2test && python3 generate_tcs_main.py generation_configs/v19.json $start_time $time_limit)"
-docker exec container-wadiff-$seed_corpora_name bash -c "(cd /home/wadiff/mutator && python3 run_dir_std_testing_main.py /home/wadiff/spec2test/generated_tcs/v19/tcs /testcases_tmp $start_time $time_limit)"
-docker exec container-wadiff-$seed_corpora_name bash -c "(find /testcases_tmp/test_std_new_tcs /home/wadiff/spec2test/generated_tcs/v19/tcs -type f -name "*.wasm" -exec cp {} /testcases/ \;)"
+docker exec container-wadiff-$seed_corpora_name bash -c "(cd /home/wadiff/mutator && timeout $time_limit_s python3 run_dir_std_testing_main.py /home/wadiff/spec2test/generated_tcs/v19/tcs /testcases_tmp $start_time $time_limit)"
+docker exec container-wadiff-$seed_corpora_name bash -c "(find /testcases_tmp/test_std_new_tcs /home/wadiff/spec2test/generated_tcs/v19/tcs -type f -name "*.wasm" -print0 | xargs -0 cp -t /testcases/)"
 docker exec container-wadiff-$seed_corpora_name bash -c "(cd / && tar -czf testcases.tar.gz testcases)"
 
 mkdir -p $test_cases_path/$seed_corpora_name

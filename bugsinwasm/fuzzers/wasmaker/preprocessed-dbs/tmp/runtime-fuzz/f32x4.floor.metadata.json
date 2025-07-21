@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"360cf580ea0a48658f1bf908db589721","collectionName":"f32x4.floor","type":"collection"}

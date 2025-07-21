@@ -1,26 +1,3 @@
-[
-    [
-        "\\hex{28}~~m{:}\\Bmemarg ",
-        "\\I32.\\LOAD~m"
-    ],
-    [
-        "\\hex{2C}~~m{:}\\Bmemarg ",
-        "\\I32.\\LOAD\\K{8\\_s}~m"
-    ],
-    [
-        "\\hex{40}~~\\hex{00} ",
-        "\\MEMORYGROW"
-    ],
-    [
-        "\\hex{FC}~~8{:}\\Bu32~~x{:}\\Bdataidx~\\hex{00} ",
-        "\\MEMORYINIT~x"
-    ],
-    [
-        "\\hex{FC}~~9{:}\\Bu32~~x{:}\\Bdataidx ",
-        "\\DATADROP~x"
-    ],
-    [
-        "\\hex{FC}~~11{:}\\Bu32~~\\hex{00} ",
-        "\\MEMORYFILL"
-    ]
-]
+version https://git-lfs.github.com/spec/v1
+oid sha256:87110eabea37bd89f467efc27b894ab3b551aefc095551cf62b5ed11d7cf802e
+size 497

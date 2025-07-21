@@ -32,3 +32,5 @@ if __name__ == '__main__':
     # Keep generating
     while time.time() - start_time < time_limit:
       test_and_analyze(result_base_dir, paras, start_time, time_limit, impls=impls)
+
+    print(f"Fuzzing finished. Next will be copying files back to the host.")

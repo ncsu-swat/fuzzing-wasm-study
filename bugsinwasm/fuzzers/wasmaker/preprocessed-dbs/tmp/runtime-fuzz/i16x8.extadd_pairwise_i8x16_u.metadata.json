@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"47a6f3d6dcb841a7ae3fdeaa3dfb2b15","collectionName":"i16x8.extadd_pairwise_i8x16_u","type":"collection"}

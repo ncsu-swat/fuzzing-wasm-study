@@ -7,6 +7,7 @@ test_cases_path=$2
 
 # Specify fuzzing time (in minutes)
 time_limit=$3
+time_limit_s=$((time_limit * 60))
 
 # Spin up container
 docker_file_path=$4
@@ -16,7 +17,7 @@ docker run -d --name container-wasmsmith-$seed_corpora_name img-wasmsmith sleep 
 echo -e "\nRunning WasmSmith Fuzzer. Please wait.\n"
 
 docker exec container-wasmsmith-$seed_corpora_name bash -c "mkdir /testcases"
-docker exec container-wasmsmith-$seed_corpora_name bash -c "(bash run.sh 1000 $time_limit)"
+docker exec container-wasmsmith-$seed_corpora_name bash -c "(chmod +x ./run.sh && timeout $time_limit_s ./run.sh 1000 $time_limit)"
 docker exec container-wasmsmith-$seed_corpora_name bash -c "(cd / && tar -czf testcases.tar.gz /testcases)"
 
 mkdir -p $test_cases_path/$seed_corpora_name

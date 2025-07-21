@@ -193,3 +193,9 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 **/*~
+
+# Ignore generated test cases (to avoid bloating repository)
+bugsinwasm/fuzzers/**/testcases
+
+# Temporarily ignore some non-critical large files
+bugsinwasm/fuzzers/wasmaker/preprocessed-dbs/wasmbench/runtime-fuzz/block.bson

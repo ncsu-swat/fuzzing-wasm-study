@@ -1,22 +1,3 @@
-[
-    [
-        "\\hex{41}~~n{:}\\Bi32 ",
-        "\\I32.\\CONST~n"
-    ],
-    [
-        "\\hex{47} ",
-        "\\I32.\\NE"
-    ],
-    [
-        "\\hex{4A} ",
-        "\\I32.\\GT\\K{\\_s}"
-    ],
-    [
-        "\\hex{A8} ",
-        "\\I32.\\TRUNC\\K{\\_}\\F32\\K{\\_s}"
-    ],
-    [
-        "\\hex{FC}~~7{:}\\Bu32 ",
-        "\\I64.\\TRUNC\\K{\\_sat\\_}\\F64\\K{\\_u}"
-    ]
-]
+version https://git-lfs.github.com/spec/v1
+oid sha256:2570e5a90f3bc86c3ed155ce591bb9b508b48e2720a51cea533eb66d4de01709
+size 376

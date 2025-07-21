@@ -25,7 +25,7 @@ mutate_REU_cmd = "./mutator_REU mutation {} {} {}"
 mutate_RND_cmd = "./mutator_RND mutation {} {} {} >> mutation_RND.log"
 
 def fuzz(args):
-    file_path, file_name, ingred_dir, tar_dir, mutateCmd, start_time, time_limit = args
+    file_path, file_name, ingred_dir, tar_dir, mutateCmd, start_time, time_limit, fuzzing_round = args
     status = cmd("wasm2wat {} -o {}.wat".format(file_path, file_path[:-5]))
     if status[0] != 0:
         print("Bad input: {}".format(file_path))
@@ -37,9 +37,9 @@ def fuzz(args):
         if time.time() - start_time > time_limit:
           return 0
 
-        new_file = "{}/{}-{}".format(tar_dir, i, file_name)
+        new_file = "{}/{}-{}-{}".format(tar_dir, fuzzing_round, i, file_name)
         if os.path.exists(new_file):
-            print("File {} existing, contine...".format(new_file))
+            print("File {} existing, continue...".format(new_file))
             continue
         print("Generating {}".format(new_file))
         cmd(mutateCmd.format(ingred_dir, file_path, new_file))
@@ -50,7 +50,7 @@ def fuzz(args):
     return 0
 
 def fuzz_simple(args):
-    file_path, file_name, tar_dir, start_time, time_limit = args
+    file_path, file_name, tar_dir, start_time, time_limit, fuzzing_round = args
     status = cmd("wasm2wat {} -o {}.wat".format(file_path, file_path[:-5]))
     if status[0] != 0:
         print("Bad input: {}".format(file_path))
@@ -62,7 +62,7 @@ def fuzz_simple(args):
         if time.time() - start_time > time_limit:
           return 0
 
-        new_file = "{}/{}-{}".format(tar_dir, i, file_name)
+        new_file = "{}/{}-{}-{}".format(tar_dir, fuzzing_round, i, file_name)
         if os.path.exists(new_file):
             print("File {} existing, contine...".format(new_file))
             continue
@@ -85,23 +85,26 @@ if __name__ == '__main__':
     all_task = []
     executor = ProcessPoolExecutor(max_workers=15)
     # cnt = 0
+    fuzzing_round = 0
     for root, dirs, files in os.walk(sys.argv[2]):
-        for file in files:
-            if file.endswith(".wasm") and not file.endswith("aot.wasm") and not file.endswith(".debug.wasm"):
-                file_path = os.path.abspath(root + "/" + file)
-                print("Mutating {}".format(file_path))
-                if sys.argv[1] == "simple":
-                    all_task.append(executor.submit(fuzz_simple, (file_path, file, os.path.abspath(sys.argv[4]), start_time, time_limit)))
-                    # fuzz_simple(file_path, file, os.path.abspath(sys.argv[4]))
-                elif sys.argv[1] == "normal":
-                    all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_cmd, start_time, time_limit)))
-                elif sys.argv[1] == "CU":
-                    all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_CU_cmd, start_time, time_limit)))
-                elif sys.argv[1] == "REU":
-                    all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_REU_cmd, start_time, time_limit)))
-                    # cnt += 1
-                    # fuzz(file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4], start_time, time_limit))
-                # if len(all_task) >= 40:
+        while time.time() - start_time < time_limit: # to continue until time limit (for generating a balanced number of test cases regardless of the seed corpora size)
+            for file in files:
+                if file.endswith(".wasm") and not file.endswith("aot.wasm") and not file.endswith(".debug.wasm"):
+                    file_path = os.path.abspath(root + "/" + file)
+                    print("Mutating {}".format(file_path))
+                    if sys.argv[1] == "simple":
+                        all_task.append(executor.submit(fuzz_simple, (file_path, file, os.path.abspath(sys.argv[4]), start_time, time_limit, fuzzing_round)))
+                        # fuzz_simple(file_path, file, os.path.abspath(sys.argv[4]))
+                    elif sys.argv[1] == "normal":
+                        all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_cmd, start_time, time_limit, fuzzing_round)))
+                    elif sys.argv[1] == "CU":
+                        all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_CU_cmd, start_time, time_limit, fuzzing_round)))
+                    elif sys.argv[1] == "REU":
+                        all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_REU_cmd, start_time, time_limit, fuzzing_round)))
+                        # cnt += 1
+                        # fuzz(file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4], start_time, time_limit))
+                    # if len(all_task) >= 40:
+            fuzzing_round += 1
     wait(all_task, timeout=None, return_when=ALL_COMPLETED)
     # all_task = []
     # print("Task Number: ", len(all_task))

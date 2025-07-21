@@ -1,15 +1,3 @@
-{
-    "exec_condig_para": {
-        "consider_illegal_op": false,
-        "only_non_trap": false,
-        "limit_ty_candidates_on_failed_ty_trap": false,
-        "limit_val_cnaditaions_on_failed_ty_trap": true
-    },
-    "base_dir": "tt/spec_cov",
-    "template_strategy": "8",
-    "remove_existing": true,
-    "save_meta_data": true,
-    "solution_num": 1,
-    "detect_spec_cov_exec": true,
-    "skip_generation": true
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:1aa03875db0a5b730c474906418adb32dcb57d65da30ceb1b1ebe5ab095e7c1b
+size 421

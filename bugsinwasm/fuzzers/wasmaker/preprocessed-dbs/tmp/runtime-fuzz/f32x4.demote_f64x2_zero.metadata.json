@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"808658b0eb4947b29f39c5d4e1a99c0d","collectionName":"f32x4.demote_f64x2_zero","type":"collection"}
