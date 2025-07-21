@@ -224,115 +224,71 @@
 \vspace{-0.7ex}
 }
 
+%% NEW BUGS
+\newcommand{\WasmsmithNoSeedPending}{1}
+\newcommand{\WasmsmithNoSeedConfirmed}{5}
+\newcommand{\WasmsmithWasmBenchPending}{---}
+\newcommand{\WasmsmithWasmBenchConfirmed}{---}
+\newcommand{\WasmsmithTransBenchPending}{---}
+\newcommand{\WasmsmithTransBenchConfirmed}{---}
+\newcommand{\WasmsmithSpecBenchPending}{---}
+\newcommand{\WasmsmithSpecBenchConfirmed}{---}
+\newcommand{\WasmsmithBugBenchPending}{---}
+\newcommand{\WasmsmithBugBenchConfirmed}{---}
+\newcommand{\WasmsmithTotalPending}{---}
+\newcommand{\WasmsmithTotalConfirmed}{---}
 
-%% HELPER
-\newcommand{\calcSum}[2]{\pgfmathsetmacro{\result}{int(#1 +
-#2)}\result}
-\newcommand{\calcDiv}[2]{\pgfmathsetmacro{\result}{int(100*(#1 / #2))}\result}
+\newcommand{\WadiffNoSeedPending}{---}
+\newcommand{\WadiffNoSeedConfirmed}{---}
+\newcommand{\WadiffWasmBenchPending}{---}
+\newcommand{\WadiffWasmBenchConfirmed}{---}
+\newcommand{\WadiffTransBenchPending}{---}
+\newcommand{\WadiffTransBenchConfirmed}{---}
+\newcommand{\WadiffSpecBenchPending}{6}
+\newcommand{\WadiffSpecBenchConfirmed}{3}
+\newcommand{\WadiffBugBenchPending}{---}
+\newcommand{\WadiffBugBenchConfirmed}{---}
+\newcommand{\WadiffTotalPending}{---}
+\newcommand{\WadiffTotalConfirmed}{---}
 
-%% NUMBERS
-\newcommand{\nummutators}{348}
-\newcommand{\numGCCmutators}{236}
-\newcommand{\numLLVMmutators}{112}
-\newcommand{\numtotalminedmutators}{364}
-\newcommand{\numduplicatemutators}{16}
-\newcommand{\numGCCduplicatemutators}{14}
-\newcommand{\numLLVMduplicatemutators}{2}
-%% NUMBER OF MUTATORS (ISSUEMUT + METAMUT)
-\newcommand{\numallmutators}{466}
-\newcommand{\numsuccessfulmutators}{79}
-% not sure the difference between "numsuccessfulmutatororsTool" and "numsuccessfulissuemut"
-\newcommand{\numsuccessfulmutatororsTool}{31}
-\newcommand{\numsuccessfulissuemut}{33}
-\newcommand{\numsuccessfulmetamut}{46}
-\newcommand{\numrepr}{30}
-\newcommand{\numfiles}{35,472}
-\newcommand{\numagents}{30}
-\newcommand{\basetime}{24 hours}
+\newcommand{\WasmakerNoSeedPending}{---}
+\newcommand{\WasmakerNoSeedConfirmed}{---}
+\newcommand{\WasmakerWasmBenchPending}{...}
+\newcommand{\WasmakerWasmBenchConfirmed}{...}
+\newcommand{\WasmakerTransBenchPending}{...}
+\newcommand{\WasmakerTransBenchConfirmed}{...}
+\newcommand{\WasmakerSpecBenchPending}{...}
+\newcommand{\WasmakerSpecBenchConfirmed}{...}
+\newcommand{\WasmakerBugBenchPending}{...}
+\newcommand{\WasmakerBugBenchConfirmed}{...}
+\newcommand{\WasmakerTotalPending}{...}
+\newcommand{\WasmakerTotalConfirmed}{...}
 
-% \newcommand{\totalnumberofUNIQUEbugsALL}{65}
-\newcommand{\totalNumberCrashesUNIONTool}{45}
-\newcommand{\totalNumberCrashesUNIONmetamut}{59}
+\newcommand{\WappliqueNoSeedPending}{---}
+\newcommand{\WappliqueNoSeedConfirmed}{---}
+\newcommand{\WappliqueWasmBenchPending}{...}
+\newcommand{\WappliqueWasmBenchConfirmed}{...}
+\newcommand{\WappliqueTransBenchPending}{...}
+\newcommand{\WappliqueTransBenchConfirmed}{...}
+\newcommand{\WappliqueSpecBenchPending}{...}
+\newcommand{\WappliqueSpecBenchConfirmed}{...}
+\newcommand{\WappliqueBugBenchPending}{...}
+\newcommand{\WappliqueBugBenchConfirmed}{...}
+\newcommand{\WappliqueTotalPending}{...}
+\newcommand{\WappliqueTotalConfirmed}{...}
 
-%%% NUMBER OF UNIQUE CRASHES IN INTERSECTION
-\newcommand{\numberofUNIQUEcrashesINTERSECTIONTool}{17}
-\newcommand{\numberofUNIQUEcrashesINTERSECTIONmus}{10}
-\newcommand{\numberofUNIQUEcrashesINTERSECTIONmuu}{8}
-
-%%% NUMBER OF UNIQUE CRASHES IN UNION
-\newcommand{\numberofUNIQUEcrashesUNIONTool}{33}
-\newcommand{\numberofUNIQUEcrashesUNIONmus}{25}
-\newcommand{\numberofUNIQUEcrashesUNIONmuu}{15}
-
-%%% 8h
-\newcommand{\totalnumberofcrashesUNIONToolAVG}{34.6}
-\newcommand{\totalnumberofcrashesUNIONmusAVG}{27.8}
-\newcommand{\totalnumberofcrashesUNIONmuuAVG}{18.6}
-\newcommand{\totalnumberofcrashesUNIONmetamutAVG}{27.8}
-
-%%% 2h
-\newcommand{\numberofcrashesUNIONToolAVGtwohour}{21.4}
-\newcommand{\numberofcrashesUNIONmusAVGtwohour}{16.4}
-\newcommand{\numberofcrashesUNIONmuuAVGtwohour}{11.6}
-\newcommand{\numberofcrashesUNIONsuccessfulAVGtwohour}{42.6}
-
-%%% NUMBER OF CRASHES SINGLE MUTATION
-\newcommand{\numberofcrashesSINGLEMUTATIONTool}{43}
-\newcommand{\numberofcrashesSINGLEMUTATIONmetamut}{55}
-
-%%% NUMBER OF "UNIQUE" BUGS manifested by our tool
-\newcommand{\totalnumberofUNIQUEbugsToolLLVM}{20}
-\newcommand{\totalnumberofUNIQUEbugsToolGCC}{10}
-\newcommand{\totalnumberofUNIQUEbugsTool}{\calcSum{\totalnumberofUNIQUEbugsToolLLVM}{\totalnumberofUNIQUEbugsToolGCC}}
-
-%% NUMBER OF BUGS OUR TOOL manifested
-\newcommand{\totalnumberofbugsToolLLVM}{30}
-\newcommand{\totalnumberofbugsToolGCC}{12}
-\newcommand{\totalnumberofbugsTool}{\calcSum{\totalnumberofbugsToolLLVM}{\totalnumberofbugsToolGCC}}
-%% NUMBER OF BUGS OUR TOOL FIXED-CONFIRMED
-\newcommand{\totalnumberofbugsToolCONFIRMEDorFIXED}{38}
-
-%%%
-\newcommand{\numberofUNIQUEcrashesUNIONsuccessful}{10}
-\newcommand{\numberofUNIQUEcrashesUNIONsuccessfulFROMTool}{4}
-
-%% NUMBER OF BUG REPORT
-\newcommand{\numberofissuesGCC}{1457}
-\newcommand{\numberofissuesLLVM}{303}
-\newcommand{\numberofissuesMined}{\calcSum{\numberofissuesGCC}{\numberofissuesLLVM}}
-
-%% NUMBER OF FILES GENERATED
-\newcommand{\numberoffilesTool}{1,200,000}
-\newcommand{\numberoffilesFuzzforall}{450,000}
-
-%% NUMBER OF CRASHES FUZZ4ALL
-\newcommand{\totalnumberofcrashesFuzzforall}{11}
-\newcommand{\numberofUNIQUEcrashesFuzzforall}{9}
-\newcommand{\numberofUNIQUEcrashesFuzzforallGCC}{4}
-\newcommand{\numberofUNIQUEcrashesFuzzforallLLVM}{7}
-\newcommand{\numberofUNIQUEcrashesDETECTEDBYISSUEMUT}{4}
-
-\newcommand{\numberofRUNSFuzzforall}{7}
-\newcommand{\numberofRUNSRealFuzzforall}{14}
-%% DATES
-\newcommand{\Startdateissue}{January 2023}
-\newcommand{\Enddateissue}{October 2024}
-
-%% NAMES
-\newcommand{\mmut}{\textsc{MetaMut}}
-\newcommand{\grayc}{\textsc{GrayC}}
-\newcommand{\grammarinator}{\textsc{Grammarinator}}
-\newcommand{\kitten}{\textsc{Kitten}}
-\newcommand{\ffall}{\textsc{Fuzz4All}}
-\newcommand{\tname}{\textsc{IssueMut}\xspace}
-\newcommand{\bh}{bhis}
-\newcommand{\bhis}{bhis}
-\newcommand{\mmuts}{mu.s}
-\newcommand{\mmutu}{mu.u}
-\newcommand{\all}{\textbf{all}}
-\newcommand{\sota}{SoTA}
-\newcommand{\etal}{\emph{et al.}}
-
+\newcommand{\NoSeedTotalPending}{1}
+\newcommand{\NoSeedTotalConfirmed}{5}
+\newcommand{\WasmBenchTotalPending}{...}
+\newcommand{\WasmBenchTotalConfirmed}{...}
+\newcommand{\TransBenchTotalPending}{...}
+\newcommand{\TransBenchTotalConfirmed}{...}
+\newcommand{\SpecBenchTotalPending}{6}
+\newcommand{\SpecBenchTotalConfirmed}{3}
+\newcommand{\BugBenchTotalPending}{...}
+\newcommand{\BugBenchTotalConfirmed}{...}
+\newcommand{\TotalTotalPending}{---}
+\newcommand{\TotalTotalConfirmed}{---}
 
 %% FANCY TEXT
 % \newcommand\encircle[1]{%
