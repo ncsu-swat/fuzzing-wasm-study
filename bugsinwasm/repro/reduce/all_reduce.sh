@@ -27,7 +27,7 @@ declare -A func_names=(
 for job in "${job_names[@]}"; do
   fuzzer_name=$(echo "$job" | cut -d'-' -f1)
   seed_name=$(echo "$job" | cut -d'-' -f2)
-  cases_path="$BUGSINWASM_HOME/cases/$fuzzer_name/$seed_name"
+  cases_path="/home/ihayet/cases/$fuzzer_name/$seed_name"
 
   echo "Fuzzer: $fuzzer_name, Seed Corpora: $seed_name"
 done
