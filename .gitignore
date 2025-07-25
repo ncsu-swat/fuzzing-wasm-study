@@ -194,6 +194,8 @@ cython_debug/
 .cursorindexingignore
 **/*~
 
+**/.DS_Store
+
 # Ignore generated test cases (to avoid bloating repository)
 bugsinwasm/fuzzers/**/testcases
 
