@@ -27,7 +27,48 @@
 \section{Introduction}
 \label{sec:intro}
 
-The fuzzer (6 fuzzer)
+\section{Evaluation}
+\label{sec:eval}
+
+\begin{table*}[htbp]
+	\centering
+	\scriptsize
+	\renewcommand{\arraystretch}{1.1}
+	\resizebox{\linewidth}{!}{%
+		\begin{tabular}{|l|cc|cc|cc|cc|cc|cc|}
+			\hline
+			\textbf{}
+			& \multicolumn{2}{c|}{\textbf{no-seed}} 
+			& \multicolumn{2}{c|}{\textbf{specbench}} 
+			& \multicolumn{2}{c|}{\textbf{wasmbench}} 
+			& \multicolumn{2}{c|}{\textbf{transbench}} 
+			& \multicolumn{2}{c|}{\textbf{bugbench}} 
+			& \multicolumn{2}{c|}{\textbf{Total}} \\
+			\cline{2-13}
+			\textbf{Tool} 
+			& pending & confirmed 
+			& pending & confirmed 
+			& pending & confirmed 
+			& pending & confirmed 
+			& pending & confirmed 
+			& pending & confirmed \\
+			\hline
+			wasmsmith   &    \WasmsmithNoSeedPending{}     &     \WasmsmithNoSeedConfirmed{}      &    \WasmsmithSpecBenchPending{}     &     \WasmsmithSpecBenchConfirmed{}      &    \WasmsmithWasmBenchPending{}     &     \WasmsmithWasmBenchConfirmed{}      &     \WasmsmithTransBenchPending{}    &     \WasmsmithTransBenchConfirmed{}      &    \WasmsmithBugBenchPending{}     &     \WasmsmithBugBenchConfirmed{}      &    \WasmsmithTotalPending{}     &     \WasmsmithTotalConfirmed{}      \\
+			wadiff      &    \WadiffNoSeedPending{}     &     \WadiffNoSeedConfirmed{}     &    \WadiffSpecBenchPending{}     &     \WadiffSpecBenchConfirmed{}      &    \WadiffWasmBenchPending{}     &     \WadiffWasmBenchConfirmed{}      &    \WadiffTransBenchPending{}     &     \WadiffTransBenchConfirmed{}      &    \WadiffBugBenchPending{}     &     \WadiffBugBenchConfirmed{}     &       \WadiffTotalPending{}  &     \WadiffTotalConfirmed{}      \\
+			wasmaker    &    \WasmakerNoSeedPending{}     &     \WasmakerNoSeedConfirmed{}      &    \WasmakerSpecBenchPending{}     &     \WasmakerSpecBenchConfirmed{}      &    \WasmakerWasmBenchPending{}     &     \WasmakerWasmBenchConfirmed{}      &    \WasmakerTransBenchPending{}     &     \WasmakerTransBenchConfirmed{}      &    \WasmakerBugBenchPending{}     &     \WasmakerBugBenchConfirmed{}      &    \WasmakerBugBenchPending{}     &     \WasmakerBugBenchConfirmed{}      \\
+			wapplique   &    \WappliqueNoSeedPending{}     &     \WappliqueNoSeedConfirmed{}      &    \WappliqueSpecBenchPending{}     &     \WappliqueSpecBenchConfirmed{}      &    \WappliqueWasmBenchPending{}     &     \WappliqueWasmBenchConfirmed{}      &    \WappliqueTransBenchPending{}     &     \WappliqueTransBenchConfirmed{}      &    \WappliqueBugBenchPending{}     &     \WappliqueBugBenchConfirmed{}      &    \WappliqueTotalPending{}     &     \WappliqueTotalConfirmed{}      \\
+			\hline
+			\textbf{Total} 
+			&    \NoSeedTotalPending{}     &     \NoSeedTotalConfirmed{}      &    \SpecBenchTotalPending{}     &     \SpecBenchTotalConfirmed{}      &    \WasmBenchTotalPending{}     &     \WasmBenchTotalConfirmed{}      &    \TransBenchTotalPending{}     &     \TransBenchTotalConfirmed{}      &    \BugBenchTotalPending{}     &     \BugBenchTotalConfirmed{}      &    \TotalTotalPending{}     &     \TotalTotalConfirmed{}      \\
+			\hline
+		\end{tabular}%
+	}
+	\caption{Number of new pending/confirmed bugs found by different fuzzer-seed combinations.}
+	\label{tab:newbugs}
+\end{table*}
+
+
+The fuzzer (6 fuzzers)
 Specification-driven: WaDiff
 Mutational: Wasmaker, Wapplique // AFL++, libFuzzer, hongFuzz
   %% Regression Tests from Other Languages (e.g. C, C++, Rust, Go, Python)
