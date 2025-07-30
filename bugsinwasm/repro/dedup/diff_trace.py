@@ -49,17 +49,28 @@ print(f"✅ Breakpoint set at ID {bp.GetID()}")
 # ----------- Launch Process -----------
 launch_info = lldb.SBLaunchInfo(PROGRAM_ARGS)
 launch_info.SetWorkingDirectory(".")
-process = target.Launch(launch_info, lldb.SBError())
-if not process or not process.IsValid():
-  print("Failed to launch process.")
+error = lldb.SBError()
+process = target.Launch(launch_info, error)
+
+if error.Fail():
+  print("❌ Launch failed:", error.GetCString())
   lldb.SBDebugger.Terminate()
   exit(1)
+print(f"Launch successful. PID={process.GetProcessID()}")
+print("Immediate process state:", lldb.SBDebugger.StateAsCString(process.GetState()))
+
 
 # ----------- Wait for Breakpoint Hit -----------
-while process.GetState() != lldb.eStateStopped:
-  pass
+while True:
+  if process.GetState() == lldb.eStateStopped:
+    print("📍 Hit breakpoint. Starting instruction trace...")
+    break
+  else:
+    print("❌ Process not in stopped state. Current state:", lldb.SBDebugger.StateAsCString(process.GetState()))
+    lldb.SBDebugger.Terminate()
+    exit(1)
 
-print("📍 Hit breakpoint. Starting instruction trace...")
+# print("📍 Hit breakpoint. Starting instruction trace...")
 
 # ----------- Begin Instruction-Level Trace -----------
 trace = []
@@ -72,8 +83,9 @@ while process.IsValid() and process.GetState() != lldb.eStateExited:
 
   frame = thread.GetSelectedFrame()
   module = frame.GetModule()
-
-  if PROGRAM_PATH not in module.GetFileSpec().GetFilename():
+  
+  filename = module.GetFileSpec().GetFilename()
+  if not filename or PROGRAM_PATH not in filename:
     thread.StepOver()
     continue
 
