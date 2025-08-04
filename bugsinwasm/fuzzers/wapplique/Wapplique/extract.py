@@ -2,7 +2,7 @@ import os
 import subprocess
 import sys
 
-split_cmd = "./mutator split null {} {} >> split.log"
+split_cmd = "./mutator_orig split null {} {} >> split.log"
 
 def cmd(commandline):
     # print(commandline)

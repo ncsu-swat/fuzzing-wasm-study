@@ -10,7 +10,7 @@ RUN mkdir -p /wapplique/case && mkdir /wapplique/ingred
 
 # Copy specific files into the container at /wapplique
 COPY *.py \
-mutator.cpp mutator_CU.cpp mutator_REU.cpp \
+mutator.cpp mutator_tracer.cpp mutator_CU.cpp mutator_REU.cpp \
 /wapplique
 COPY include/ /wapplique/include/
 
@@ -19,7 +19,8 @@ COPY wabt/ /wabt/
 ENV PATH="/wabt/:${PATH}"
 
 WORKDIR /wapplique
-RUN g++ -std=c++17 mutator.cpp -o mutator -I ./include
+RUN g++ -std=c++17 mutator.cpp -o mutator_orig -I ./include
+RUN g++ -std=c++17 mutator_tracer.cpp -o mutator_tracer -I ./include
 RUN g++ -std=c++17 mutator_CU.cpp -o mutator_CU -I ./include
 RUN g++ -std=c++17 mutator_REU.cpp -o mutator_REU -I ./include
 

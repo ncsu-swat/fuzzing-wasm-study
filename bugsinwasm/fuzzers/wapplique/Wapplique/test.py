@@ -18,8 +18,8 @@ def cmd(commandline):
     # print(output)
     return status, output
 
-mutate_cmd = "./mutator mutation {} {} {} >> mutation.log"
-simple_mutate_cmd = "./mutator simplemutation ./ingredient {} {}"
+mutate_cmd = "./mutator_tracer mutation {} {} {} >> mutation.log"
+simple_mutate_cmd = "./mutator_orig simplemutation ./ingredient {} {}"
 mutate_CU_cmd = "./mutator_CU mutation {} {} {}"
 mutate_REU_cmd = "./mutator_REU mutation {} {} {}"
 mutate_RND_cmd = "./mutator_RND mutation {} {} {} >> mutation_RND.log"

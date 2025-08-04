@@ -13,6 +13,9 @@ time_limit_s=$((time_limit * 60))
 docker_file_path=$4
 (cd $docker_file_path && docker build -t img-wapplique .)
 docker run -d --name container-wapplique-$seed_corpora_name img-wapplique sleep infinity
+
+echo $seed_corpora_path
+
 docker cp $seed_corpora_path container-wapplique-$seed_corpora_name:/wapplique/ingredSeed
 docker cp $seed_corpora_path container-wapplique-$seed_corpora_name:/wapplique/SeedPool
 
