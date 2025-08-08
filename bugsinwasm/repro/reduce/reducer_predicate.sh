@@ -16,6 +16,14 @@ python3 /home/ihayet/wasm/scripts/eval/dedup_output.py "$reduced_dir/output"
 diff_output=$(diff "$ref_output_path" "$new_output_path")
 diff_status=$?
 
+echo "++++++++++++++++++++++++++++++++++++++++++"
+cat "$ref_output_path"
+echo "++++++++++++++++++++++++++++++++++++++++++"
+cat "$new_output_path"
+echo "++++++++++++++++++++++++++++++++++++++++++"
+echo "$diff_output"
+echo "++++++++++++++++++++++++++++++++++++++++++"
+
 rm "$reduced_dir/output/temp.txt"
 rm "$reduced_dir/output/deduped/temp.txt.txt"
 rm "$reduced_dir/temp.wasm"

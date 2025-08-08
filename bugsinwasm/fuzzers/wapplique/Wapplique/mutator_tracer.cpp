@@ -1717,6 +1717,9 @@ void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs) {
         code.clear();
         newlocal.clear();
         newglobal.clear();
+
+        cout << "MySplitID: " << sid << "\nMySplitName: " << splits[sid] << "\n\n"; // TWEAKED
+
         decoder("/home/unicornt/WASM/WasmSynthesis/splits/" + splits[sid], code, newCur, newPost, newlocal, newglobal);
         AddFixCode(newCode, ps, newPost);
         // print("/home/unicornt/WASM/WasmSynthesis/splits/"+splits[sid]);
