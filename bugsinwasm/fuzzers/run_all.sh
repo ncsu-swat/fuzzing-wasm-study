@@ -51,7 +51,7 @@ time_elapsed=0
 
 echo -e "\n++ Starting new "$time_limit"m campaigns."
 
-(cd wapplique && mkdir -p testcases/$time_stamp && srun --job-name=wapplique-dummy --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wapplique-dummy.txt bash -c "bash fuzz.sh ../../seed_corpora/dummy testcases/$time_stamp $time_limit ./Wapplique" &)
+(cd wapplique && mkdir -p testcases/$time_stamp && srun --job-name=wapplique-dummy --ntasks=1 --cpus-per-task=30 --cpu-bind=cores --output=../logs/wapplique-dummy-out.txt --err=../logs/wapplique-dummy-err.txt bash -c "bash fuzz.sh ../../seed_corpora/dummy testcases/$time_stamp $time_limit ./Wapplique" &)
 
 # (cd wadiff && mkdir testcases/$time_stamp 2>/dev/null && srun --job-name=wadiff-specbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wadiff-specbench.txt bash -c "bash fuzz.sh ../../seed_corpora/specbench testcases/$time_stamp $time_limit ." &)
 # (cd wasmsmith && mkdir testcases/$time_stamp 2>/dev/null && srun --job-name=wasmsmith-noseed --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmsmith-noseed.txt bash -c "bash fuzz.sh ../../seed_corpora/noseed testcases/$time_stamp $time_limit ." &)
@@ -65,6 +65,8 @@ echo -e "\n++ Starting new "$time_limit"m campaigns."
 # (cd wapplique && srun --job-name=wapplique-specbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wapplique-specbench.txt bash -c "bash fuzz.sh ../../seed_corpora/specbench testcases/$time_stamp $time_limit ./Wapplique" &)
 
 # ======================================== Monitor job completion ========================================
+sleep 60
+
 echo -e "\n++ Monitoring Slurm jobs and per-container file counts every $interval_minutes minutes..."
 declare -A container_dirs=(
   [wadiff-specbench]="/testcases_tmp/test_std_new_tcs"
@@ -96,7 +98,7 @@ while true; do
     container_name="container-${job}"
     container_dir="${container_dirs[$job]:-/testcases}"  # fallback to /testcases
 
-    if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+    if docker ps -a --format '{{.Names}}' | grep -q "${container_name}"; then
       count=$(docker exec "$container_name" find "$container_dir" -type f 2>/dev/null | wc -l)
       printf " + %-32s %-12s %-38s %-30s\n" "[$container_name]" "[$status]" "($container_dir)" "Test cases count: $count"
 

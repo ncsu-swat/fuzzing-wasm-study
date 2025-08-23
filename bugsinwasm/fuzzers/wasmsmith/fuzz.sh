@@ -12,7 +12,7 @@ time_limit_s=$((time_limit * 60))
 # Spin up container
 docker_file_path=$4
 (cd $docker_file_path && docker build -t img-wasmsmith .)
-docker run -d --name container-wasmsmith-$seed_corpora_name img-wasmsmith sleep infinity
+docker run -d --memory 32g --name container-wasmsmith-$seed_corpora_name img-wasmsmith sleep infinity
 
 echo -e "\nRunning WasmSmith Fuzzer. Please wait.\n"
 

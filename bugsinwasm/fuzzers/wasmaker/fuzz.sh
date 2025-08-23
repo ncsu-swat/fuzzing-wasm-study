@@ -12,7 +12,7 @@ time_limit_s=$((time_limit * 60))
 # Spin up container
 docker_file_path=$4
 (cd $docker_file_path && docker build -t img-wasmaker .)
-docker run -d --name container-wasmaker-$seed_corpora_name img-wasmaker sleep infinity
+docker run -d --memory 32g --name container-wasmaker-$seed_corpora_name img-wasmaker sleep infinity
 docker cp $seed_corpora_path container-wasmaker-$seed_corpora_name:/seed_corpora
 docker exec container-wasmaker-$seed_corpora_name bash -c "(cd /home/ubuntu/BREWasm &&  python3 -m pip install -e .)"
 docker exec container-wasmaker-$seed_corpora_name bash -c "(cd / && bash start.sh)"

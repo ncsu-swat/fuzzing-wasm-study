@@ -208,9 +208,12 @@ bugsinwasm/fuzzers/logs
 
 # Ignore seeds
 bugsinwasm/seed_corpora
-bugsinwasm/fuzzers/wapplique/Wapplique/SeedPool
-bugsinwasm/fuzzers/wapplique/Wapplique/ingredSeed
-bugsinwasm/fuzzers/wapplique/Wapplique/case
+bugsinwasm/fuzzers/wapplique/**/SeedPool
+bugsinwasm/fuzzers/wapplique/**/ingredSeed
+bugsinwasm/fuzzers/wapplique/**/case
 
 # Ignore temp files generated during execution
 bugsinwasm/**/*.su
+
+# Ignore wasi-sdk
+bugsinwasm/benchmarks-no-repro/**/wasi-sdk-16.0

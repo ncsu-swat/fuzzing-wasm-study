@@ -13,10 +13,6 @@
 #include "coding.h"
 using namespace std;
 
-std::vector<std::string> used_ingredients;
-std::string seed_file;
-std::ofstream log_file; // File handle for JSON log
-
 std::random_device rd;
 std::mt19937 e(rd());
 std::uniform_int_distribution<uint64_t> u(0, 2000);
@@ -68,18 +64,6 @@ uint8 TryPop() {
     uint8 ret = curStack.back();
     curStack.pop_back();
     return ret;
-}
-
-static std::string extractOriginName(const std::string &splitPath) {
-    std::ifstream in{splitPath};
-    if (!in) return "";
-
-    std::string line, last;
-    while (std::getline(in, line)) {
-        if (!line.empty()) last = line;
-    }
-    // turn "/…/seed-0.wasm" → "seed-0.wasm"
-    return std::filesystem::path(last).filename().string();
 }
 
 void TryPop(uint8 t) {
@@ -171,12 +155,14 @@ template<typename retType, int N>retType readsN(int &pos, uint8 *buffer) {
         uint8 SecondHighestBitMask = 1 << 6;
         if (Byte & HighestBitMask) {
             // The byte has leading 1. It contains 7 bits payload.
+
             make_unsigned_t<retType> Payload = Byte & (~HighestBitMask); // & 0b01111111
             Result |= (Payload << Offset);
             Offset += 7;
             RemainingBits -= 7;
         } else {
             // The byte has leading 0. It will be the last byte.
+
             // The number of bits that take effect in the byte. Since RemainingBits
             // must be at least 1, EffectiveBits also must be at least 1. It is also
             // at most 7.
@@ -901,6 +887,26 @@ bool GenerateInfo(int p, int p_end, bool can_return = true) {
 
 map<int, int>SplitCnt;
 
+
+// void TrySplit(int p, int p_end, int siz) {
+//     cout << " = = = = = = = = " << p << ' ' << p_end << ' ' << siz << " = = = = = = = = " << endl;
+//     if(p_end - p < siz * 2) return;
+//     // first try size of 3
+//     for(int i = 0; i < 100; i++) {
+//         int p_st = p + rand() % (p_end - p - siz + 1);
+//         if(checkInstr[p_st] != true || p_st + siz > p_end) continue;
+//         ClearStack();
+//         cout << "------------------ " << p_st << " -------------" << endl;
+//         // PrintInstr(p_st, p_st + siz);
+//         if(GenerateInfo(p_st, p_st + siz)) {
+//             // how to save splits? what's a question
+//             cout << "It's a good split " << p_st << " -> " << p_st + siz << endl;
+//             PrintInstr(p_st, p_st + siz);
+//             reverse(postStack.begin(), postStack.end());
+//         }
+//     }
+// }
+
 const int mod = 1e7+7;
 string split_file;
 
@@ -956,6 +962,7 @@ void TrySplit(int p, int p_end, char*dir) {
                     // stringstream ss;
                     // ss << hex << file_id;
                     // print("/home/unicornt/WASM/WasmSynthesis/splits/split-" + ss.str());
+
                 }
             }
         }
@@ -1004,6 +1011,7 @@ void GenPreMem(vector<uint8>&code, uint8 opcode, uint8 type) {
     writeu32(code, (uint)id);
     code.push_back(opcode);
 }
+
 
 void addGetGlobal(vector<uint8>&newCode, uint id) {
     newCode.push_back(WASM_OP_GET_GLOBAL);
@@ -1670,6 +1678,7 @@ void AddFixCode(vector<uint8>&newCode, vector<uint8>&ps, vector<uint8>&cs) {
             ps.push_back(cs[ps.size()]);
         }
     }
+    
 }
 
 void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs) {
@@ -1709,17 +1718,12 @@ void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs) {
     if(sid == -1) {
         // delet this code fragment
     } else {
-        // Track the used split
-        used_ingredients.push_back(splits[sid]);
-        std::cout << "Add split: " << splits[sid] << endl;
+        std::cout << "Add split :" << splits[sid] << endl;
         newPost.clear();
         newCur.clear();
         code.clear();
         newlocal.clear();
         newglobal.clear();
-
-        cout << "MySplitID: " << sid << "\nMySplitName: " << splits[sid] << "\n\n"; // TWEAKED
-
         decoder("/home/unicornt/WASM/WasmSynthesis/splits/" + splits[sid], code, newCur, newPost, newlocal, newglobal);
         AddFixCode(newCode, ps, newPost);
         // print("/home/unicornt/WASM/WasmSynthesis/splits/"+splits[sid]);
@@ -1862,6 +1866,7 @@ void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
                 // vector<int>endVec;
                 GenerateInfo(i, p_end, 0);
                 for(int kk = 0; kk < 30; kk++){
+                // for(int j = i + 30; j < p_end - 1 && j < i + 61; j += 5){
                     int j = i + rand() % min(p_end - i - 10, 50) + 10;
                     if(checkInstr[j] != true || instrDep[j] != instrDep[i])
                         continue;
@@ -1890,6 +1895,10 @@ void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
                         debug("Split " << i << ' ' << j);
                         reverse(postStack.begin(), postStack.end());
                         TryAddSplit(newCode, postStack, curStack);
+
+                        // stringstream ss;
+                        // ss << hex << file_id;
+                        // print("/home/unicornt/WASM/WasmSynthesis/splits/split-" + ss.str());
                         i = j - 1;
                         mutate = true;
                         debug("Finish Mutataion!!!");
@@ -1944,6 +1953,19 @@ void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
                         AddFixCode(newCode, pre, empty);
                         AddFixCode(newCode, empty, post);
                     }
+                    //  else if(suitFunc.size() >= 2) {
+                    //     newCode.push_back(WASM_OP_I32_CONST);
+                    //     writes32(1, newCode);
+                    //     newCode.push_back(WASM_OP_I32_AND);
+                    //     newCode.push_back(WASM_OP_IF);
+                    //     writes33(type, newCode);
+                    //     newCode.push_back(WASM_OP_CALL);
+                    //     writeu32(newCode, (uint32)suitFunc[rand() % suitFunc.size()]);
+                    //     newCode.push_back(WASM_OP_ELSE);
+                    //     newCode.push_back(WASM_OP_CALL);
+                    //     writeu32(newCode, (uint32)suitFunc[rand() % suitFunc.size()]);
+                    //     newCode.push_back(WASM_OP_END);
+                    // } 
                     else {
                         newCode.push_back(WASM_OP_DROP);
                         newCode.push_back(WASM_OP_CALL);
@@ -1957,10 +1979,22 @@ void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
                     uint32 id = readu32(p, wasmBuffer);
                     if(id == 5u) {
                         newCode.pop_back();
-                        newCode.push_back(WASM_OP_I32_CONST);
-                        writes32(65520, newCode);
-                        newCode.push_back(WASM_OP_SET_GLOBAL);
-                        writeu32(newCode, 0);
+                        /*
+                            i32.const 65520
+                            global.set 0
+                        */
+                       newCode.push_back(WASM_OP_I32_CONST);
+                       writes32(65520, newCode);
+                       newCode.push_back(WASM_OP_SET_GLOBAL);
+                       writeu32(newCode, 0);
+                       newCode.push_back(opcode);
+                    }
+                } else if (opcode == WASM_OP_CALL) {
+                    int p = i + 1;
+                    uint32 id = readu32(p, wasmBuffer);
+                    if(id == 0) {
+                        newCode.pop_back();
+                        addFinalPrint(newCode);
                         newCode.push_back(opcode);
                     }
                 } else if (opcode == WASM_OP_BR_IF) {
@@ -1986,11 +2020,28 @@ void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
                     }
                     newCode.push_back(opcode);
                 }
+                // else if (opcode == WASM_OP_I32_DIV_S || opcode == WASM_OP_I32_DIV_U || opcode == WASM_OP_I32_REM_S || opcode == WASM_OP_I32_REM_U) {
+                //     newCode.pop_back();
+                //     addI32Const(newCode, 1);
+                //     newCode.push_back(WASM_OP_I32_OR);
+                //     newCode.push_back(opcode);
+                // } else if(opcode == WASM_OP_I64_DIV_S || opcode == WASM_OP_I64_DIV_U || opcode == WASM_OP_I64_REM_S || opcode == WASM_OP_I64_REM_U) {
+                //     newCode.pop_back();
+                //     newCode.push_back(WASM_OP_I64_CONST);
+                //     writes32(1, newCode);
+                //     newCode.push_back(WASM_OP_I64_OR);
+                //     newCode.push_back(opcode);
+                // }
             }
         } else {
             newCode.push_back(wasmBuffer[i]);
         }
     }
+    // if(mutate) {
+        // newCode.pop_back();
+        // addFinalPrint(newCode);
+        // newCode.push_back(WASM_OP_END);
+    // }
 }
 
 void SimpleMutate(int p, int p_end, vector<uint8>&newCode) {
@@ -2004,6 +2055,69 @@ void SimpleMutate(int p, int p_end, vector<uint8>&newCode) {
                 printf("mutate op\n");
                 AddRandMath(newCode, 0);
             } else newCode.push_back(opcode);
+            
+            // int type = -1;
+            // if((type=isAStore(opcode)) != -1) {
+            //     // cout << "Is a store" << endl;
+            //     GenPreMem(newCode, opcode, (uint8)type);
+            //     int pn = i + 1;
+            //     readu32(pn, wasmBuffer);
+            //     readu32(pn, wasmBuffer);
+            //     for(int w = i + 1; w < pn; w++)
+            //         newCode.push_back(wasmBuffer[w]);
+            //     i = pn - 1;
+            // } else if((type = isALoad(opcode) != -1)) {
+            //     // cout << "Is a load" << endl;
+            //     newCode.pop_back();
+            //     newCode.push_back(WASM_OP_I32_CONST);
+            //     writes32(MEM_LIM, newCode);
+            //     newCode.push_back(WASM_OP_I32_AND);
+            //     int pn = i + 1;
+            //     readu32(pn, wasmBuffer);
+            //     readu32(pn, wasmBuffer);
+            //     for(int w = i; w < pn; w++)
+            //         newCode.push_back(wasmBuffer[w]);
+            //     i = pn - 1;
+            // } else if(opcode == WASM_OP_CALL_INDIRECT) {
+            //     int p = i + 1;
+            //     uint32 type = readu32(p, wasmBuffer);
+            //     uint32 table_idx = readu32(p, wasmBuffer);
+            //     // printf("Fix Call Indirect %u %u\n", table_idx, type);
+            //     newCode.pop_back();
+            //     vector<int>suitFunc;
+            //     for(auto f : funcRefTable[table_idx])
+            //         if(FuncType[f] == type)
+            //             suitFunc.push_back(f);
+            //     if(suitFunc.size() == 0) {
+            //         // addCallPrint(newCode);
+            //         newCode.push_back(WASM_OP_DROP);
+            //         vector<uint8>pre, post, empty;
+            //         for(auto p : TypeInfo[type])
+            //             pre.push_back(p);
+            //         for(auto p : TypeInfoRet[type])
+            //             post.push_back(p);
+            //         AddFixCode(newCode, pre, empty);
+            //         AddFixCode(newCode, empty, post);
+            //     } else if(suitFunc.size() >= 2) {
+            //         newCode.push_back(WASM_OP_I32_CONST);
+            //         writes32(1, newCode);
+            //         newCode.push_back(WASM_OP_I32_AND);
+            //         newCode.push_back(WASM_OP_IF);
+            //         writes33(type, newCode);
+            //         newCode.push_back(WASM_OP_CALL);
+            //         writeu32(newCode, (uint32)suitFunc[rand() % suitFunc.size()]);
+            //         newCode.push_back(WASM_OP_ELSE);
+            //         newCode.push_back(WASM_OP_CALL);
+            //         writeu32(newCode, (uint32)suitFunc[rand() % suitFunc.size()]);
+            //         newCode.push_back(WASM_OP_END);
+            //     } else {
+            //         newCode.push_back(WASM_OP_DROP);
+            //         newCode.push_back(WASM_OP_CALL);
+            //         writeu32(newCode, (uint32)suitFunc[0]);
+            //     }
+            //     i = p - 1;
+            // } 
+            
         } else {
             newCode.push_back(wasmBuffer[i]);
         }
@@ -2025,14 +2139,6 @@ void loadSplits(string dir) {
 }
 
 int main(int argc, char *argv[]) {
-    // ensure our global manifest exists
-    {
-    std::ifstream init("all_traces.json");
-    if (!init.good()) {
-        std::ofstream create("all_traces.json");
-        create << "[\n]\n";
-    }
-    }
     srand(time(NULL));
     if(argc == 4 || argc == 5) {
         if(strcmp(argv[1], "split") == 0) {
@@ -2055,280 +2161,328 @@ int main(int argc, char *argv[]) {
             loadSplits(argv[2]);
         }
         split_file = argv[3];
-        seed_file = argv[3]; // Set seed_file to input WASM file
         string fname(argv[3]);
-        FILE *wasmFile = fopen(argv[3], "rb");
-        if(wasmFile == NULL) {
-            printf("Cannot open wasm file\n");
-            log_file.close();
+        // cout << "Start Loading, File Name is : " << fname << std::endl;
+
+        fstream wasmFile(fname, std::ios::in);
+        if (!wasmFile.is_open()) {
+            std::cerr << "Failed to open Wasm file." << std::endl;
             return 1;
         }
-        int wasmSize = fread(wasmBuffer, sizeof(uint8), sizeof(wasmBuffer), wasmFile);
-        fclose(wasmFile);
-        // printf("File Size %d\n", wasmSize);
-        uint8 *buffer = wasmBuffer;
+        string ofile = "./new.wasm";
+        if(MutationMod == true) {
+            ofile = argv[4];
+        }
+        ofstream newFile(ofile, std::ios::out | std::ios::binary);
+
+        wasmFile.seekg(0, std::ios::end);
+        streampos fileSize = wasmFile.tellg();
+        wasmFile.seekg(0, std::ios::beg);
+
+        if (!wasmFile.read(reinterpret_cast<char*>(wasmBuffer), fileSize)) {
+            std::cerr << "Failed to read Wasm file." << std::endl;
+            return 1;
+        }
+        wasmFile.close();
+
+        if(wasmBuffer[0] != 0x00 || wasmBuffer[1] != 0x61 || wasmBuffer[2] != 0x73 || wasmBuffer[3] != 0x6D) {
+            printf("Not A Wasm File\n");
+            return 0;
+        }
+
+        // printf("Start loading wasm file\n");
+        if(MutationMod == true) {
+            for(auto i = 0; i < 8; i++)
+                newFile << wasmBuffer[i];
+        } else if(SplitMod == true){
+            cout << "Splitting " << fname << endl;
+        }
+
         int pos = 8;
+        int sec_st = 0;
+        int sec_cnt = 0;
+        int unkown_cnt = 0;
+        int expr_st = -1, expr_end = -1;
+        uint32 vecCnt;
         vector<uint8>newCode;
-        for(int i = 0; i < 8; i++)
-            newCode.push_back(buffer[i]);
-        vector<uint8>newTypeSec, newImportSec, newFuncSec, newTableSec, newMemSec, newGlobSec, newExportSec, newStartSec, newElemSec, newCodeSec, newDataSec;
-        int TypeCnt, ImportCnt, FuncCnt, TableCnt, MemCnt, GlobCnt, ExportCnt, StartExist, ElemCnt, CodeCnt, DataCnt;
-        if(wasmBuffer[0] != 0 || wasmBuffer[1] != 'a' || wasmBuffer[2] != 's' || wasmBuffer[3] != 'm') {
-            printf("Wrong Wasm Head\n");
-            log_file.close();
-            return 1;
-        }
-        while(pos < wasmSize) {
-            uint8 secID = buffer[pos++];
-            // cout << hex << +secID << endl;
-            uint32 secSize = readu32(pos, buffer);
-            int sec_end = pos + secSize;
-            // printf("Sec %u Size %u\n", secID, secSize);
-            switch (secID) {
-                case 1: // type section
-                {
-                    TypeCnt = readu32(pos, buffer);
-                    // printf("Type Cnt %d\n", TypeCnt);
-                    for(int i = 0; i < TypeCnt; i++) {
-                        uint8 f = buffer[pos++];
-                        assert(f == 0x60);
-                        uint32 params = readu32(pos, buffer);
-                        for(uint j = 0; j < params; j++)
-                            TypeInfo[i].push_back(buffer[pos++]);
-                        uint32 results = readu32(pos, buffer);
-                        for(uint j = 0; j < results; j++)
-                            TypeInfoRet[i].push_back(buffer[pos++]);
-                    }
-                    for(int i = pos - secSize; i < sec_end; i++)
-                        newTypeSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 2: // import section
-                {
-                    ImportCnt = readu32(pos, buffer);
-                    import_cnt = ImportCnt;
-                    // printf("Import Cnt %d\n", ImportCnt);
-                    for(int i = pos; i < sec_end; i++)
-                        newImportSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 3: // function section
-                {
-                    FuncCnt = readu32(pos, buffer);
-                    // printf("Func Cnt %d\n", FuncCnt);
-                    for(int i = 0; i < FuncCnt; i++)
-                        FuncType.push_back(readu32(pos, buffer));
-                    for(int i = pos - secSize; i < sec_end; i++)
-                        newFuncSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 4: // Table section
-                {
-                    TableCnt = readu32(pos, buffer);
-                    for(int i = pos; i < sec_end; i++)
-                        newTableSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 5: // Mem section
-                {
-                    MemCnt = readu32(pos, buffer);
-                    for(int i = pos; i < sec_end; i++)
-                        newMemSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 6: // global section
-                {
-                    GlobCnt = readu32(pos, buffer);
-                    // printf("Global Cnt %d\n", GlobCnt);
-                    for(int i = 0; i < GlobCnt; i++) {
-                        uint8 type = buffer[pos++];
-                        uint8 mut = buffer[pos++];
-                        LoadInitExpr(pos, sec_end, buffer);
-                        // printf("Global Type %u mut %u\n", type, mut);
-                        Globals.push_back(make_pair(type, mut));
-                    }
-                    for(int i = pos - secSize; i < sec_end; i++)
-                        newGlobSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 7: // export section
-                {
-                    ExportCnt = readu32(pos, buffer);
-                    for(int i = pos; i < sec_end; i++)
-                        newExportSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 8: // start section
-                {
-                    StartExist = 1;
-                    for(int i = pos; i < sec_end; i++)
-                        newStartSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 9: // element section
-                {
-                    ElemCnt = readu32(pos, buffer);
-                    // printf("Element Cnt %d\n", ElemCnt);
-                    for(int i = 0; i < ElemCnt; i++) {
-                        uint32 table_idx = readu32(pos, buffer);
-                        LoadInitExpr(pos, sec_end, buffer);
-                        uint32 elem_cnt = readu32(pos, buffer);
-                        // printf("Table %u elem cnt %u\n", table_idx, elem_cnt);
-                        for(int j = 0; j < elem_cnt; j++) {
-                            funcRefTable[table_idx].push_back(readu32(pos, buffer));
-                        }
-                    }
-                    for(int i = pos - secSize; i < sec_end; i++)
-                        newElemSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                case 10: // code section
-                {
-                    CodeCnt = readu32(pos, buffer);
-                    // printf("Code Cnt %d\n", CodeCnt);
-                    int code_start = newCode.size();
-                    for(int i = 0; i < CodeCnt; i++) {
-                        uint32 codeSize = readu32(pos, buffer);
-                        // printf("Code %d Size %u\n", i, codeSize);
-                        int code_end = pos + codeSize;
-                        int local_tot = readu32(pos, buffer);
-                        // printf("Local Tot %d\n", local_tot);
-                        Locals.clear();
-                        for(int j = 0; j < local_tot; j++) {
-                            int local_cnt = readu32(pos, buffer);
-                            uint8 local_type = buffer[pos++];
-                            // printf("Local %d Type %u\n", local_cnt, local_type);
-                            Locals.push_back(make_pair(local_cnt, local_type));
-                        }
-                        int code_body = pos;
-                        if(SplitMod == true)
-                            TrySplit(code_body, code_end, argv[3]);
-                        else if(SimpleMutationMod == true)
-                            SimpleMutate(code_body, code_end, newCodeSec);
-                        else TryMutate(code_body, code_end, newCodeSec, 3);
-                        pos = code_end;
-                    }
-                    pos = sec_end;
-                    break;
-                }
-                case 11: // data section
-                {
-                    DataCnt = readu32(pos, buffer);
-                    for(int i = pos; i < sec_end; i++)
-                        newDataSec.push_back(buffer[i]);
-                    pos = sec_end;
-                    break;
-                }
-                default:
-                    printf("Unknown Section\n");
-                    log_file.close();
-                    return 1;
+        vector<uint8>codeSec;
+        while(pos < 1000000 && unkown_cnt < 3) {
+            sec_st = pos;
+            uint8 NewSectionID = wasmBuffer[pos++];
+            uint32 SecSize = 0;
+            // cout << "New Section ID is 0x" << hex << +NewSectionID << ' ';
+            // cout << "pos 1 : " << pos;
+            SecSize = readu32(pos, wasmBuffer);
+            // cout << "  ->  " << pos << endl;
+            int endSec = pos + SecSize;
+            if(NewSectionID && NewSectionID != 0x0A && MutationMod == true && NewSectionID != 0x06) {
+                for(int ww = sec_st; ww < endSec; ww++)
+                    newFile << wasmBuffer[ww];
             }
+            // cout << "Section Size are 0x" << hex << SecSize << endl;
+            switch(NewSectionID) {
+            case 0x01:
+            // Type Section
+                vecCnt = readu32(pos, wasmBuffer);
+                // printf("Type Count is %u : \n", vecCnt);
+                for(int i = 0; i < vecCnt; i++) {
+                    uint8 chk = wasmBuffer[pos++];
+                    // printf("%u " ,chk);
+                    if(chk != 96) {
+                        // printf("Something went wrong maybe?\n");
+                    }
+                    uint32 paraCnt = readu32(pos, wasmBuffer);
+                    // printf("Para cnt %u\n", paraCnt);
+                    for(int j = 0; j < paraCnt; j++) {
+                        uint8 valType = wasmBuffer[pos++];
+                        valType = 0x7f - valType;
+                        // printf("%d %u\n", i, valType);
+                        TypeInfo[i].push_back(valType);
+                        // printf("%d %u\n", i, valType);
+                    }
+                    // printf("\n");
+                    uint32 retCnt = readu32(pos, wasmBuffer);
+                    // printf("Return cnt %u\n", retCnt);
+                    for(int j = 0; j < retCnt; j++) {
+                        uint8 valType = wasmBuffer[pos++];
+                        TypeInfoRet[i].push_back(0x7f-valType);
+                    }
+                }
+                break;
+            case 0x02:
+            // Import Section
+                vecCnt = readu32(pos, wasmBuffer);
+                // printf("Import %d\n", vecCnt);
+                for(int i = 0; i < vecCnt; i++) {
+                    // read module name
+                    uint32 str_len = readu32(pos, wasmBuffer);
+                    pos += str_len;
+                    // external name
+                    str_len = readu32(pos, wasmBuffer);
+                    pos += str_len;
+                    // external type
+                    uint8 type = wasmBuffer[pos++];
+                    uint8 gtype, mut, lim;
+                    switch(type) {
+                    case 0: // function
+                        // printf("Function import\n");
+                        import_cnt += 1;
+                        readu32(pos, wasmBuffer);
+                        break;
+                    case 1: // table
+                        // printf("Table import\n");
+                        pos ++;
+                        [[fallthrough]]
+                    case 2: // memory
+                        // printf("Memory import\n");
+                        lim = wasmBuffer[pos++];
+                        readu32(pos, wasmBuffer);
+                        if(lim == 1 || lim == 3) {
+                            // have max
+                            readu32(pos, wasmBuffer);
+                        }
+                        break;
+                    case 3: // global
+                        gtype = 0x7f - wasmBuffer[pos++];
+                        mut = wasmBuffer[pos++];
+                        // printf("Global %d type %u %u import\n", Globals.size(), gtype, mut);
+                        Globals.push_back(make_pair(gtype, mut));
+                        break;
+                    default:
+                        // printf("Unkown type\n");
+                        break;
+                    }
+                }
+                // printf("Import Function Count is %u : ", import_cnt);
+                break;
+            case 0x03:
+            // Function Section
+                vecCnt = readu32(pos, wasmBuffer);
+                // printf("Function Count is %u : ", vecCnt + import_cnt);
+                for(int i = 0; i < import_cnt; i++)
+                    FuncType.push_back(0xffffff);
+                for(int i = 0; i < vecCnt; i++) {
+                    uint32 FuncIdx = readu32(pos, wasmBuffer);
+                    FuncType.push_back(FuncIdx);
+                    // printf("%u ", FuncIdx);
+                }
+                // printf("\n");
+                break;
+            case 0x04:
+            // Table Section
+                break;
+            case 0x05:
+            // Memory Section
+                break;
+            case 0x06:
+            // Global Section
+                vecCnt = readu32(pos, wasmBuffer);
+                sec_st = pos;
+                for(int i = 0; i < vecCnt; i++) {
+                    // loadType
+                    uint8 globType = 0x7f - wasmBuffer[pos++];
+                    uint8 valMut = wasmBuffer[pos++]; // const(0) or var(1)
+                    // printf("Global %d type %u %u\n", Globals.size(), globType, valMut);
+                    Globals.push_back(make_pair(globType, valMut));
+                    LoadInitExpr(pos, endSec, wasmBuffer);
+                }
+                codeSec.clear();
+                writeu32(codeSec, vecCnt + 4);
+                for(int i = sec_st; i < pos; i++)
+                    codeSec.push_back(wasmBuffer[i]);
+                for(int i = 0; i < 4; i++) {
+                    codeSec.push_back(0x7f - i);
+                    codeSec.push_back(0x1);
+                    int p1 = codeSec.size();
+                    GenRandInit(codeSec, i);
+                    // PrintInstr(p1, codeSec.size(), codeSec.data());
+                    Globals.push_back(make_pair((uint8)i, (uint8)1));
+                    codeSec.push_back(WASM_OP_END);
+                }
+                if(MutationMod == true) {
+                    newCode.push_back(NewSectionID);
+                    writeu32(newCode, codeSec.size());
+                    for(auto w : codeSec)
+                        newCode.push_back(w);
+                    for(auto w: newCode)
+                        newFile << w;
+                }
+                break;
+            case 0x07:
+            // Export Section
+                break;
+            case 0x08:
+            // Start Section
+                break;
+            case 0x09:
+            // Element Section
+                vecCnt = readu32(pos, wasmBuffer);
+                for(int i = 0; i < vecCnt; i++) {
+                    uint32 check = readu32(pos, wasmBuffer);
+                    int table_idx = 0;
+                    if(check == 0x02 || check == 0x06) {
+                        table_idx = readu32(pos, wasmBuffer);
+                    }
+                    if(check == 0x0 || check == 0x02 || check == 0x4 || check == 0x6) {
+                        LoadInitExpr(pos, endSec, wasmBuffer);
+                    }
+                    switch (check) {
+                    case 0x01:
+                    case 0x02:
+                    case 0x03:
+                        pos++;
+                        [[fallthrough]];
+
+                    case 0x00: {
+                        uint32_t VecCnt = readu32(pos, wasmBuffer);
+                        for (uint32_t i = 0; i < VecCnt; ++i) {
+                            uint32 func_id = readu32(pos, wasmBuffer);
+                            funcRefTable[table_idx].push_back(func_id);
+                            // printf("%d:%d ", func_id, FuncType[func_id]);
+                        }
+                        // printf("\n");
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                    uint32 VecCnt;
+                    switch (check) {
+                    case 0x05:
+                    case 0x06:
+                    case 0x07:
+                        pos++;
+                        [[fallthrough]];
+                    case 0x04:
+                        VecCnt = readu32(pos, wasmBuffer);
+                        for(int i = 0; i < VecCnt; i++) {
+                            LoadInitExpr(pos, endSec, wasmBuffer);
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                break;
+            case 0x0A:
+            // Code Section
+                debug("Code Section " << hex << pos << dec);
+                sec_st = pos;
+                expr_end = pos + SecSize;
+                vecCnt = readu32(pos, wasmBuffer);
+                // cout << "Code Cnt " << vecCnt << endl;
+                codeSec.clear();
+                newCode.clear();
+                writeu32(codeSec, vecCnt);
+                for(int i = 0; i < vecCnt; i++) {
+                    cout << "====================  " << i + import_cnt << "  ================= " << endl;
+                    // every function's code segment
+                    sec_st = pos;
+                    uint32 segSize = readu32(pos, wasmBuffer);
+                    uint32 segEnd = pos + segSize;
+                    // if(find(ignoreFunc.begin(), ignoreFunc.end(), i+import_cnt) != ignoreFunc.end()) {
+                    //     // printf("Ignoring Function %d\n", i + import_cnt);
+                    //     writeu32(codeSec, segSize);
+                    //     for(int ww = pos; ww < segEnd; ww++) {
+                    //         codeSec.push_back(wasmBuffer[ww]);
+                    //     }
+                    //     pos = segEnd;
+                    //     continue;
+                    // }
+                    uint32 vec_begin = pos;
+                    uint32 VecCnt = readu32(pos, wasmBuffer);
+                    // cout << "Local cnt " << VecCnt << endl;
+                    Locals.clear();
+                    for(auto p : TypeInfo[FuncType[i + import_cnt]])
+                        Locals.push_back(make_pair(1, p));
+                    for(int j = 0; j < VecCnt; j++) {
+                        uint32 localCnt = readu32(pos, wasmBuffer);
+                        uint8 localType = wasmBuffer[pos++];
+                        Locals.push_back(make_pair(localCnt, 0x7f - localType));
+                        // cout << "Local " << dec << localCnt << hex << " Type is " << +localType << endl;
+                    }
+                    uint32 vec_end = pos;
+                    // pos -> segEnd is all code? I think so
+                    // if(i == 0xe5) {
+                    //     PrintInstr(pos, segEnd);
+                    vector<uint8>mutateCode;
+                    int orglen = segEnd - pos;
+                    if(SplitMod == true) TrySplit(pos, segEnd, argv[4]);
+                    else if(SimpleMutationMod == true) SimpleMutate(pos, segEnd, mutateCode);
+                    else if(MutationMod == true) TryMutate(pos, segEnd, mutateCode, (segEnd - pos) / 50);
+                    // }
+                    debug("Seg Size " << segSize << " -> " << segSize + mutateCode.size() - orglen);
+                    segSize += mutateCode.size() - orglen;
+                    writeu32(codeSec, segSize);
+                    for(int ww = vec_begin; ww < vec_end; ww++)
+                        codeSec.push_back(wasmBuffer[ww]);
+                    for(auto w : mutateCode)
+                        codeSec.push_back(w);
+                    pos = segEnd;
+                }
+                assert(pos == expr_end);
+                if(MutationMod == true) {
+                    newCode.push_back(NewSectionID);
+                    writeu32(newCode, codeSec.size());
+                    for(auto w : codeSec)
+                        newCode.push_back(w);
+                    for(auto w: newCode)
+                        newFile << w;
+                }
+                break;
+            case 0x0B:
+            // Data Section
+                break;
+            default:
+                // printf("Maybe A unkown section?\n");
+                unkown_cnt++;
+            }
+            pos = endSec;
+            sec_cnt++;
+            // printf("now pos at %d\n", pos);
         }
-        // printf("File Size %d\n", wasmSize);
-        for(auto x : newTypeSec)
-            newCode.push_back(x);
-        for(auto x : newImportSec)
-            newCode.push_back(x);
-        for(auto x : newFuncSec)
-            newCode.push_back(x);
-        for(auto x : newTableSec)
-            newCode.push_back(x);
-        for(auto x : newMemSec)
-            newCode.push_back(x);
-        for(auto x : newGlobSec)
-            newCode.push_back(x);
-        for(auto x : newExportSec)
-            newCode.push_back(x);
-        for(auto x : newStartSec)
-            newCode.push_back(x);
-        for(auto x : newElemSec)
-            newCode.push_back(x);
-        int codeSecStart = newCode.size();
-        int codeSecSize = newCodeSec.size();
-        newCode.push_back(0x0a);
-        writeu32(newCode, codeSecSize + 4);
-        for(auto x : newCodeSec)
-            newCode.push_back(x);
-        for(auto x : newDataSec)
-            newCode.push_back(x);
-        string out_file;
-        if(argc == 5)
-            out_file = argv[4];
-        else out_file = fname.substr(0, fname.find_last_of('.')) + "-O0.wasm";
-        FILE *wasmOut = fopen(out_file.c_str(), "wb");
-        if(wasmOut == NULL) {
-            printf("Cannot open output file\n");
-            log_file.close();
-            return 1;
-        }
-        fwrite(newCode.data(), sizeof(uint8), newCode.size(), wasmOut);
-        fclose(wasmOut);
-        // ------------------------------------------------
-        // Logging added
-        // ------------------------------------------------
-    {
-        using fs = std::filesystem::path;
-            std::string testcase = fs(seed_file).stem().string();
-
-        // open for read+write
-        std::fstream manifest("all_traces.json",
-                              std::ios::in | std::ios::out);
-        if (!manifest) {
-            std::cerr << "ERROR: cannot open all_traces.json\n";
-            return 1;
-        }
-
-        // figure out if this is the first entry
-        manifest.seekg(0, std::ios::end);
-        auto size = manifest.tellg();
-        bool first = (size <= 4);        // file is "[\n]\n" if empty
-
-        // rewind write‐cursor to just before the closing "]\n"
-        manifest.seekp(-2, std::ios::end);
-
-        // if not first, prepend a comma
-        if (!first) manifest << ",\n";
-
-        // write our object
-        manifest << "  {\n";
-        manifest << "    \"testcase\":   \"" << out_file << "\",\n";
-        manifest << "    \"seed\":       \"" << seed_file << "\",\n";
-        manifest << "    \"ingredients\": [\n";
-        for (size_t i = 0; i < used_ingredients.size(); ++i) {
-            // splitName is e.g. "split-ece4b78b"
-            const auto &splitName = used_ingredients[i];
-
-            // if your splits live in argv[2], build the full path:
-            std::filesystem::path splitsDir{argv[2]};
-            std::string splitPath = (splitsDir / splitName).string();
-
-            // read the last line out of that file, pull its filename:
-            std::string origin = extractOriginName(splitPath);
-
-            manifest << "      {\"" << splitName << "\": \"" << origin << "\"}"
-                     << (i + 1 < used_ingredients.size() ? "," : "")
-                     << "\n";
-        }
-        manifest << "    ]\n";
-
-        manifest << "  }\n";
-
-        // finally close the JSON array
-        manifest << "]\n";
-        manifest.close();
-    }
-
-
+        if(MutationMod == true)
+            newFile.close();
     }
     return 0;
 }

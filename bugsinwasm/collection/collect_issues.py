@@ -20,15 +20,18 @@ def collect_issues_and_comments(owner, repo, limit):
 
     try:
         # Retrieve the list of issues as JSON containing issue numbers.
+        # Filter for issues with "bug" or "Bug" labels
         list_cmd = [
             'gh', 'issue', 'list',
             '--repo', repository,
             '--state', 'all',
             '--limit', str(limit),
+            '--label', 'bug,Bug',
             '--json', 'number'
         ]
         list_output = subprocess.check_output(list_cmd)
         issues = json.loads(list_output)
+        print(f"Retrieved {len(issues)} issues from {repository}")
     except subprocess.CalledProcessError as e:
         print("Error while listing issues:", e)
         return {}
@@ -37,10 +40,12 @@ def collect_issues_and_comments(owner, repo, limit):
         return {}
 
     # For each issue number, retrieve detailed info and comments.
-    for issue in issues:
+    for i, issue in enumerate(issues, 1):
         issue_number = issue.get("number")
         if issue_number is None:
             continue
+        
+        print(f"Processing issue {i}/{len(issues)}: #{issue_number}")
         
         try:
             view_cmd = [
@@ -74,6 +79,7 @@ def store_issues_json(owner, repo, limit, output_file="issues.json"):
         with open(output_file, "w") as fp:
             json.dump(data, fp, indent=2)
         print(f"Issues and comments have been successfully saved to {output_file}")
+        print(f"Total issues collected: {len(data)}")
     except IOError as e:
         print("Error writing JSON to file:", e)
 
@@ -81,8 +87,7 @@ def store_issues_json(owner, repo, limit, output_file="issues.json"):
 if __name__ == "__main__":
     owner = sys.argv[1]   # Replace with the actual repository owner
     repo  = sys.argv[2]    # Replace with the actual repository name
-    limit = sys.argv[3]
+    limit = int(sys.argv[3])
     storage_dir = sys.argv[4]  # Directory path to store issues.json
 
     store_issues_json(owner, repo, limit, os.path.join(storage_dir, "issues.json"))
-

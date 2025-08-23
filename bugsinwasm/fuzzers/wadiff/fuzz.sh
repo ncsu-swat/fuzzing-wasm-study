@@ -12,7 +12,7 @@ time_limit_s=$((time_limit * 60))
 # Spin up container
 docker_file_path=$4
 (cd $docker_file_path && docker build -t img-wadiff .)
-docker run -d --name container-wadiff-$seed_corpora_name img-wadiff sleep infinity
+docker run -d --memory 32g --name container-wadiff-$seed_corpora_name img-wadiff sleep infinity
 
 docker exec container-wadiff-$seed_corpora_name bash -c "mkdir /testcases"
 docker exec container-wadiff-$seed_corpora_name bash -c "mkdir /testcases_tmp"

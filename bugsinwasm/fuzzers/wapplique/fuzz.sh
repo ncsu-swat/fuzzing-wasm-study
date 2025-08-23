@@ -12,9 +12,7 @@ time_limit_s=$((time_limit * 60))
 # Spin up container
 docker_file_path=$4
 (cd $docker_file_path && docker build -t img-wapplique .)
-docker run -d --name container-wapplique-$seed_corpora_name img-wapplique sleep infinity
-
-echo $seed_corpora_path
+docker run --tmpfs /testcases:rw,size=64g,mode=1777 -d --memory 128g --name container-wapplique-$seed_corpora_name img-wapplique sleep infinity
 
 docker cp $seed_corpora_path container-wapplique-$seed_corpora_name:/wapplique/ingredSeed
 docker cp $seed_corpora_path container-wapplique-$seed_corpora_name:/wapplique/SeedPool
@@ -26,3 +24,7 @@ docker exec container-wapplique-$seed_corpora_name bash -c "cd / && tar -czf tes
 mkdir -p $test_cases_path/$seed_corpora_name
 docker cp container-wapplique-$seed_corpora_name:/testcases.tar.gz $test_cases_path/$seed_corpora_name/testcases.tar.gz
 (cd $test_cases_path/$seed_corpora_name && tar -xzf testcases.tar.gz)
+
+docker exec container-wapplique-$seed_corpora_name bash -c "cd /wapplique && python3 extractor.py mutation.log" 
+docker cp container-wapplique-$seed_corpora_name:/wapplique/mutation.log $test_cases_path/$seed_corpora_name
+docker cp container-wapplique-$seed_corpora_name:/wapplique/output.json $test_cases_path/$seed_corpora_name

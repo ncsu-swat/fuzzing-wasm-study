@@ -961,7 +961,7 @@ void TrySplit(int p, int p_end, char*dir) {
                     break;
                     // stringstream ss;
                     // ss << hex << file_id;
-                    // print("/home/unicornt/WASM/WasmSynthesis/splits/split-" + ss.str());
+                    // print("/wapplique/ingred/split-" + ss.str());
 
                 }
             }
@@ -1681,7 +1681,7 @@ void AddFixCode(vector<uint8>&newCode, vector<uint8>&ps, vector<uint8>&cs) {
     
 }
 
-void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs) {
+void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs,  std::string out_file) {
     int newCode_st = newCode.size();
     int split_cnt = 0;
     vector<uint8> code;
@@ -1697,7 +1697,8 @@ void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs) {
         code.clear();
         newlocal.clear();
         newglobal.clear();
-        if(decoder("/home/unicornt/WASM/WasmSynthesis/splits/" + splits[tid], code, newCur, newPost, newlocal, newglobal) != true)
+
+        if(decoder("/wapplique/ingred/" + splits[tid], code, newCur, newPost, newlocal, newglobal) != true)
             continue;
         bool f = true;
         for(auto ls : newlocal) {
@@ -1718,15 +1719,35 @@ void TryAddSplit(vector<uint8>&newCode, vector<uint8>ps, vector<uint8>cs) {
     if(sid == -1) {
         // delet this code fragment
     } else {
-        std::cout << "Add split :" << splits[sid] << endl;
+        //std::cout << "Add split :" << splits[sid] << endl;
         newPost.clear();
         newCur.clear();
         code.clear();
         newlocal.clear();
         newglobal.clear();
-        decoder("/home/unicornt/WASM/WasmSynthesis/splits/" + splits[sid], code, newCur, newPost, newlocal, newglobal);
+        
+        std::string splitPath = "/wapplique/ingred/" + splits[sid];    // ADDED BY US
+        std::ifstream ifs(splitPath);
+        std::string line, originSeed;
+        while (std::getline(ifs, line)) {
+            if (!line.empty() && line.front() == '/') {
+                originSeed = line;
+            }
+        }
+        ifs.close();
+
+
+
+        std::cout << "***TestCase:" << out_file        // ADDED BY US
+              << ",SplitFragment:" << splits[sid]
+              << ",SplitOrigin:" << originSeed
+              << "***"
+              << std::endl;
+        decoder("/wapplique/ingred/" + splits[sid], code, newCur, newPost, newlocal, newglobal);
+
+
         AddFixCode(newCode, ps, newPost);
-        // print("/home/unicornt/WASM/WasmSynthesis/splits/"+splits[sid]);
+        // print("/wapplique/ingred/"+splits[sid]);
         split_cnt++;
         // PrintInstr(0, code.size(), code.data());
         debug("===========");
@@ -1851,7 +1872,7 @@ int isAStore(uint8 opcode) {
     return -1;
 }
 
-void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
+void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt, std::string out_file) {
     // int mutate_cnt = (p_end - p) / 100 + 1;
     // bool mutate = mutate_cnt > 0;
     for(int i = p; i < p_end; i++)
@@ -1894,11 +1915,11 @@ void TryMutate(int p, int p_end, vector<uint8>&newCode, int mutate_cnt) {
                         debug("============================================");
                         debug("Split " << i << ' ' << j);
                         reverse(postStack.begin(), postStack.end());
-                        TryAddSplit(newCode, postStack, curStack);
+                        TryAddSplit(newCode, postStack, curStack, out_file);
 
                         // stringstream ss;
                         // ss << hex << file_id;
-                        // print("/home/unicornt/WASM/WasmSynthesis/splits/split-" + ss.str());
+                        // print("/wapplique/ingred/split-" + ss.str());
                         i = j - 1;
                         mutate = true;
                         debug("Finish Mutataion!!!");
@@ -2164,15 +2185,19 @@ int main(int argc, char *argv[]) {
         string fname(argv[3]);
         // cout << "Start Loading, File Name is : " << fname << std::endl;
 
+
+        string ofile = "./new.wasm";    // Added by us
+        if(MutationMod == true) {
+            ofile = argv[4];
+        }
+
+
         fstream wasmFile(fname, std::ios::in);
         if (!wasmFile.is_open()) {
             std::cerr << "Failed to open Wasm file." << std::endl;
             return 1;
         }
-        string ofile = "./new.wasm";
-        if(MutationMod == true) {
-            ofile = argv[4];
-        }
+        
         ofstream newFile(ofile, std::ios::out | std::ios::binary);
 
         wasmFile.seekg(0, std::ios::end);
@@ -2449,7 +2474,7 @@ int main(int argc, char *argv[]) {
                     int orglen = segEnd - pos;
                     if(SplitMod == true) TrySplit(pos, segEnd, argv[4]);
                     else if(SimpleMutationMod == true) SimpleMutate(pos, segEnd, mutateCode);
-                    else if(MutationMod == true) TryMutate(pos, segEnd, mutateCode, (segEnd - pos) / 50);
+                    else if(MutationMod == true) TryMutate(pos, segEnd, mutateCode, (segEnd - pos) / 50, ofile);
                     // }
                     debug("Seg Size " << segSize << " -> " << segSize + mutateCode.size() - orglen);
                     segSize += mutateCode.size() - orglen;

@@ -2,7 +2,7 @@ import os
 import subprocess
 import sys
 
-split_cmd = "./mutator_orig split null {} {} >> split.log"
+split_cmd = "./mutator split null {} {} >> split.log"
 
 def cmd(commandline):
     # print(commandline)
@@ -18,10 +18,12 @@ if __name__ == "__main__":
         for file in files:
             if file.endswith(".wasm") and not file.endswith("-aot.wasm"):
                 file_path = os.path.abspath(root + "/" + file)
-                st, ot = cmd("wasm2wat {} -o {}.wat".format(file_path, file_path))
+                # st, ot = cmd("wasm2wat {} -o {}.wat".format(file_path, file_path))
+                st, ot = cmd("wasm-tools print {} -o {}.wat".format(file_path, file_path))
                 if st != 0:
                     continue
-                cmd("wat2wasm {}.wat -o {}".format(file_path, file_path))
+                # cmd("wat2wasm {}.wat -o {}".format(file_path, file_path))
+                cmd("wasm-tools parse {}.wat -o {}".format(file_path, file_path))
                 # print("Splitting {}".format(file_path))
                 cmd(split_cmd.format(file_path, sys.argv[2]))
                 # print("")
