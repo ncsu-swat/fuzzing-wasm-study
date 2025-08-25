@@ -450,29 +450,60 @@ def primitive2simd(root):
                             subs_node = Node(Instruction(subs_instr, None),
                                              instr_type={'params': [ValTypeV128, ValTypeI32], 'results': [ValTypeV128]})
                         subs_node.sub_instrs = node.sub_instrs
-                        subs_node.sub_instrs[-1] = Node(Instruction(I32Const, random.randint(0, 10000)),
-                                                        instr_type={'params': [], 'results': [ValTypeI32]})
+                        
+                        new_node = Node(Instruction(I32Const, random.randint(0, 10000)),
+                            instr_type={'params': [], 'results': [ValTypeI32]})
+                        if subs_node.sub_instrs:
+                            subs_node.sub_instrs[-1] = new_node
+                        else:
+                            # no children to replace; just append a sensible one
+                            subs_node.sub_instrs.append(new_node)
+
+
                         node.copy(subs_node)
                     elif subs_instr in V128_I64_to_V128['instrs']:
                         subs_node = Node(Instruction(subs_instr, random.randint(0, 1)),
                                          instr_type={'params': [ValTypeV128, ValTypeI64], 'results': [ValTypeV128]})
                         subs_node.sub_instrs = node.sub_instrs
-                        subs_node.sub_instrs[-1] = Node(Instruction(I64Const, random.randint(0, 10000)),
+                        
+                        new_node = Node(Instruction(I64Const, random.randint(0, 10000)),
                                                         instr_type={'params': [], 'results': [ValTypeI64]})
+                        
+                        if subs_node.sub_instrs:
+                            subs_node.sub_instrs[-1] = new_node
+                        else:
+                            # no children to replace; just append a sensible one
+                            subs_node.sub_instrs.append(new_node)
+                        
                         node.copy(subs_node)
                     elif subs_instr in V128_F32_to_V128['instrs']:
                         subs_node = Node(Instruction(subs_instr, random.randint(0, 1)),
                                          instr_type={'params': [ValTypeV128, ValTypeF32], 'results': [ValTypeV128]})
                         subs_node.sub_instrs = node.sub_instrs
-                        subs_node.sub_instrs[-1] = Node(Instruction(F32Const, numpy.float32(numpy.random.random())),
+                        
+                        
+                        new_node = Node(Instruction(F32Const, numpy.float32(numpy.random.random())),
                                                         instr_type={'params': [], 'results': [ValTypeF32]})
+                        
+                        if subs_node.sub_instrs:
+                            subs_node.sub_instrs[-1] = new_node
+                        else:
+                            # no children to replace; just append a sensible one
+                            subs_node.sub_instrs.append(new_node)
                         node.copy(subs_node)
                     elif subs_instr in V128_F64_to_V128['instrs']:
                         subs_node = Node(Instruction(subs_instr, random.randint(0, 1)),
                                          instr_type={'params': [ValTypeV128, ValTypeF64], 'results': [ValTypeV128]})
                         subs_node.sub_instrs = node.sub_instrs
-                        subs_node.sub_instrs[-1] = Node(Instruction(F64Const, numpy.float64(numpy.random.random())),
+                        
+                        new_node = Node(Instruction(F64Const, numpy.float64(numpy.random.random())),
                                                         instr_type={'params': [], 'results': [ValTypeF64]})
+                        
+                        if subs_node.sub_instrs:
+                            subs_node.sub_instrs[-1] = new_node
+                        else:
+                            # no children to replace; just append a sensible one
+                            subs_node.sub_instrs.append(new_node)
                         node.copy(subs_node)
 
                     else:

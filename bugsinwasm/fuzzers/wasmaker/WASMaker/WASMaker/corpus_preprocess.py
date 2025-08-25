@@ -1,6 +1,8 @@
 import os
 import sys
 
+import json # Added by ME
+
 import pymongo
 from BREWasm import *
 
@@ -33,6 +35,17 @@ def init_mongodb():
       runtime_fuzz_db[collection_name].insert_one({})
       runtime_fuzz_db[collection_name].delete_many({})
 
+
+def annotate_with_seed_name(obj, seed_name): #Added by ME
+
+  if isinstance(obj, dict):
+    obj.setdefault("origin_seed_name", seed_name)
+    for v in obj.values():
+      annotate_with_seed_name(v, seed_name)
+  elif isinstance(obj, list):
+    for v in obj:
+      annotate_with_seed_name(v, seed_name)
+
 clear_mongodb()
 init_mongodb()
 
@@ -43,6 +56,7 @@ try:
         print(f"Processing {file}")
         
         file_path = os.path.join(root, file)
+        seed_name = os.path.basename(file_path) # Added by ME
 
         wasm_binary = BREWasm(file_path)
 
@@ -54,6 +68,9 @@ try:
 
           json_string = ast_to_json(AST_list)
           AST_nodes_json = json.loads(json_string)
+
+          annotate_with_seed_name(AST_nodes_json, seed_name) #Added by ME
+
 
           store_mongodb(AST_nodes_json)
           # print("function :" + str(i))

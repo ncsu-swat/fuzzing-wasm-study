@@ -2,7 +2,12 @@ import inspect
 import random
 import struct
 
+import os, time, json  # Added by ME
+from collections import defaultdict  # Added by ME
+from threading import local  # Added by ME
+
 import numpy as np
+import pymongo  # Added by ME
 
 from WASMaker.fuzzer.AST import *
 from WASMaker.fuzzer.emit_binary import EmitBinary
@@ -12,6 +17,60 @@ from WASMaker.parser.module import Module, Locals, Global, Data, Code, Elem, Exp
 from WASMaker.parser.opnames import *
 from WASMaker.parser.types import FuncType, FtTag, Limits, GlobalType, TableType
 from WASMaker.settings import AST_NUM
+
+# -------------------- Provenance helpers (Added by ME) --------------------
+__prov_tl = local()
+
+def _prov_reset():
+    __prov_tl.seeds = set()
+    __prov_tl.opcode_counts = defaultdict(int)
+
+def _prov_note_json(ast_json):
+    """Record seed + opcode histogram from a selected AST JSON fragment."""
+    if not hasattr(__prov_tl, "seeds"):
+        _prov_reset()
+
+    s = ast_json.get("origin_seed_name")
+    if s:
+        __prov_tl.seeds.add(s)
+
+    # quick opcode histogram over the fragment JSON
+    def walk(a):
+        if isinstance(a, dict):
+            op = a.get("opcode")
+            if op is None and isinstance(a.get("instr"), dict):
+                op = a["instr"].get("opcode")
+            if op is not None:
+                __prov_tl.opcode_counts[str(op)] += 1
+            for v in a.values():
+                walk(v)
+        elif isinstance(a, list):
+            for v in a:
+                walk(v)
+    walk(ast_json)
+
+def _prov_snapshot_and_reset(testcase_path):
+    """Return the provenance collected for this testcase and reset."""
+    if not hasattr(__prov_tl, "seeds"):
+        _prov_reset()
+    data = {
+        "testcase": testcase_path,
+        "seeds_used": sorted(__prov_tl.seeds),
+        "opcode_counts": dict(__prov_tl.opcode_counts),
+        "ts": time.time(),
+    }
+    _prov_reset()
+    return data
+
+def _append_jsonl(path, obj):
+    """Append a single JSON object as a line to a JSONL file."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    line = json.dumps(obj, separators=(",", ":")) + "\n"
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(line)
+        f.flush()
+        os.fsync(f.fileno())
+# ------------------ End provenance helpers (Added by ME) ------------------
 
 
 def generate_random_number(valtype):
@@ -58,6 +117,31 @@ def generate_random_number(valtype):
             return 2 ** 128 - 1
 
 
+def _collect_seeds(ast, out):  # (kept for potential future use)
+    if isinstance(ast, dict):
+        v = ast.get("origin_seed_name")
+        if v:
+            out.add(v)
+        for val in ast.values():
+            _collect_seeds(val, out)
+    elif isinstance(ast, list):
+        for val in ast:
+            _collect_seeds(val, out)
+
+def _collect_opcodes(ast, counts):  # (kept for potential future use)
+    if isinstance(ast, dict):
+        op = ast.get("opcode")
+        if op is None and isinstance(ast.get("instr"), dict):
+            op = ast["instr"].get("opcode")
+        if op is not None:
+            counts[str(op)] += 1
+        for val in ast.values():
+            _collect_opcodes(val, counts)
+    elif isinstance(ast, list):
+        for val in ast:
+            _collect_opcodes(val, counts)
+
+
 def get_stack_depth():
     current_frame = inspect.currentframe()
     stack_depth = 0
@@ -89,40 +173,37 @@ def get_avail_ASTs():
 def generate_random_string(length):
     random_data = np.random.bytes(length)
     random_string = random_data.decode('utf-8', errors='ignore')
-
     return random_string
 
 
 def emit_funcbody(AST_num, module, avail_ASTs, AST_mutation, functype=None):
     local_list = []
-
     AST_nodes = []
 
     for i in range(AST_num):
-
         instr_index = random.randint(0, len(avail_ASTs) - 1)
-
         instr_collection = avail_ASTs[instr_index]
 
         AST_count = len(instr_collection)
-
         if AST_count == 1:
             random_AST_json = instr_collection[0]
         else:
             random_index = random.randint(0, AST_count - 1)
-            all_AST_json = instr_collection
+            random_AST_json = instr_collection[random_index]
 
-            random_AST_json = all_AST_json[random_index]
+        # provenance hook: exactly once, before json_to_ast
+        _prov_note_json(random_AST_json)
 
         random_AST = json_to_ast(random_AST_json)
 
-        if AST_mutation == True:
+        if AST_mutation:
             random_AST = primitive2simd(random_AST)
 
-        if functype != None:
+        if functype is not None:
             emit_node_context(module, local_list, random_AST, avail_ASTs, AST_mutation, functype)
         else:
             emit_node_context(module, local_list, random_AST, avail_ASTs, AST_mutation)
+
         AST_nodes.append(random_AST)
 
     funcbody = convert_instrs(AST_nodes)
@@ -132,14 +213,13 @@ def emit_funcbody(AST_num, module, avail_ASTs, AST_mutation, functype=None):
         results_type.extend(ast.type["results"])
 
     all_local_list = []
-
-    if functype != None:
+    if functype is not None:
         for param_type in functype.param_types:
             all_local_list.append(Locals(1, param_type))
 
     all_local_list = all_local_list + local_list
 
-    if functype != None:
+    if functype is not None:
         handle_return(funcbody, functype.result_types, all_local_list)
 
     return funcbody, local_list, results_type
@@ -148,7 +228,6 @@ def emit_funcbody(AST_num, module, avail_ASTs, AST_mutation, functype=None):
 def handle_return(instrs, results_type, all_local_list):
     i = 0
     while i < len(instrs):
-
         if instrs[i].opcode in [Block, Loop]:
             args = instrs[i].args
             handle_return(args.instrs, results_type, all_local_list)
@@ -158,7 +237,6 @@ def handle_return(instrs, results_type, all_local_list):
             handle_return(args.instrs2, results_type, all_local_list)
         else:
             if instrs[i].opcode == Return:
-
                 for result in results_type:
                     is_exist = False
                     optional_local = []
@@ -189,7 +267,6 @@ def convert_instrs(AST_nodes):
     for _, node in enumerate(AST_nodes):
         if node.instr.opcode in [Block, Loop]:
             instr = node.instr
-
             instr.args = BlockArgs(node.instr.args, convert_instrs(node.sub_instrs))
             func_instrs.append(instr)
             continue
@@ -203,21 +280,21 @@ def convert_instrs(AST_nodes):
                 if i.opcode == Else_:
                     end_index = _
 
-            instr.args = IfArgs(node.instr.args, convert_instrs(node.sub_instrs[0: end_index]),
-                                convert_instrs(node.sub_instrs[end_index + 1:]))
+            instr.args = IfArgs(
+                node.instr.args,
+                convert_instrs(node.sub_instrs[0: end_index]),
+                convert_instrs(node.sub_instrs[end_index + 1:])
+            )
 
             func_instrs.extend(condition_instrs)
             func_instrs.append(instr)
             continue
         elif node.instr.opcode == BrTable:
             func_instrs.extend(convert_instrs(node.sub_instrs))
-
             node.instr = Instruction(BrTable, BrTableArgs(node.instr.args, 0))
             func_instrs.append(node.instr)
-
         else:
             func_instrs.extend(convert_instrs(node.sub_instrs))
-
             if node.instr.opcode == Unreachable:
                 node.instr.opcode = Nop
             func_instrs.append(node.instr)
@@ -231,9 +308,7 @@ def json_to_ast(json_ast):
 
     while stack:
         curr_json_ast, curr_node = stack.pop()
-
         sub_instrs = curr_json_ast.get('sub_instrs', [])
-
         for sub_instr_data in sub_instrs:
             sub_instr_node = json_to_ast_convert(sub_instr_data)
             curr_node.sub_instrs.append(sub_instr_node)
@@ -248,45 +323,37 @@ def json_to_ast_convert(json_ast):
     context = json_ast.get('context')
     if context is not None:
         context = Context().to_object(context)
-
     node = Node(instr, type, context)
     return node
 
 
 def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=None):
-    node_stack = []
-    node_stack.append(node)
+    node_stack = [node]
 
-    while node_stack != []:
+    while node_stack:
         node = node_stack.pop()
         context = node.context
 
         if context is not None:
 
             if context.local_variable:
-
                 local_type = context.local_variable['local_variable_type']
 
                 all_local_list = []
-
                 if functype != None:
                     for param_type in functype.param_types:
                         all_local_list.append(Locals(1, param_type))
-
                 all_local_list = all_local_list + local_list
 
                 is_exist = False
                 local_id = None
-
                 for _, local in enumerate(all_local_list):
                     if local.type == local_type:
                         is_exist = True
                         local_id = _
-
                 if is_exist == False:
                     local = Locals(1, local_type)
                     local_list.append(local)
-
                     if functype != None:
                         node.instr.args = len(functype.param_types) + len(local_list) - 1
                     else:
@@ -294,9 +361,7 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
                 else:
                     node.instr.args = local_id
 
-
             elif context.functype:
-
                 invoked_functype = FuncType(FtTag, context.functype['param_types'].copy(),
                                             context.functype['result_types'].copy())
 
@@ -311,27 +376,20 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
                 stack_depth = get_stack_depth()
 
                 if stack_depth >= 16:
-
                     for param in invoked_functype.param_types:
                         if param == ValTypeI32:
-                            node.sub_instrs.append(
-                                Node(Instruction(Drop), instr_type={'params': [ValTypeI32], 'results': []}))
+                            node.sub_instrs.append(Node(Instruction(Drop), instr_type={'params': [ValTypeI32], 'results': []}))
                         elif param == ValTypeI64:
-                            node.sub_instrs.append(
-                                Node(Instruction(Drop), instr_type={'params': [ValTypeI64], 'results': []}))
+                            node.sub_instrs.append(Node(Instruction(Drop), instr_type={'params': [ValTypeI64], 'results': []}))
                         elif param == ValTypeF32:
-                            node.sub_instrs.append(
-                                Node(Instruction(Drop), instr_type={'params': [ValTypeF32], 'results': []}))
+                            node.sub_instrs.append(Node(Instruction(Drop), instr_type={'params': [ValTypeF32], 'results': []}))
                         elif param == ValTypeF64:
-                            node.sub_instrs.append(
-                                Node(Instruction(Drop), instr_type={'params': [ValTypeF64], 'results': []}))
+                            node.sub_instrs.append(Node(Instruction(Drop), instr_type={'params': [ValTypeF64], 'results': []}))
                         elif param == ValTypeV128:
-                            node.sub_instrs.append(
-                                Node(Instruction(Drop), instr_type={'params': [ValTypeV128], 'results': []}))
+                            node.sub_instrs.append(Node(Instruction(Drop), instr_type={'params': [ValTypeV128], 'results': []}))
 
                     if node.instr.opcode == CallIndirect:
-                        node.sub_instrs.append(
-                            Node(Instruction(Drop), instr_type={'params': [ValTypeI32], 'results': []}))
+                        node.sub_instrs.append(Node(Instruction(Drop), instr_type={'params': [ValTypeI32], 'results': []}))
 
                     for result in invoked_functype.result_types:
                         if result == ValTypeI32:
@@ -375,10 +433,8 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
                     funcbody.extend([Instruction(Drop)] * len(results_type))
 
                     all_local_list = []
-
                     for param_type in invoked_functype.param_types:
                         all_local_list.append(Locals(1, param_type))
-
                     all_local_list = all_local_list + func_local_list
 
                     for result in invoked_functype.result_types:
@@ -403,24 +459,18 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
                                 funcbody.append(Instruction(V128Const, generate_random_number(ValTypeV128)))
 
                     code_item = Code(expr=funcbody, locals_vec=func_local_list)
-
                     module.func_sec.append(functype_id)
-
                     module.code_sec.append(code_item)
-                    if node.instr.opcode == Call:
 
+                    if node.instr.opcode == Call:
                         node.instr.args = len(module.func_sec) - 1
                     else:
-
                         drop_node = Node(Instruction(Drop), instr_type={'params': [ValTypeI32], 'results': []})
-
                         node.instr.args = functype_id
 
                         if module.table_sec == []:
-
                             module.table_sec.append(TableType(limits=Limits(1, 200, 200)))
-                            module.elem_sec.append(
-                                Elem(offset_expr=[Instruction(I32Const, 1)], vec_init=[len(module.func_sec) - 1]))
+                            module.elem_sec.append(Elem(offset_expr=[Instruction(I32Const, 1)], vec_init=[len(module.func_sec) - 1]))
                         else:
                             module.elem_sec[0].init.append(len(module.func_sec) - 1)
 
@@ -429,18 +479,16 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
 
                         node.sub_instrs.append(drop_node)
                         node.sub_instrs.append(i32Const_node)
-            elif context.global_variable:
 
+            elif context.global_variable:
                 global_variable_type = context.global_variable['global_variable_type']
                 is_exist = False
-
                 for _, global_item in enumerate(module.global_sec):
                     if global_item.type.val_type == global_variable_type:
                         node.instr.args = _
                         is_exist = True
                         break
                 if is_exist != True:
-
                     if global_variable_type == ValTypeI32:
                         global_variable_init = [Instruction(I32Const, generate_random_number(ValTypeI32))]
                     elif global_variable_type == ValTypeI64:
@@ -454,6 +502,7 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
                     global_variable = Global(GlobalType(val_type=global_variable_type, mut=1), global_variable_init)
                     module.global_sec.append(global_variable)
                     node.instr.args = len(module.global_sec) - 1
+
             elif context.memory:
                 if module.mem_sec == []:
                     max = context.memory['max']
@@ -464,53 +513,50 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
                     else:
                         memory_limit = Limits(1, 65536, 65536)
                         offset_expr = [Instruction(I32Const, random.randint(200, 64 * 1024 * max - 1))]
-
                         init_data = bytearray(generate_random_string(random.randint(0, 10000)).encode())
                     module.mem_sec.append(memory_limit)
                     linear_data = Data(offset_expr=offset_expr, vec_init=init_data)
                     module.data_sec.append(linear_data)
                 else:
-
                     max = module.mem_sec[0].max
                     if max < context.memory['max']:
                         module.mem_sec[0].tag = 1
                         module.mem_sec[0].max = context.memory['max']
                         max = module.mem_sec[0].max
                         offset_expr = [Instruction(I32Const, random.randint(200, 64 * 1024 * max - 1))]
-
                         init_data = bytearray(generate_random_string(random.randint(0, 10)).encode())
                         linear_data = Data(offset_expr=offset_expr, vec_init=init_data)
-
                         module.data_sec.append(linear_data)
                 if I32Load <= node.instr.opcode <= MemoryGrow:
-
                     if "8" in opnames[node.instr.opcode]:
                         node.instr.args = MemArg(align=0, offset=random.randint(0, 10000))
                     elif "16" in opnames[node.instr.opcode]:
                         node.instr.args = MemArg(align=random.randint(0, 1), offset=random.randint(0, 10000))
                     else:
                         node.instr.args = MemArg(align=random.randint(0, 2), offset=random.randint(0, 10000))
+
         node_stack.extend(node.sub_instrs)
 
 
 def emit_wasm_bianry(file_name, avail_ASTs, AST_mutation, module_mutation):
-    module = Module(1836278016, 1)
+    # start provenance for this testcase
+    _prov_reset()
 
+    module = Module(1836278016, 1)
     AST_num = AST_NUM
 
-    # generate function body for the function main
+    # main function body (emit_funcbody now records fragments via _prov_note_json)
     funcbody, locals_list, results_type = emit_funcbody(AST_num, module, avail_ASTs, AST_mutation)
 
-    # generate function type for the function main
+    # function type
     functype = FuncType(FtTag, [], results_type)
     module.type_sec.append(functype)
     functype_id = len(module.type_sec) - 1
 
     funcbody.append(Instruction(Return))
-
     handle_return(funcbody, functype.result_types, locals_list)
 
-    # generate local variables for the function main
+    # locals init
     for _, local in enumerate(locals_list):
         if local.type == ValTypeI32:
             funcbody.insert(0, Instruction(I32Const, generate_random_number(ValTypeI32)))
@@ -528,17 +574,33 @@ def emit_wasm_bianry(file_name, avail_ASTs, AST_mutation, module_mutation):
             funcbody.insert(0, Instruction(V128Const, generate_random_number(ValTypeV128)))
             funcbody.insert(1, Instruction(LocalSet, _))
 
-    # generate code item for the function main
+    # sections
     code_item = Code(expr=funcbody, locals_vec=locals_list)
     module.func_sec.append(functype_id)
     module.code_sec.append(code_item)
 
-    # export the function main
     module.export_sec.append(Export("main", ExportDesc(idx=len(module.func_sec) - 1)))
 
-    # module mutation
     if module_mutation:
         module_mutator(module)
 
-    # write the module to the file
+    # write wasm
+    os.makedirs(os.path.dirname(file_name) or ".", exist_ok=True)
     EmitBinary(file_name, module).emit_binary()
+
+    # --- provenance output ---
+    prov = _prov_snapshot_and_reset(file_name)
+
+    # per-test sidecar
+    try:
+        with open(file_name + ".meta.json", "w", encoding="utf-8") as side:
+            json.dump(prov, side, indent=2)
+    except Exception:
+        pass
+
+    # single run-wide JSONL under the same output dir
+    try:
+        jsonl_path = os.path.join(os.path.dirname(file_name) or ".", "provenance.jsonl")
+        _append_jsonl(jsonl_path, prov)
+    except Exception:
+        pass

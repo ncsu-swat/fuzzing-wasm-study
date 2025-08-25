@@ -197,14 +197,13 @@ cython_debug/
 **/.DS_Store
 
 # Ignore generated test cases (to avoid bloating repository)
-bugsinwasm/fuzzers/**/testcases
+bugsinwasm/fuzzers/**/testcases/
 
 # Temporarily some non-critical large files
-bugsinwasm/fuzzers/wasmaker/preprocessed-dbs
-bugsinwasm/fuzzers/wasmaker/preprocessed-dbs/wasmbench/runtime-fuzz/block.bson
+/bugsinwasm/fuzzers/wasmaker/preprocessed-dbs/
 
 # Ignore logs
-bugsinwasm/fuzzers/logs
+/bugsinwasm/fuzzers/logs
 
 # Ignore seeds
 bugsinwasm/seed_corpora

@@ -27,8 +27,12 @@ check_slurm_job_by_name() {
 #   wapplique-specbench
 # )
 
+# job_names=(
+#   wapplique-dummy
+# )
+
 job_names=(
-  wapplique-dummy
+  wasmaker-bugbench
 )
 
 echo -e "\n++ Removing stale containers"
@@ -51,11 +55,11 @@ time_elapsed=0
 
 echo -e "\n++ Starting new "$time_limit"m campaigns."
 
-(cd wapplique && mkdir -p testcases/$time_stamp && srun --job-name=wapplique-dummy --ntasks=1 --cpus-per-task=30 --cpu-bind=cores --output=../logs/wapplique-dummy-out.txt --err=../logs/wapplique-dummy-err.txt bash -c "bash fuzz.sh ../../seed_corpora/dummy testcases/$time_stamp $time_limit ./Wapplique" &)
+# (cd wapplique && mkdir -p testcases/$time_stamp && srun --job-name=wapplique-dummy --ntasks=1 --cpus-per-task=30 --cpu-bind=cores --output=../logs/wapplique-dummy-out.txt --err=../logs/wapplique-dummy-err.txt bash -c "bash fuzz.sh ../../seed_corpora/dummy testcases/$time_stamp $time_limit ./Wapplique" &)
 
 # (cd wadiff && mkdir testcases/$time_stamp 2>/dev/null && srun --job-name=wadiff-specbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wadiff-specbench.txt bash -c "bash fuzz.sh ../../seed_corpora/specbench testcases/$time_stamp $time_limit ." &)
 # (cd wasmsmith && mkdir testcases/$time_stamp 2>/dev/null && srun --job-name=wasmsmith-noseed --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmsmith-noseed.txt bash -c "bash fuzz.sh ../../seed_corpora/noseed testcases/$time_stamp $time_limit ." &)
-# (cd wasmaker && mkdir testcases/$time_stamp 2>/dev/null && srun --job-name=wasmaker-bugbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmaker-bugbench.txt bash -c "bash fuzz.sh ../../seed_corpora/bugbench testcases/$time_stamp $time_limit ./WASMaker" &)
+(cd wasmaker && mkdir testcases/$time_stamp 2>/dev/null && srun --job-name=wasmaker-bugbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmaker-bugbench.txt bash -c "bash fuzz.sh ../../seed_corpora/bugbench testcases/$time_stamp $time_limit ./WASMaker" &)
 # (cd wasmaker && srun --job-name=wasmaker-wasmbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmaker-wasmbench.txt bash -c "bash fuzz.sh ../../seed_corpora/wasmbench testcases/$time_stamp $time_limit ./WASMaker" &)
 # (cd wasmaker && srun --job-name=wasmaker-transbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmaker-transbench.txt bash -c "bash fuzz.sh ../../seed_corpora/transbench testcases/$time_stamp $time_limit ./WASMaker" &)
 # (cd wasmaker && srun --job-name=wasmaker-specbench --ntasks=1 --cpus-per-task=3 --cpu-bind=cores --output=../logs/wasmaker-specbench.txt bash -c "bash fuzz.sh ../../seed_corpora/specbench testcases/$time_stamp $time_limit ./WASMaker" &)
