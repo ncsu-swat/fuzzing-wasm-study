@@ -170,7 +170,7 @@ class WasmReader:
             self.read_non_custom_sec(sec_id, module, n, w)
             remain = self.remaining()
             if remain + int(n) != remaining_before_read:
-                breakpoint()
+                # breakpoint()
                 raise Exception("section size mismatch, id: %d" % sec_id)
 
     def read_custom_sec(self, sec_size):

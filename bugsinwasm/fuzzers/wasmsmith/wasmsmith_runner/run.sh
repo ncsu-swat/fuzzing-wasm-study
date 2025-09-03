@@ -29,6 +29,7 @@ while true; do
     break
   fi
 
-  head -c "$randomness_length" /dev/urandom | wasm-tools smith -c config.json -o "/testcases/${idx}.wasm"
+  timestamp=$(date +%s)
+  head -c "$randomness_length" /dev/urandom | wasm-tools smith -c config.json -o "/testcases/${idx}_${timestamp}.wasm"
   idx=$((idx + 1))
 done

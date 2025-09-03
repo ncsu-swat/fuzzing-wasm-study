@@ -8,11 +8,11 @@ time_limit = sys.argv[1]  # minutes
 sys.setrecursionlimit(100000)
 
 # output dir under the repo (not /testcases at filesystem root)
-OUT_DIR = os.path.join(os.getcwd(), "testcases")
+OUT_DIR = "/testcases"
 os.makedirs(OUT_DIR, exist_ok=True)
 
-JSONL_PATH = os.path.join(OUT_DIR, "provenance.jsonl")
-JSON_ARRAY_PATH = os.path.join(OUT_DIR, "provenance.json")
+JSONL_PATH = os.path.join(os.getcwd(), "provenance.jsonl")
+JSON_ARRAY_PATH = os.path.join(os.getcwd(), "provenance.json")
 
 # fuzz window
 end_time = time.time() + (int(time_limit) * 60)
@@ -32,9 +32,9 @@ if all(not bucket for bucket in avail_ASTs):
 i = 0
 while time.time() < end_time:
     try:
-        filename = os.path.join(OUT_DIR, f"test{i + 1}.wasm")
+        filename = os.path.join(OUT_DIR, f"test{i + 1}_{time.time()}.wasm")
         emit_wasm_bianry(filename, avail_ASTs, AST_mutation=True, module_mutation=True)
-        print(f"test{i + 1}.wasm generated successfully")
+        print(f"test{i + 1}_{time.time()}.wasm generated successfully")
         i += 1
     except Exception as e:
         print(f"\nWASMaker exception: {e!r}")

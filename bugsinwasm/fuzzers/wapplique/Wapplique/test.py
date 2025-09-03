@@ -36,7 +36,7 @@ def fuzz(args):
     cmd("wasm-tools parse -o {}.wasm {}".format(file_path[:-5], file_path))
     # cmd("python3 callGraph.py {}.wat > {}.cg".format(file_name[:-5], file_name[:-5]))
     for i in range(Case_For_Seed):
-        new_file = "{}/{}-{}-{}".format(tar_dir, fuzzing_round, i, file_name)
+        new_file = "{}/{}-{}-{}_{}.wasm".format(tar_dir, fuzzing_round, i, file_name, time.time())
         if os.path.exists(new_file):
             print("File {} existing, continue...".format(new_file))
             continue
@@ -61,7 +61,7 @@ def fuzz_simple(args):
         if time.time() - start_time > time_limit:
           return 0
 
-        new_file = "{}/{}-{}-{}".format(tar_dir, fuzzing_round, i, file_name)
+        new_file = "{}/{}-{}-{}_{}".format(tar_dir, fuzzing_round, i, file_name, time.time())
         if os.path.exists(new_file):
             print("File {} existing, continue...".format(new_file))
             continue
@@ -90,21 +90,24 @@ if __name__ == '__main__':
             for file in files:
                 if file.endswith(".wasm") and not file.endswith("aot.wasm") and not file.endswith(".debug.wasm"):
                     file_path = os.path.abspath(root + "/" + file)
+                    file_name = file.replace(".wasm", "")
                     print("Mutating {}".format(file_path))
                     if sys.argv[1] == "simple":
                         all_task.append(executor.submit(fuzz_simple, (file_path, file, os.path.abspath(sys.argv[4]), fuzzing_round)))
                         # fuzz_simple(file_path, file, os.path.abspath(sys.argv[4]))
                     elif sys.argv[1] == "normal":
-                        all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_cmd, fuzzing_round)))
+                        all_task.append(executor.submit(fuzz, (file_path, file_name, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_cmd, fuzzing_round)))
                     elif sys.argv[1] == "CU":
-                        all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_CU_cmd, fuzzing_round)))
+                        all_task.append(executor.submit(fuzz, (file_path, file_name, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_CU_cmd, fuzzing_round)))
                     elif sys.argv[1] == "REU":
-                        all_task.append(executor.submit(fuzz, (file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_REU_cmd, fuzzing_round)))
+                        all_task.append(executor.submit(fuzz, (file_path, file_name, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]), mutate_REU_cmd, fuzzing_round)))
                         # cnt += 1
                         # fuzz(file_path, file, os.path.abspath(sys.argv[3]), os.path.abspath(sys.argv[4]))
                     # if len(all_task) >= 40:
             fuzzing_round += 1
-    wait(all_task, timeout=None, return_when=ALL_COMPLETED)
+
+        wait(all_task, timeout=None, return_when=ALL_COMPLETED)
+    
     # all_task = []
     # print("Task Number: ", len(all_task))
     # for t in all_task:

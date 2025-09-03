@@ -17,7 +17,12 @@ docker run --tmpfs /testcases:rw,size=64g,mode=1777 -d --memory 128g --name cont
 docker cp $seed_corpora_path container-wapplique-$seed_corpora_name:/wapplique/ingredSeed
 docker cp $seed_corpora_path container-wapplique-$seed_corpora_name:/wapplique/SeedPool
 
-docker exec container-wapplique-$seed_corpora_name bash -c "mkdir /testcases"
+# # The following two lines will ensure to always use preprocessed wasmbench for seed_corpora
+# docker cp ../../seed_corpora/wasmbench container-wapplique-$seed_corpora_name:/wapplique/ingredSeed # wasmbench is always used as the ingredients seed pool for its size and diversity offering of ingredients
+# docker cp Wapplique/ingred/ingred.tar.gz container-wapplique-$seed_corpora_name:/wapplique
+# docker exec container-wapplique-$seed_corpora_name bash -c "mkdir -p /wapplique/ingred && tar -xzf ingred.tar.gz -C /wapplique/ingred"
+
+docker exec container-wapplique-$seed_corpora_name bash -c "mkdir -p /testcases"
 docker exec container-wapplique-$seed_corpora_name bash -c "timeout $time_limit_s python3 wapplique.py $time_limit"
 docker exec container-wapplique-$seed_corpora_name bash -c "cd / && tar -czf testcases.tar.gz /testcases"
 

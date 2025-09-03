@@ -12,7 +12,7 @@ shrunken_wat_path="$WASM_DIR/shrunken_$FILENAME.wat"
 
 export TMPDIR="/tmp"
 
-RUST_LOG=info wasm-tools shrink ./reducer_predicate.sh "$wasm_path" -o "$shrunken_wasm_path"
+RUST_LOG=info timeout 1440m wasm-tools shrink -a 100000 ./reducer_predicate.sh "$wasm_path" -o "$shrunken_wasm_path"
 if [ -f "$shrunken_wasm_path" ]; then
   wasm-tools print "$shrunken_wasm_path" -o "$shrunken_wat_path"
 fi

@@ -539,68 +539,71 @@ def emit_node_context(module, local_list, node, avail_ASTs, is_simd, functype=No
 
 
 def emit_wasm_bianry(file_name, avail_ASTs, AST_mutation, module_mutation):
-    # start provenance for this testcase
-    _prov_reset()
-
-    module = Module(1836278016, 1)
-    AST_num = AST_NUM
-
-    # main function body (emit_funcbody now records fragments via _prov_note_json)
-    funcbody, locals_list, results_type = emit_funcbody(AST_num, module, avail_ASTs, AST_mutation)
-
-    # function type
-    functype = FuncType(FtTag, [], results_type)
-    module.type_sec.append(functype)
-    functype_id = len(module.type_sec) - 1
-
-    funcbody.append(Instruction(Return))
-    handle_return(funcbody, functype.result_types, locals_list)
-
-    # locals init
-    for _, local in enumerate(locals_list):
-        if local.type == ValTypeI32:
-            funcbody.insert(0, Instruction(I32Const, generate_random_number(ValTypeI32)))
-            funcbody.insert(1, Instruction(LocalSet, _))
-        elif local.type == ValTypeI64:
-            funcbody.insert(0, Instruction(I64Const, generate_random_number(ValTypeI64)))
-            funcbody.insert(1, Instruction(LocalSet, _))
-        elif local.type == ValTypeF32:
-            funcbody.insert(0, Instruction(F32Const, generate_random_number(ValTypeF32)))
-            funcbody.insert(1, Instruction(LocalSet, _))
-        elif local.type == ValTypeF64:
-            funcbody.insert(0, Instruction(F64Const, generate_random_number(ValTypeF64)))
-            funcbody.insert(1, Instruction(LocalSet, _))
-        elif local.type == ValTypeV128:
-            funcbody.insert(0, Instruction(V128Const, generate_random_number(ValTypeV128)))
-            funcbody.insert(1, Instruction(LocalSet, _))
-
-    # sections
-    code_item = Code(expr=funcbody, locals_vec=locals_list)
-    module.func_sec.append(functype_id)
-    module.code_sec.append(code_item)
-
-    module.export_sec.append(Export("main", ExportDesc(idx=len(module.func_sec) - 1)))
-
-    if module_mutation:
-        module_mutator(module)
-
-    # write wasm
-    os.makedirs(os.path.dirname(file_name) or ".", exist_ok=True)
-    EmitBinary(file_name, module).emit_binary()
-
-    # --- provenance output ---
-    prov = _prov_snapshot_and_reset(file_name)
-
-    # per-test sidecar
     try:
-        with open(file_name + ".meta.json", "w", encoding="utf-8") as side:
-            json.dump(prov, side, indent=2)
-    except Exception:
-        pass
+        # start provenance for this testcase
+        _prov_reset()
 
-    # single run-wide JSONL under the same output dir
-    try:
-        jsonl_path = os.path.join(os.path.dirname(file_name) or ".", "provenance.jsonl")
-        _append_jsonl(jsonl_path, prov)
+        module = Module(1836278016, 1)
+        AST_num = AST_NUM
+
+        # main function body (emit_funcbody now records fragments via _prov_note_json)
+        funcbody, locals_list, results_type = emit_funcbody(AST_num, module, avail_ASTs, AST_mutation)
+
+        # function type
+        functype = FuncType(FtTag, [], results_type)
+        module.type_sec.append(functype)
+        functype_id = len(module.type_sec) - 1
+
+        funcbody.append(Instruction(Return))
+        handle_return(funcbody, functype.result_types, locals_list)
+
+        # locals init
+        for _, local in enumerate(locals_list):
+            if local.type == ValTypeI32:
+                funcbody.insert(0, Instruction(I32Const, generate_random_number(ValTypeI32)))
+                funcbody.insert(1, Instruction(LocalSet, _))
+            elif local.type == ValTypeI64:
+                funcbody.insert(0, Instruction(I64Const, generate_random_number(ValTypeI64)))
+                funcbody.insert(1, Instruction(LocalSet, _))
+            elif local.type == ValTypeF32:
+                funcbody.insert(0, Instruction(F32Const, generate_random_number(ValTypeF32)))
+                funcbody.insert(1, Instruction(LocalSet, _))
+            elif local.type == ValTypeF64:
+                funcbody.insert(0, Instruction(F64Const, generate_random_number(ValTypeF64)))
+                funcbody.insert(1, Instruction(LocalSet, _))
+            elif local.type == ValTypeV128:
+                funcbody.insert(0, Instruction(V128Const, generate_random_number(ValTypeV128)))
+                funcbody.insert(1, Instruction(LocalSet, _))
+
+        # sections
+        code_item = Code(expr=funcbody, locals_vec=locals_list)
+        module.func_sec.append(functype_id)
+        module.code_sec.append(code_item)
+
+        module.export_sec.append(Export("main", ExportDesc(idx=len(module.func_sec) - 1)))
+
+        if module_mutation:
+            module_mutator(module)
+
+        # write wasm
+        os.makedirs(os.path.dirname(file_name) or ".", exist_ok=True)
+        EmitBinary(file_name, module).emit_binary()
+
+        # --- provenance output ---
+        prov = _prov_snapshot_and_reset(file_name)
+
+        # per-test sidecar
+        try:
+            with open(file_name + ".meta.json", "w", encoding="utf-8") as side:
+                json.dump(prov, side, indent=2)
+        except Exception:
+            pass
+
+        # single run-wide JSONL under the same output dir
+        try:
+            jsonl_path = os.path.join(os.path.dirname(file_name) or ".", "provenance.jsonl")
+            _append_jsonl(jsonl_path, prov)
+        except Exception:
+            pass
     except Exception:
-        pass
+        print("Could not process file. Continuing.")

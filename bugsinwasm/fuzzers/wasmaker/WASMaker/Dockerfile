@@ -60,8 +60,8 @@ COPY ASTs /home/${USER}/ASTs-mongodb
 COPY binaries /home/${USER}/binaries
 
 # install runtimes
-COPY runtimes /home/${USER}/runtimes
-RUN chmod +x /home/${USER}/runtimes/*
+# COPY runtimes /home/${USER}/runtimes
+# RUN chmod +x /home/${USER}/runtimes/*
 ENV PATH="/home/ubuntu/runtimes/wamrc-1.2.3-x86_64-ubuntu-22.04:/home/ubuntu/runtimes/WasmEdge-0.13.3-Linux/bin:/home/ubuntu/runtimes/wasmer-linux-amd64/bin:/home/ubuntu/runtimes/wasmtime-v12.0.0-x86_64-linux:${PATH}"
 
 COPY BREWasm/ /home/${USER}/BREWasm/

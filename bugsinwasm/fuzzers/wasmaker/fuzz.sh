@@ -40,6 +40,9 @@ if [ "$remaining_time_s" -ge 0 ]; then
   mkdir -p $test_cases_path/$seed_corpora_name
   docker cp container-wasmaker-$seed_corpora_name:/testcases.tar.gz $test_cases_path/$seed_corpora_name/testcases.tar.gz
   (cd $test_cases_path/$seed_corpora_name && tar -xzf testcases.tar.gz)
+
+  docker cp container-wasmaker-$seed_corpora_name:/home/ubuntu/WASMaker/provenance.jsonl $test_cases_path/$seed_corpora_path
+  docker cp container-wasmaker-$seed_corpora_name:/home/ubuntu/WASMaker/provenance.json $test_cases_path/$seed_corpora_path
 else
   echo -e "\n !!! RAN OUT OF TIME (while preprocessing?) !!!\n"
 fi
