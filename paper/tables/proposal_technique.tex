@@ -1,0 +1,29 @@
+\begin{table}[t]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{15pt}
+    \renewcommand{\arraystretch}{1.1}
+    \setlength{\aboverulesep}{1pt}
+    \setlength{\belowrulesep}{1pt}
+    \caption{Characterizing the reported bugs by WASM proposal/subsystem and discovery technique.}
+    \label{tab:proposal_technique}
+    \begin{tabular}{@{}l|c|c|c@{}}
+        \toprule
+        \textbf{Proposal / Subsystem} & \textbf{Transplantation} & \textbf{Fuzzing} & \textbf{Total} \\
+        \midrule
+        SIMD/Multi-value        & 2 & 12 & 14 \\
+        Core execution engine   & 0 & 6  & 6  \\
+        WASI / host interface   & 3 & 2  & 5  \\
+        Reference Types / GC    & 3 & 0  & 3  \\
+        Exception Handling      & 2 & 0  & 2  \\
+        Core / module structure & 1 & 0  & 1  \\
+        Threads + CLI           & 1 & 0  & 1  \\
+        Uncertain               & 1 & 1  & 2  \\
+        \midrule
+        \textbf{Total} &
+        \textbf{\TransplantationBugsCount{}} &
+        \textbf{\ReportedFuzzingBugsCount{}} &
+        \textbf{\ReportedBugs{}} \\
+        \bottomrule
+    \end{tabular}
+\end{table}

@@ -1,0 +1,56 @@
+
+\newcommand{\filledplus}{%
+  \tikz[baseline=(p.base)]\node (p)
+    [circle, fill=black, inner sep=0.15pt,
+     minimum size=0.9ex, line width=0pt]
+    {\textcolor{white}{\tiny +}};%
+}
+
+\begin{table*}[ht]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{4.5pt}
+    \renewcommand{\arraystretch}{1.1}
+    \setlength{\aboverulesep}{1pt}
+    \setlength{\belowrulesep}{1pt}
+    \caption{Categories, WASM proposal, and discovery technique
+    for a sample of bugs we report with \tname{}.}
+    \label{tab:error_conditions}
+    \begin{tabular}{@{}c|l|l|l|l|p{9.5cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Category} & \textbf{Proposal} &
+        \textbf{Symptom} & \textbf{Found with} &
+        \textbf{Error Conditions} \\
+        \midrule
+        1 & \multirow{6}{*}{\shortstack[l]{Runtime\\Failure}}
+          & Ref. Types & Different Output & Transplantation
+          & \texttt{ref.null} operand is a typed function reference id. \\
+        2 & & Ref. Types & Crash & Transplantation
+          & Uninitialized reference type used. \\
+        3 & & SIMD & Different Output & Fuzzing
+          & Extracted signed lane used as memory load address. \\
+        4 & & SIMD & Different Output & Fuzzing
+          & \texttt{i16x8.extract\_lane\_s} value used as \texttt{v128.load32x2\_u} address. \\
+        5 & & SIMD & Crash & Fuzzing
+          & Non-terminating recursive call in vector-returning function, followed by \texttt{unreachable}. \\
+        6 & & SIMD & Different Output & Fuzzing
+          & Signed lane extraction \filledplus{}~used as effective address. \\
+        \hline
+        7 & \multirow{7}{*}{\shortstack[l]{Compilation\\Failure}}
+          & SIMD + Multi-value & Crash & Fuzzing
+          & Function with return type \texttt{(i32, i32, v128)}. \\
+        8 & & SIMD & Crash & Fuzzing
+          & NaN, then f32 SIMD op, then f64 SIMD op. \\
+        9 & & SIMD & Different Output & Fuzzing
+          & SIMD constant \filledplus{}~\texttt{.ne} \filledplus{}~4 SIMD cast ops. \\
+        10 & & SIMD & Crash & Fuzzing
+           & \texttt{i32x4.lt\_u} on a vector from \texttt{f64x2.lt}. \\
+        11 & & SIMD & Crash & Fuzzing
+           & Lane-extracted i32 address used for \texttt{v128.load8\_splat}. \\
+        12 & & Ref. Types/GC & Different Output & Transplantation
+           & \texttt{ref eq} used as a function-type parameter. \\
+        13 & & Core/module & Different Output & Transplantation
+           & Remove all functions. \\
+        \bottomrule
+    \end{tabular}
+\end{table*}

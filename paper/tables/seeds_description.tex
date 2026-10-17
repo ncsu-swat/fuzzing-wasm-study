@@ -1,0 +1,33 @@
+\begin{table*}[t]
+    \centering
+    \footnotesize
+    \setlength{\tabcolsep}{12.5pt}
+    \renewcommand{\arraystretch}{1}
+    \setlength{\aboverulesep}{1pt}
+    \setlength{\belowrulesep}{1pt}
+    \caption{Seed corpora used in our evaluation, their count, binary size, control-flow nesting depth, and baseline coverage achieved across four WebAssembly runtimes when replayed directly without fuzzing.}
+    \label{tab:seed_corpora}
+    \begin{tabular}{@{}p{2cm}lrrrrrrrr@{}}
+        \toprule
+        \multirow{2}{*}{\textbf{Seed Corpus}} &
+        \multirow{2}{*}{\textbf{Count (K)}} &
+        \multicolumn{2}{c}{\textbf{Size (KB)}} &
+        \multicolumn{2}{c}{\textbf{Nesting Depth (K)}} &
+        \multicolumn{4}{c}{\textbf{Branch Coverage (\%)}} \\
+        \cmidrule(lr){3-4}
+        \cmidrule(lr){5-6}
+        \cmidrule(lr){7-10}
+        & & Mean & SD & Mean & SD &
+        Wasmtime & Wasmer & WAMR & WasmEdge \\
+        \midrule
+        \llvmbench{}
+        & 0.22 & 15 & 8.80 & 0.22 & 0.12 & 11.02 & 12.02 & 14.39 & 27.53 \\
+        \textbf{\tname{}}
+        & 0.58 & 584 & 3900 & 2.95 & 1.97 & 13.73 & 16.12 & 18.23 & 28.57 \\
+        \wasmbench{}
+        & 8.50 & 700 & 3200 & 1.86 & 1.48 & 12.31 & 11.97 & 17.71 & 27.67 \\
+        \specbench{}
+        & 200 & 0.27 & 0.13 & 0.00 & 0.00 & 10.89 & 10.01 & 15.32 & 19.81 \\
+        \bottomrule
+    \end{tabular}
+\end{table*}

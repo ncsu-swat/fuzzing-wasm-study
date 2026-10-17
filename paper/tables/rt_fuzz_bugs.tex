@@ -1,0 +1,21 @@
+\begin{table}[t]
+    \caption{Number of bugs that fuzzers reveal with \rtbench{}. Rows and columns ``$\Sigma$'' aggregate unique bugs found. Overlap of two bugs between \wasmaker{} and \wapplique{}. \Ishrak{Update numbers.}
+    % \Mar{Numbers inconsistent! 25-27! Careful, PLEASE!}\Ishrak{2 bugs overlapped between \wasmaker{} and \wapplique{} which is why it seems 27. But, the bottom row sums to 25 because there is no bug overlap across runtimes.}
+    }
+    \label{tab:rt_fuzz_bugs}
+    \footnotesize
+    \centering
+    \setlength{\tabcolsep}{2.8pt}
+    \begin{tabular}{llccccr}
+        \toprule
+        \textbf{Seed Corpus} & \textbf{Fuzzer} & \textbf{\wasmer{}} & \textbf{\wamr{}} & \textbf{\wasmedge{}} & \textbf{$\Sigma$} \\ 
+        \midrule
+        \multirow{3}{*}{\rtbench{}} 
+            & \wadiff{}    & - & - & - & - \\
+            & \wasmaker{}  & 8 & 4 & 5 & 17 \\
+            & \wapplique{} & 6 & 1 & 3 & 10 \\  
+        \midrule
+        $\Sigma$ & & 13 & 4 & 8 & \textbf{25 (2)}\\
+        \bottomrule
+    \end{tabular}
+\end{table}

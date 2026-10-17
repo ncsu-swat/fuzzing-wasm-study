@@ -1,0 +1,23 @@
+\begin{table*}[t]
+    \footnotesize
+    \caption{Sections of a WebAssembly module~\cite{spec}.}
+    \begin{tabular}{l p{14.5cm}}
+        \toprule
+        \textbf{Section} & \textbf{Description} \\
+        \midrule
+        Type     & Defines function signatures (\texttt{func (param ... ) (result ... )}); each entry specifies the parameter and result types of a function. \\
+        Import   & Declares external dependencies from the host environment, such as functions, tables, memories, or globals that the module expects from outside. \\
+        Function & Declares all non-imported functions and associates them with type indices defined in the Type section. \\
+        Table    & Declares tables used by the module, typically function tables that support indirect function calls. \\
+        Memory   & Declares linear memories, specifying their minimum and maximum page sizes. \\
+        Global   & Declares global variables, each defined by a type, mutability flag, and an initializer expression. \\
+        Export   & Exposes module elements (functions, tables, memories, or globals) to the outside world by name. \\
+        Start    & Specifies the start function, which is automatically invoked at module instantiation. \\
+        Element  & Initializes tables (e.g., function tables) with function indices for indirect calls. \\
+        \rowcolor{lightgray}Code     & Contains actual function bodies, including local declarations and the sequence of instructions that define behavior. \\
+        Data     & Initializes linear memory with byte segments, defining the memory’s contents at instantiation. \\
+        Custom   & Contains debug info and metadata which don't affect the execution semantics \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:wasm_sections}
+\end{table*}

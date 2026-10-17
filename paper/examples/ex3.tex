@@ -1,0 +1,49 @@
+% --- WAT language definition and style ---
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,             % reduce space between numbers and code
+  frame=lines,               % only top and bottom borders
+  rulecolor=\color{black},
+  framesep=6pt,
+  xleftmargin=0pt,           % remove extra indentation
+  framexleftmargin=0pt,      % align code with numbers
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false
+}
+
+% --- Example WAT code listing ---
+\begin{lstlisting}[style=watpaper,caption={Example 3 (Wasmer Issue\#5668) (Fuzz Bug found by WASMaker \Fix{cite})},label={example:ex3}]
+(module
+  ...
+    i32.const 0
+    v128.load32_splat offset=6231 align=1
+    loop ;; label = @1
+      i32.const 1
+      v128.load16x4_u offset=8280 align=1
+    . . .   
+   return)
+)
+\end{lstlisting}
+
+    

@@ -1,0 +1,57 @@
+% --- WAT language definition and style ---
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  captionpos=b,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,             % reduce space between numbers and code
+  frame=lines,               % only top and bottom borders
+  rulecolor=\color{black},
+  framesep=6pt,
+  xleftmargin=0pt,           % remove extra indentation
+  framexleftmargin=0pt,      % align code with numbers
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false
+}
+
+% --- Example WAT code listing ---
+\begin{lstlisting}[
+  style=watpaper,
+  caption={\textbf{(Runtime Failure Category Bug)} (\href{https://github.com/wasmerio/wasmer/issues/5674}{Wasmer\#5674})},
+  label={example:ex12}
+]
+(module
+  ...
+    loop
+      i32.const 0
+      i32.const 0
+      call 0
+      br_if 0
+       i32.const 1
+       i32.const 0
+       i32.div_u
+  ...
+  )
+)
+\end{lstlisting}
+
+    

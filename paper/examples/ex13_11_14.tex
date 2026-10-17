@@ -1,0 +1,110 @@
+% Required packages:
+% \usepackage{listings}
+% \usepackage{xcolor}
+% \usepackage{hyperref}
+% Do NOT load subcaption just for these listings.
+
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    memory,ref.null,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,
+  frame=lines,
+  rulecolor=\color{black},
+  framesep=0pt,
+  xleftmargin=0pt,
+  framexleftmargin=0pt,
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false,
+  aboveskip=2pt,
+  belowskip=2pt
+}
+
+
+
+% --- Compact three-example layout ---
+\begin{figure}[t]
+\centering
+
+% ==================================================
+% Top row: SIMD compilation bug
+% ==================================================
+
+\begin{lstlisting}[style=watpaper]
+(module...
+  (func (;0;) (type 0) (result i32 i32 v128)
+    i32.const 0
+    i32.const 0
+    v128.const i32x4 0x00000000 0x00000000 0x00000000 0x00000000
+  )
+)
+\end{lstlisting}
+{\footnotesize
+\textbf{(a)} Compilation bug related to SIMD
+(\href{https://github.com/wasmerio/wasmer/issues/5667}{Wasmer\#5667}).
+\par}
+
+% ==================================================
+% Bottom row: Two side-by-side runtime bugs
+% ==================================================
+
+\begin{minipage}[t]{0.48\linewidth}
+\begin{lstlisting}[style=watpaper]
+(module
+  (type (;0;) (func))...
+   (func (;0;)
+     br 0 ref.null 0
+     unreachable
+   )
+)
+\end{lstlisting}
+{\footnotesize
+\textbf{(b)} Runtime bug related to GC/RefTypes.
+(\href{https://github.com/bytecodealliance/wasm-micro-runtime/issues/4480}{WAMR\#4480})
+\par}
+\end{minipage}\hfill%
+\begin{minipage}[t]{0.48\linewidth}
+\begin{lstlisting}[style=watpaper]
+(module
+  (memory (;0;) 1 2)
+
+  (data (;0;)
+    (i32.const 896340315) ""
+  )
+)
+\end{lstlisting}
+{\footnotesize
+\textbf{(c)} Runtime bug in core execution.
+(\href{https://github.com/wasmerio/wasmer/issues/5734}{Wasmer\#5734})
+\par}
+\end{minipage}
+
+\smallskip
+
+% Overall listing caption
+{\footnotesize
+\caption{Representative bugs revealed by \tname{}.}
+\label{example:bug_examples}
+}
+
+\end{figure}

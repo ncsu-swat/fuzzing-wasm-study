@@ -1,0 +1,50 @@
+
+% --- WAT language definition and style ---
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  captionpos=b,
+  numbersep=2pt,
+  frame=lines,
+  rulecolor=\color{black},
+  framesep=6pt,
+  xleftmargin=0pt,
+  framexleftmargin=0pt,
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false
+}
+
+% --- Example WAT code listing with hyperlink caption ---
+\begin{lstlisting}[
+  style=watpaper,
+  caption={\textbf{(Runtime Failure Category Bug)} (\href{https://github.com/WasmEdge/WasmEdge/issues/4289}{Wasmedge\#4289})},
+  label={example:ex10}
+]
+(module...
+  v128.const i32x4 0 0 0 0
+  v128.const i32x4 0 0 0 0
+  i32x4.eq
+  i16x8.extract_lane_s 0
+  v128.load32x2_u offset=6401 align=1...
+)
+\end{lstlisting}

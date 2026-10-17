@@ -1,0 +1,188 @@
+% =============================================================
+%  Response Letter — IEEE TSE Minor Revision
+%  Same template as the major-revision letter. Drop into the SAME
+%  Overleaf project directory as the main paper (needs macros.tex).
+% =============================================================
+\documentclass[11pt]{article}
+\include{macros}
+
+% ---------- Page geometry ----------
+\usepackage[letterpaper,margin=1in]{geometry}
+
+% ---------- Core packages ----------
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+\usepackage{amsmath}
+\usepackage{parskip}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    citecolor=blue!60!black,
+    urlcolor=blue!60!black
+}
+
+% ---------- Colors ----------
+\definecolor{commentbg}{RGB}{245,245,245}
+\definecolor{commentborder}{RGB}{180,180,180}
+\definecolor{tseblue}{RGB}{0,51,102}
+
+% ---------- Section styling ----------
+\titleformat{\section}{\Large\bfseries\color{tseblue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{tseblue}}{\thesubsection}{1em}{}
+
+% ---------- Reviewer comment / response environments ----------
+\newtcolorbox{revcomment}[1][]{
+    breakable,
+    colback=commentbg,
+    colframe=commentborder,
+    boxrule=0.5pt,
+    arc=2pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    fonttitle=\bfseries,
+    title={#1},
+    before skip=10pt, after skip=4pt
+}
+
+\newenvironment{response}{%
+    \par\vspace{10pt}
+    \par\noindent\textbf{\color{tseblue}Response:}\par\nobreak\ignorespaces
+}{%
+    \par\vspace{15pt}
+}
+
+% ---------- Sequential "Reviewer N, Comment M" numbering ----------
+\newcounter{reviewernum}
+\newcounter{cmtcounter}[reviewernum]
+\newcommand{\newreviewer}{\stepcounter{reviewernum}\setcounter{cmtcounter}{0}}
+
+\newenvironment{rcomment}{%
+    \stepcounter{cmtcounter}%
+    \begin{revcomment}[R\thereviewernum{}.C\thecmtcounter{}.~Reviewer~\thereviewernum{}, Comment~\thecmtcounter]
+}{%
+    \end{revcomment}
+}
+
+% ---------- Manuscript metadata ----------
+\newcommand{\manuscriptID}{TSE-2026-01-0053}
+\newcommand{\authorList}{Ishrak Hayet, Mohsen EsfandyariDoulabi, Giorgi Merabishvili, and Marcelo d'Amorim}
+\newcommand{\aeName}{Associate Editor}
+
+\begin{document}
+
+% =============================================================
+% Title block
+% =============================================================
+\begin{center}
+    {\LARGE\bfseries Response to Reviewers (Minor Revision)}\\[10pt]
+    {\Large \PaperTitle{}}\\[8pt]
+    {\large Manuscript \manuscriptID{}}\\[8pt]
+    \authorList\\[6pt]
+    \textsc{10-15-2026}
+\end{center}
+
+\vspace{1em}
+\hrule
+\vspace{1.5em}
+
+% =============================================================
+% Letter to the Associate Editor
+% =============================================================
+\section*{Letter to the Associate Editor}
+
+Dear \aeName{},
+
+We sincerely thank you and the reviewers for your careful evaluation of our revised manuscript and for the encouraging feedback. We are grateful for your recognition of our revisions and we appreciate the recommendations of acceptance from Reviewers~1 and~3.
+
+The main remaining comment, from Reviewer~2, asks which characteristics of \rtbench{} are responsible for its observed gains, and offers as one option an explicit acknowledgment of this limitation. We agree that our evaluation treats \rtbench{} as a whole and does not isolate the contribution of individual seed properties. We have therefore added an explicit statement of this limitation to the Threats to Validity section, avoided attributing the effectiveness of \rtbench{} to any single factor, and described the partial mitigation provided by our post-hoc mapping of bugs to WebAssembly proposals. We also address Reviewer~3's optional suggestion by adding a worked example of a core execution engine bug to RQ4. Reviewer~1 requested no further changes.
+
+We hope the revised manuscript meets the expectations of the editorial committee for publication in \emph{IEEE Transactions on Software Engineering}.
+
+\vspace{1em}
+Sincerely,\\
+\authorList
+
+\clearpage
+
+% =============================================================
+% Summary of Changes
+% =============================================================
+\section{Summary of Changes}
+
+\begin{table*}[!h]
+\centering
+\footnotesize
+\caption{Summary of Changes in the Minor Revision}
+\label{tab:summary_changes}
+\begin{tabular}{|>{\raggedright\arraybackslash}m{3.2cm}|>{\centering\arraybackslash}m{2.5cm}|>{\raggedright\arraybackslash}m{9.2cm}|}
+\hline
+\textbf{Change} & \textbf{Location} & \textbf{Description} \\
+\hline
+
+Limitation on attributing the effectiveness of \rtbench{} &
+Threats to Validity &
+Added a statement that the corpus is evaluated as a whole and that the seed properties driving its gains are not isolated. Described the partial mitigation from the post-hoc bug-to-proposal mapping (Table VI) and deferred the analysis of other seed properties and their interactions to future work. \\
+\hline
+
+Core execution engine bug example &
+\S~V.(D) (RQ4) &
+Added Example 3, a core execution engine bug found by fuzzing, to complement the existing SIMD/Multi-value analysis. \\
+\hline
+
+\end{tabular}
+\end{table*}
+
+% =============================================================
+% Reviewer 1
+% =============================================================
+\section{Response to Reviewer 1}
+\newreviewer
+
+\begin{rcomment}
+    I was previously Reviewer 1 for this paper. [\ldots] I think these points have all been addressed, and recommend the manuscript for publication.
+\end{rcomment}
+\begin{response}
+    We thank the reviewer for the careful review across both rounds and for recommending the manuscript for publication. No further changes were requested.
+\end{response}
+
+% =============================================================
+% Reviewer 2
+% =============================================================
+\section{Response to Reviewer 2}
+\newreviewer
+
+\begin{rcomment}
+    However, \rtbench{} combines several potentially influential factors. Its inputs are collected from multiple source runtimes, and it includes both issue-derived inputs and testsuite-derived inputs. In addition, \rtbench{} differs from the existing corpora in terms of input size, control-flow nesting depth, proposal distribution, and initial coverage. Therefore, it remains unclear which factors primarily account for the observed gains. [\ldots] I encourage the authors to add at least one of the following analyses in the revision: [\ldots] If a complete ablation study is beyond the scope of the paper, explicitly acknowledge this limitation in the Discussion and Threats to Validity sections, and avoid attributing the overall effectiveness of \rtbench{} to any single factor.
+\end{rcomment}
+\begin{response}
+    We thank the reviewer for this thoughtful comment and for noting that it does not question the overall effectiveness of \rtbench{}. We agree that \rtbench{} intrinsically constitutes different overlapping factors. Based on our provenance analysis, we observed that different factors from different seeds would contribute toward a single bug. Therefore decomposing the seed corpora without introducing some side-effects becomes challenging. So our original approach was to treat the whole seed corpora as the unit of analysis. Our current analyses is limited in terms of a factor-level decomposition and we defer this analysis to future work.
+    
+    Therefore we followed the reviewer's last suggestion and explicitly acknowledged this limitation. Specifically, we added the following statement to the Threats to Validity section (\S.VI):
+
+    \begin{quote}
+    Additionally, we evaluate the corpus as a whole without showing exactly what properties of a seed drive gains. We partially mitigate this threat with a post-hoc mapping of bugs to WebAssembly proposals (Table VI). In both transplantation and fuzzing, we found that the presence of proposal-specific instructions is associated with effective seeds. We will analyze other seed properties and their interaction in future work.
+    \end{quote}
+
+    Consistent with the reviewer's recommendation, we do not attribute the effectiveness of \rtbench{} to any single factor.
+\end{response}
+
+% =============================================================
+% Reviewer 3
+% =============================================================
+\section{Response to Reviewer 3}
+\newreviewer
+
+\begin{rcomment}
+    According to Table VI, 6 deep bugs belonging to the ``Core execution engine'' were found entirely by fuzzing, which is the second-largest bug category. The authors did a deep analysis for the SIMD/Multi-value category, it might be better to add some analysis to the Core execution engine bugs.
+\end{rcomment}
+\begin{response}
+    We thank the reviewer for the positive assessment and for this suggestion. To complement the SIMD/Multi-value analysis, we added a core execution engine bug example to RQ4 (\S.V.(D)), shown as Example 3. In this example, the test case module has a 1-page memory (max 2) and an active data segment with empty contents at offset 896340315, far beyond the memory's size. Under bulk-memory semantics, an out-of-bounds active segment should result in a handled trap at instantiation even when empty. However, this test case resulted in an unhandled segmentation fault.
+\end{response}
+
+\end{document}

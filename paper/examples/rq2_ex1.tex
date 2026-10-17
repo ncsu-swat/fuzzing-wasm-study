@@ -1,0 +1,95 @@
+% --- WAT language definition and style ---
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,
+  frame=lines,
+  rulecolor=\color{black},
+  framesep=6pt,
+  xleftmargin=0pt,
+  framexleftmargin=0pt,
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false,
+  escapeinside={(*@}{@*)},
+}
+
+% --- helper macro: tight colorbox ---
+\newcommand{\tightbox}[2]{\begingroup\fboxsep=0pt\colorbox{#1}{#2}\endgroup}
+
+\begin{figure}[t]
+\centering
+% ----------- TOP ROW (2 columns) -----------
+\begin{minipage}[t]{0.48\linewidth}
+\lstset{style=watpaper}
+\begin{lstlisting}
+(func (result externref)
+  (local externref)
+  (*@\tightbox{red!15}{local.get 0}@*)
+
+  
+)
+\end{lstlisting}
+\centering\footnotesize{(a) Bug-causing WAT code with no \CodeIn{externref} initialization.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\lstset{style=watpaper}
+\begin{lstlisting}
+(func (result externref)
+  (local externref)
+  (*@\tightbox{green!15}{ref.null extern}@*)
+  (*@\tightbox{green!15}{local.set 0}@*)
+  local.get 0
+)
+\end{lstlisting}
+\centering\footnotesize{(b) Corresponding non-crashing WAT code with explicit initialization.}
+\end{minipage}
+
+\vspace{6pt}
+
+% ----------- BOTTOM ROW (1 column) -----------
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,
+  frame=lines,
+  rulecolor=\color{black},
+  framesep=6pt,
+  escapeinside={(*@}{@*)}
+}
+\begin{lstlisting}
+// WasmEdge/lib/executor/executor.cpp:164
+auto *Inst = Val.get<RefVariant>().getPtr<Runtime::Instance::CompositeBase>();
+(*@\tightbox{red!15}{assuming(Inst);}@*)
+\end{lstlisting}
+\centering\footnotesize{(c) Crash site in executor.cpp}
+
+\vspace{-4pt}
+\caption{Illustration of the \textbf{uninitialized externref bug} (\href{https://github.com/WasmEdge/WasmEdge/issues/4325}{WasmEdge\#4325}). The uninitialized local variable in (a) triggers a null pointer check in \wasmedge~(c). For comparison, the non-crashing WAT code is shown in (b). Confirmed and fixed with pull request (\href{https://github.com/WasmEdge/WasmEdge/pull/4329}{PR\#4329}).
+}
+\label{ex:rq2_ex1}
+\end{figure}

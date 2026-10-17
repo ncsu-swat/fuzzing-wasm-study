@@ -1,0 +1,402 @@
+%%%%%%%%% PACKAGES
+% \usepackage{balance} % For balanced columns on the last page
+
+\usepackage{cite}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{color}
+\usepackage{minted}
+\usepackage{graphicx}
+\usepackage{rotate}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{breakurl}
+\usepackage{xspace}
+\usepackage[round-mode=places,round-precision=1,group-separator={,},group-minimum-digits={3},output-decimal-marker={.}, round-pad=false, exponent-mode = threshold, exponent-thresholds = -3:5, tight-spacing=true]{siunitx}
+\usepackage{subcaption}
+\captionsetup{font=footnotesize}
+\usepackage{pgf}
+\usepackage{pgf-pie}
+\usepackage{bbding}
+\usepackage{pifont}
+\usepackage{seqsplit}
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm,compat=1.8}
+\usepackage{datetime2}
+\usepackage{comment}
+\usepackage{balance}
+\usepackage{placeins}
+\usepackage{enumitem}
+
+% Tikz Figs
+\usepackage{tikz}
+\tikzset{>=latex}
+%\usepackage{pgf-umlsd} % for flow diagram
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{positioning}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,fill=black,text=white,inner sep=0.4pt] (char) {#1};}}
+
+\usepackage[framemethod=tikz]{mdframed}
+\mdfdefinestyle{mpdframe}{
+    frametitlebackgroundcolor   =black!15,
+    frametitlerule              =true,
+    roundcorner                 =3pt,
+    middlelinewidth             =1pt,
+    innermargin                 =0.6cm, % smaller makes box bigger
+    outermargin                 =-0.5cm,
+    innerleftmargin             =0.1cm,
+    innerrightmargin            =0cm,
+    innertopmargin              =0.1cm,
+    innerbottommargin           =0.1cm,
+    align=center
+}
+
+\usepackage[most]{tcolorbox}
+\tcbset{
+  rqbox/.style={
+    colback=gray!5,   % very light gray background
+    colframe=black!30, % light border
+    boxrule=0.4pt,    % thin border line
+    arc=2pt,          % small rounded corners
+    left=4pt,right=4pt,top=4pt,bottom=4pt,
+    boxsep=2pt
+  }
+}
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  frame=single,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true
+}
+
+\usepackage[final]{changes}
+% \usepackage{changes}
+\definechangesauthor[name={Giorgi}, color=violet]{giorgi}
+\definechangesauthor[name={Ishrak}, color=blue]{ishrak}
+\definechangesauthor[name={Mohsen}, color=orange]{mohsen}
+
+%%%%%%%%%% CHECKMARKS
+
+\newcommand{\cmark}{\color{blue}{\ding{51}}}
+\newcommand{\xmark}{\color{red}{\ding{55}}}
+
+%%%%%%%%%% CODE and MACROS
+
+\input{defs-code}
+\input{defs-logic}
+
+%%%%%%%%%% UNCLASSIFIED
+\newcommand{\Caption}[1]{\caption{#1}}
+\newcommand{\NA}{-}
+\newcommand{\specialcell}[2][c]{\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\newcommand{\DefMacro}[2]{%
+   \expandafter\newcommand\csname rmk-#1\endcsname{#2}%
+}
+\newcommand{\UseMacro}[1]{\csname rmk-#1\endcsname}
+
+\newcommand{\YC}{\textcolor{blue}{\textbf{+}}} %{$\checkmark$}}
+\newcommand{\NC}{\textcolor{red}{\textbf{-}}} %\textbf{$\times$}}}
+\newcommand{\MC}{\textcolor{magenta}{\textbf{$\pm$}}}
+
+
+
+\newcommand{\Comment}[1]{}
+\newcommand{\Boldface}[1]{\textbf{#1}}
+\newcommand{\Space}[1]{}
+
+\newcommand{\edit}[1]{#1}
+
+\newcommand{\MeanStd}[2]{#1$\pm$#2}
+\newcommand{\MeanStdSec}[2]{#1$\pm$#2 seconds}
+\newcommand{\plus}{$+$}
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+
+\newcommand{\MyPara}[1]{\vspace{1pt}\noindent\textbf{#1}.}
+\newcommand{\MyParaOnly}[1]{\noindent\textbf{#1}}
+\newcommand{\MyItPara}[1]{\noindent\textit{#1}.}
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+%\newcommand{\InputWithSpace}[1]{\bgroup\def\arraystretch{1.1}\input{#1}\egroup}
+\newcommand{\Code}[1]{{\small\ifmmode{\texttt{#1}}\else$\texttt{#1}$\fi}}
+\newcommand{\CodeIn}[1]{{\small\ifmmode{\mathtt{#1}}\else$\texttt{#1}$\fi}}
+\newcommand{\ColorBack}[1]{%
+  \begingroup \setlength{\fboxsep}{0pt}% \colorbox{purple!20}{\reducedstrut#1\/}% \endgroup
+}
+
+%% % ----------
+%% % THIS BELOW COPIED FROM vkuncak/doc/vmcai09/defs.tex
+\definecolor{gray}{RGB}{211,211,211}
+
+%% % ----------
+\newcommand{\PaperTitle}{Left Behind, Not Forgotten: Reusing Regression Tests to Find Bugs in WebAssembly Runtimes}
+% An Empirical Study on the Impact of Using Old Test Cases as Seed Corpora in Fuzzing WASM Runtimes}
+
+
+\newcommand{\RV}{RV\xspace}
+\newcommand{\specification}{spec\xspace}
+\newcommand{\specifications}{specs\xspace}
+\newcommand{\Specification}{Spec\xspace}
+\newcommand{\Specifications}{Specs\xspace}
+\newcommand{\spec}{spec\xspace}
+\newcommand{\specs}{specs\xspace}
+\newcommand{\Spec}{Spec\xspace}
+\newcommand{\Specs}{Specs\xspace}
+\newcommand{\oss}{open-source projects\xspace}
+\newcommand{\javamop}{JavaMOP\xspace}
+\newcommand{\github}{GitHub\xspace}
+%% \newcommand{\Tool}{\textsc{DEIMON}\xspace}
+%% \newcommand{\Tool}{\textsc{DEIDMON}\xspace}
+\newcommand{\x}{x\xspace}
+\newcommand{\Contrib}[1]{$\star$~#1}
+\newcommand{\CSC}{CSC\xspace}
+\newcommand{\CSCFull}{SynchronizedCollection\xspace}
+\newcommand{\MUI}{MUI\xspace}
+\newcommand{\MUIFull}{Map\_UnsafeIterator\xspace}
+\newcommand{\STHM}{STHM\xspace}
+\newcommand{\STHMFull}{StringTokenizer\_HasMoreElements\xspace}
+\newcommand{\RTS}{RTS\xspace}
+\newcommand{\RVTool}{RV tool\xspace}
+\newcommand{\version}{revision\xspace}
+\newcommand{\versions}{revisions\xspace}
+\newcommand{\IMM}{IMM\xspace}
+\newcommand{\IMMs}{IMMs\xspace}
+\newcommand{\Isolated}{\textsc{Isolated}\xspace}
+\newcommand{\NonIsolated}{\textsc{Non-Isolated}\xspace}
+\newcommand{\OneUnique}{\textsc{One Unique}\xspace}
+\newcommand{\MultipleUnique}{\textsc{Multiple Unique}\xspace}
+\newcommand{\SingleTrace}{\textsc{Single}\xspace}
+\newcommand{\Raw}{\textsc{Raw}\xspace}
+\newcommand{\NoRedundant}{\textsc{No Redundant}\xspace}
+\newcommand{\Sensitive}{\textsc{Sensitive}\xspace}
+
+\newcommand{\SQ}[1]{SQ#1\xspace}
+\newcommand{\SQs}{SQs\xspace}
+\newcommand{\RQ}[1]{RQ#1\xspace}
+\newcommand{\RQs}{RQs\xspace}
+
+\newcommand{\numTestMethods}{\#tests\xspace}
+\newcommand{\timeWithoutRV}{time\xspace}
+\newcommand{\timeWithRV}{$t^\textit{mop}$\xspace}
+\newcommand{\sloc}{SLOC\xspace}
+\newcommand{\scov}{$cov^s$\xspace}
+\newcommand{\bcov}{$cov^b$\xspace}
+\newcommand{\numCommits}{\#SHAs\xspace}
+\newcommand{\projectAge}{age\xspace}
+\newcommand{\numMonitors}{\#Mon\xspace}
+\newcommand{\numEvents}{\#Event\xspace}
+\newcommand{\numStars}{\#\FiveStar\xspace}
+% \newcommand{\RepoURL}{{\small\url{https://github.com/anonymous4submission2026/WASM_Fuzzing_Study}}}
+\newcommand{\RepoURL}{{\small\url{https://github.com/ncsu-swat/fuzzing-wasm-study}}}
+\newcommand{\Identifier}{\textsc{\IMM Indentifier}\xspace}
+\newcommand{\Classifier}{\textsc{\IMM Classifier}\xspace}
+\newcommand{\Generator}{\textsc{Policy Generator}\xspace}
+\newcommand{\Transformer}{\textsc{Code Tranformer}\xspace}
+\newcommand{\instructions}{instrumentation configurations\xspace}
+
+\newenvironment{packed_itemize}{
+\vspace{-1ex}
+\begin{list}{\labelitemi}{\leftmargin=1.2em}
+ \setlength{\itemsep}{0pt}
+ \setlength{\parskip}{0pt}
+ \setlength{\parsep}{0pt}
+ \setlength{\headsep}{0pt}
+ \setlength{\topskip}{0pt}
+ \setlength{\topmargin}{0pt}
+ \setlength{\topsep}{0pt}
+ \setlength{\partopsep}{0pt}
+ }{\end{list}
+\vspace{-0.1ex}
+}
+
+\newenvironment{packed_enumerate}{
+\vspace{-0.7ex}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.3em]%{\leftmargin=0.5em}
+ \setlength{\itemsep}{0.7pt}
+ \setlength{\parskip}{0pt}
+ \setlength{\parsep}{0pt}
+ \setlength{\headsep}{0pt}
+ \setlength{\topskip}{0pt}
+ \setlength{\topmargin}{0pt}
+ \setlength{\topsep}{0pt}
+ \setlength{\partopsep}{0pt}
+}{\end{enumerate}
+\vspace{-0.7ex}
+}
+
+%% Author Aliases
+\newcommand{\TODO}[1]{{\color{orange}{\bf TODO:} #1}}
+\newcommand{\Fix}[1]{{\textbf{[[}\color{magenta}#1}\textbf{]]}}
+\newcommand{\FixHigh}[1]{{\textbf{[[FixHigh:~}\color{red}#1}\textbf{]]}}
+\newcommand{\FixLow}[1]{{\textbf{[[FixLow:~}\color{orange}#1}\textbf{]]}}
+\newcommand{\Mar}[1]{{\textbf{[[Marcelo:~}\color{red}#1}\textbf{]]}}
+\newcommand{\marcelo}[1]{\Mar{#1}}
+\newcommand{\Ishrak}[1]{\textbf{[[Ishrak:~}{\color{blue}#1}\textbf{]]}}
+\newcommand{\Mohsen}[1]{\textbf{[[Mohsen:~}{\color{cyan}#1}\textbf{]]}}
+
+%% Technique Aliases
+\newcommand{\wasm}{WASM}
+\newcommand{\tname}{\textsc{rtbench}}
+
+%% Runtime Aliases
+\newcommand{\wasmtime}{\textsc{Wasmtime}}
+\newcommand{\wasmer}{\textsc{Wasmer}}
+\newcommand{\wamr}{\textsc{WAMR}}
+\newcommand{\wasmedge}{\textsc{WasmEdge}}
+
+%% Fuzzer Aliases
+\newcommand{\wasmsmith}{\textsc{WasmSmith}}
+\newcommand{\wadiff}{\textsc{WaDiff}}
+\newcommand{\wasmaker}{\textsc{WASMaker}}
+\newcommand{\wapplique}{\textsc{Wapplique}}
+\newcommand{\lwdiff}{\textsc{LWDIFF}}
+\newcommand{\fuzzercount}{four}
+
+%% Seed Aliases
+\newcommand{\wasmbench}{\textsc{wasmbench}}
+\newcommand{\llvmbench}{\textsc{llvmbench}}
+\newcommand{\specbench}{\textsc{specbench}}
+\newcommand{\rtbench}{\textsc{rtbench}}
+
+%% RQs
+\newcommand{\rqone}{\deleted[id=giorgi]{Is \rtbench{} a good seed corpus for fuzzing?}\added[id=giorgi]{How does seed corpus choice affect fuzzing effectiveness across \wasm{} runtimes?}}
+\newcommand{\rqtwo}{How effective is test transplantation for finding new bugs?}
+\newcommand{\rqthree}{How does transplantation compare to fuzzing?}
+\newcommand{\rqfour}{What are the characteristics of the bugs found?}
+\newcommand{\rqfive}{When do relevant seeds originate?}
+% \newcommand{\rqfive}{What are the characteristics of the relevant seeds from \tname{}?}
+
+% \newcommand{\rqthree}{How does each seed influence a test case when finding bugs?}
+% \newcommand{\rqfour}{What kind of bugs were found by \tname{}?}
+
+%% DATA
+\newcommand{\WadiffPaperBugCount}{21}
+\newcommand{\WappliquePaperBugCount}{20}
+\newcommand{\WasmakerPaperBugCount}{33}
+
+\newcommand{\rtbenchseedcount}{584}
+\newcommand{\rtbenchduplicate}{84}
+
+\newcommand{\BuggyRuntimeCount}{3}
+
+\newcommand{\ReportedFuzzingBugsCount}{21}
+\newcommand{\ReportedBugs}{34}
+
+\newcommand{\FuzzingBugsCount}{23}
+\newcommand{\TotalBugs}{36}
+
+\newcommand{\OtherSeedTotalBugs}{15}
+
+\newcommand{\WasmsmithNoSeedPending}{3}
+\newcommand{\WasmsmithNoSeedConfirmed}{12}
+\newcommand{\WasmsmithWasmBenchPending}{n/a}
+\newcommand{\WasmsmithWasmBenchConfirmed}{n/a}
+\newcommand{\WasmsmithTransBenchPending}{n/a}
+\newcommand{\WasmsmithTransBenchConfirmed}{n/a}
+\newcommand{\WasmsmithSpecBenchPending}{n/a}
+\newcommand{\WasmsmithSpecBenchConfirmed}{n/a}
+\newcommand{\WasmsmithBugBenchPending}{n/a}
+\newcommand{\WasmsmithBugBenchConfirmed}{n/a}
+\newcommand{\WasmsmithTotalPending}{3}
+\newcommand{\WasmsmithTotalConfirmed}{12}
+
+\newcommand{\WadiffNoSeedPending}{n/a}
+\newcommand{\WadiffNoSeedConfirmed}{n/a}
+\newcommand{\WadiffWasmBenchPending}{...}
+\newcommand{\WadiffWasmBenchConfirmed}{...}
+\newcommand{\WadiffTransBenchPending}{...}
+\newcommand{\WadiffTransBenchConfirmed}{...}
+\newcommand{\WadiffSpecBenchPending}{9}
+\newcommand{\WadiffSpecBenchConfirmed}{6}
+\newcommand{\WadiffBugBenchPending}{...}
+\newcommand{\WadiffBugBenchConfirmed}{...}
+\newcommand{\WadiffTotalPending}{9}
+\newcommand{\WadiffTotalConfirmed}{6}
+
+\newcommand{\WasmakerNoSeedPending}{n/a}
+\newcommand{\WasmakerNoSeedConfirmed}{n/a}
+\newcommand{\WasmakerWasmBenchPending}{2}
+\newcommand{\WasmakerWasmBenchConfirmed}{2}
+\newcommand{\WasmakerTransBenchPending}{1}
+\newcommand{\WasmakerTransBenchConfirmed}{2}
+\newcommand{\WasmakerSpecBenchPending}{0}
+\newcommand{\WasmakerSpecBenchConfirmed}{0}
+\newcommand{\WasmakerBugBenchPending}{9}
+\newcommand{\WasmakerBugBenchConfirmed}{6}
+\newcommand{\WasmakerTotalPending}{12}
+\newcommand{\WasmakerTotalConfirmed}{6}
+
+\newcommand{\WappliqueNoSeedPending}{n/a}
+\newcommand{\WappliqueNoSeedConfirmed}{n/a}
+\newcommand{\WappliqueWasmBenchPending}{1}
+\newcommand{\WappliqueWasmBenchConfirmed}{1}
+\newcommand{\WappliqueTransBenchPending}{5}
+\newcommand{\WappliqueTransBenchConfirmed}{3}
+\newcommand{\WappliqueSpecBenchPending}{0}
+\newcommand{\WappliqueSpecBenchConfirmed}{1}
+\newcommand{\WappliqueBugBenchPending}{25}
+\newcommand{\WappliqueBugBenchConfirmed}{3}
+\newcommand{\WappliqueTotalPending}{25}
+\newcommand{\WappliqueTotalConfirmed}{5}
+
+\newcommand{\NoSeedTotalPending}{3}
+\newcommand{\NoSeedTotalConfirmed}{12}
+\newcommand{\WasmBenchTotalPending}{3}
+\newcommand{\WasmBenchTotalConfirmed}{3}
+\newcommand{\TransBenchTotalPending}{6}
+\newcommand{\TransBenchTotalConfirmed}{3}
+\newcommand{\SpecBenchTotalPending}{3}
+\newcommand{\SpecBenchTotalConfirmed}{6}
+\newcommand{\BugBenchTotalPending}{32}
+\newcommand{\BugBenchTotalConfirmed}{6}
+\newcommand{\TotalTotalPending}{38}
+\newcommand{\TotalTotalConfirmed}{17}
+
+\newcommand{\rtbenchWasmakerWasmer}{7}
+\newcommand{\rtbenchWasmakerWAMR}{3}
+\newcommand{\rtbenchWasmakerWasmEdge}{3}
+\newcommand{\rtbenchWappliqueWasmer}{7}
+\newcommand{\rtbenchWappliqueWAMR}{2}
+\newcommand{\rtbenchWappliqueWasmEdge}{1}
+
+% Baseline
+\newcommand{\MaxBaselineBugsCountPerFuzzer}{5-9}
+
+% Transplantation
+\newcommand{\TransplantationBugsCount}{13}
+\newcommand{\TransplantationPreExistingCount}{7}
+\newcommand{\TransplantationPreExistingPercentage}{53.84\%}
+\newcommand{\TransplantationPostExistingCount}{6}
+\newcommand{\TransplantationPostExistingPercentage}{46.15\%}
+
+% Fuzzing
+\newcommand{\tnameUniqueFuzzBugs}{17}
+\newcommand{\CoverageImprovementOverall}{5-10\%}
+
+%% FANCY TEXT
+% \newcommand\encircle[1]{%
+%   \tikz[baseline=(X.base)] 
+%     \node (X) [draw, shape=circle, inner sep=0, fill=black, text=white] {\scriptsize\strut #1};%
+% }
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, fill=black, text=white, minimum size=1em, inner sep=1pt] {\scriptsize\strut\makebox[1em][c]{#1}};%
+}
+
+
+\definecolor{bhisRowColor}{HTML}{64b5cd}
+

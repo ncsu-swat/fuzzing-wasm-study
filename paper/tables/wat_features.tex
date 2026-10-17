@@ -1,0 +1,56 @@
+\begin{table*}[ht!]
+\scriptsize
+\centering
+\caption{Extracted features from WAT code and their explanations.}
+\begin{tabular}{l|l}
+\toprule
+\textbf{Feature} & \textbf{Explanation} \\
+\midrule
+\textit{Section-level features} & \\
+\hspace{0.5cm} Total section count & Number of sections in the module (Type, Import, Func, etc.). \\
+\hspace{0.5cm} Section counts & Frequency of each section type. \\
+\hspace{0.5cm} Data lengths & Number of characters in data segments after string abstraction. \\
+
+\midrule
+\textit{Instruction-level features} & \\
+\hspace{0.5cm} Instruction counts & Frequency of each instruction. \\
+\hspace{0.5cm} Instruction kind counts & Frequency of instruction categories (e.g., numeric, control, memory). \\
+\hspace{0.5cm} Float instruction count & Number of floating-point instructions. \\
+\hspace{0.5cm} Instruction entropy & Shannon entropy of the instruction distribution, measures structural variety. \\
+\hspace{0.5cm} Bigram counts & Frequencies of instruction pairs (captures local patterns). \\
+% \hspace{0.5cm} Trigram counts & Frequencies of instruction triples. \\
+
+\midrule
+\textit{Constant features} & \\
+\hspace{0.5cm} Global const count & Number of immutable constants in global definitions. \\
+\hspace{0.5cm} Local const count & Number of constants inside function bodies. \\
+\hspace{0.5cm} Global int/float constants & Values of integer/float constants defined at global scope. \\
+\hspace{0.5cm} Local int/float constants & Values of integer/float constants defined in functions. \\
+\hspace{0.5cm} Local v128 constants & SIMD vector constants. \\
+
+\midrule
+\textit{Function-level features} & \\
+\hspace{0.5cm} Func instrs count & Number of instructions per function. \\
+\hspace{0.5cm} Func params & Number of parameters per function. \\
+\hspace{0.5cm} Func results & Number of results per function. \\
+\hspace{0.5cm} Max nesting depths & Maximum control-flow nesting depth of blocks/loops/ifs. \\
+\hspace{0.5cm} Multi-value func count & Number of functions returning multiple values. \\
+
+\midrule
+\textit{Memory/table features} & \\
+\hspace{0.5cm} mem\_min, mem\_max & Minimum/maximum memory pages declared. \\
+\hspace{0.5cm} is\_mem64 & Whether 64-bit memory addressing is enabled. \\
+\hspace{0.5cm} is\_mem\_shared & Whether memory is shared. \\
+\hspace{0.5cm} table\_min, table\_max & Minimum/maximum table size. \\
+\hspace{0.5cm} is\_table64 & Whether 64-bit table indexing is used. \\
+\hspace{0.5cm} is\_table\_shared & Whether the table is shared. \\
+
+\midrule
+\textit{Structural metrics} & \\
+\hspace{0.5cm} Alignments & Alignment values used in memory/SIMD load/store operations. \\
+\hspace{0.5cm} Offsets & Memory offsets used in load/store operations. \\
+\bottomrule
+\end{tabular}
+\caption{\Fix{Move the discussion about features to the background section.}\Fix{Add a new column to include low-level feature counts.}\Fix{Refer to the WAT code structure references from the official specification.} Different low-level structural features extracted from the textual representation (\CodeIn{.wat}) of the seed files.}
+\label{tab:wat_features}
+\end{table*}

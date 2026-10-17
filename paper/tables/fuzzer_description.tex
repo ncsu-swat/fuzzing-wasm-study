@@ -1,0 +1,18 @@
+\begin{table*}[]
+	\centering
+	\scriptsize
+	\begin{tabular}{|l|l|p{10cm}|}
+		\hline
+		\textbf{Fuzzer}   & \textbf{Kind}             & \textbf{Description} \\
+		\hline
+		wapplique & mutation-based   & Wapplique is a mutation-based WebAssembly fuzzer that substitutes real-world code fragments into seed programs to increase diversity while ensuring validity. \\
+		\hline
+		wadiff    & hybrid           & WADIFF converts specification to simple WebAssembly files using a combination of a domain specific language and symbolic execution and later mutates these files. \\
+		\hline
+		wasmaker  & mutation-based   & WASMaker is a mutation-based fuzzer that uses slices from real-world WebAssembly files, combines, and mutates them to create new test cases. \\
+		\hline
+		wasmsmith & generation-based & WasmSmith is a random generator based fuzzer that creates syntactically valid WebAssembly modules from scratch using structural awareness. \\
+		\hline
+	\end{tabular}
+	\caption{Fuzzer descriptions. \Fix{Add mapping to seed corpora.}}
+\end{table*}

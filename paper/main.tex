@@ -1,0 +1,434 @@
+\documentclass[lettersize,journal]{IEEEtran}
+
+\input{macros}
+
+%% For acmart, uncomment the following four lines
+
+% \setcopyright{none}
+% \settopmatter{printacmref=false}
+% \renewcommand\footnotetextcopyrightpermission[1]{}
+% \pagestyle{plain}
+
+
+\begin{document}
+
+\title{\PaperTitle{}}
+
+\author{Ishrak Hayet, Mohsen EsfandyariDoulabi, Giorgi Merabishvili, and Marcelo d'Amorim
+        % <-this % stops a space
+\thanks{Ishrak, Mohsen, Giorgi, and Marcelo are with North Carolina State University, Raleigh, NC 27695 USA. (e-mail: \{ihayet, mesfand, gmerabi, mdamori\}@ncsu.edu)}}%}
+
+\pagenumbering{arabic}
+\pagestyle{plain}
+
+\maketitle
+
+\begin{abstract}
+\sloppy
+% \deleted[id=ishrak]{WebAssembly (WASM) has gained traction as a portable, high-performance, and secure execution technology, owing to its ability to deliver near-native speed across platforms.\Space{, support multiple programming languages, and provide strong sandboxing for safe deployment in browsers, for example.} \Space{\wasm{} runtimes are optimized systems capable of executing binary \wasm{} modules.} Like any complex software, \wasm{} runtimes contain bugs.
+% Fuzzing is a popular approach to finding such bugs, but a limit study we conducted on \textbf{three} popular WebAssembly runtimes, using existing fuzzers and seed corpora, indicates that the continued bug-revealing ability of these fuzzers is constrained by the diminishing effectiveness of existing WASM seed corpora.
+
+% This paper reports on a large-scale study to assess the benefits of using regression tests to find bugs in \wasm{} runtimes. The study explores two scenarios of use of regression tests: (1) \emph{transplanting} such tests across runtimes and (2) using such tests as seed corpora for fuzzing. Our study revealed a total of \textbf{\TotalBugs{}} previously-unknown bugs across \BuggyRuntimeCount{} WASM runtimes; \textbf{\TransplantationBugsCount{}} through transplantation and \textbf{\FuzzingBugsCount{}} through fuzzing. This number goes far beyond the number of bugs found through fuzzing using well-known seed corpora. Our findings yield both empirical observations and actionable recommendations.}
+
+WebAssembly (WASM) is gaining traction as a portable, high-performance, and secure execution technology for its ability to deliver near-native speed across platforms. WASM runtimes are optimized systems capable of executing binary WASM modules. As complex software, WASM runtimes contain bugs. Fuzzing is a popular approach to finding bugs in these systems, but an empirical study involving three popular WebAssembly runtimes, existing fuzzers, and existing seed corpora suggests that the bug-revealing ability of fuzzers is increasingly constrained by seed corpora that fail to keep pace with the evolving WebAssembly ecosystem.
+
+This paper reports on a large-scale empirical study of regression test reuse for WebAssembly runtimes. We observe that independently developed runtimes adopt standardized WebAssembly proposals asynchronously, causing semantic corner cases discovered in one runtime to remain relevant to others. Motivated by this observation, we investigate two complementary forms of regression test reuse: (1) transplanting regression tests across runtimes and (2) using historical regression tests as seed corpora for fuzzing. Our study revealed \textbf{\TotalBugs{}} previously unknown bugs across three WASM runtimes, including \textbf{\TransplantationBugsCount{}} through transplantation and \textbf{\FuzzingBugsCount{}} through fuzzing, substantially exceeding the number of bugs found using well-known seed corpora. Our findings provide empirical evidence that historical regression tests constitute an effective testing resource for independently evolving WebAssembly runtimes and yield actionable recommendations for future testing.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+WebAssembly, Fuzzing, Seed Corpora Evaluation, Differential Testing
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:intro}
+
+\sloppy
+WebAssembly (\wasm{}) is emerging as a portable, high-performance, and secure execution technology. Originally designed for web browsers, it has evolved into a general-purpose compilation target for languages such as C, C++, and Rust. \wasm{} delivers near-native speed while providing strong security guarantees and consistent behavior across platforms. \wasm{} runtimes (\eg{},  \wasmtime{}~\cite{wasmtime}, \wasmer{}~\cite{wasmer}, \wamr{}~\cite{wamr}, and \wasmedge{}~\cite{wasmedge}) are responsible for loading, verifying, and executing \wasm{} binaries. These systems are highly optimized and widely deployed, powering applications that range from serverless and edge computing to embedded systems. However, like any complex software, \wasm{} runtimes are prone to bugs. Their components such as interpreters, JIT compilers, and sandboxing layers can harbor subtle correctness, performance, and security issues. Such bugs may lead to crashes, miscompilations, or vulnerabilities. As \wasm{} adoption grows, ensuring the robustness and correctness of its runtimes becomes critical. 
+% Understanding the nature and prevalence of bugs in these systems, and 
+Developing effective methods to uncover and fix bugs in \wasm{} runtimes is therefore an important research challenge.
+
+Several fuzzers have been proposed to detect bugs in \wasm{} runtimes, \eg{}, \wadiff{}~\cite{zhou2023wadiff}, \wapplique{}~\cite{zhao2024wapplique}, \wasmaker{}~\cite{cao2024wasmaker}, \added[id=ishrak]{and \lwdiff{}~\cite{zhou2025lwdiff}}. These tools have previously uncovered many inconsistencies, crashes, and specification deviations across runtime implementations. However, no prior work has studied the continued effectiveness of these fuzzers when used with the existing seed corpora. As observed across various domains~\cite{miller1990empirical,xu2020krace,lyu2018smartseed,bohme2017markov,manes2019survey}, fuzzing effectiveness heavily depends on the quality and diversity of the input corpus. The quality and diversity of an outdated corpus may degrade over time as its effectiveness becomes saturated; thereby leading to limited coverage and fewer bugs found, whereas a well-curated corpus from a new source can substantially extend the effectiveness and relevance of existing fuzzers. Understanding how corpus quality influences \wasm{} fuzzing outcomes remains a crucial step toward more systematic and effective testing of \wasm{} runtimes.
+%
+
+\deleted[id=giorgi]{With the goal of evaluating the performance of \wasm{} fuzzers on three established seed corpora from the literature, we conducted a formative study involving three \wasm{} runtimes and three fuzzers. Each fuzzing campaign was executed for 24 hours and repeated multiple times to account for randomness in fuzzer behavior. Our analysis reveals that the number of newly found bugs is substantially lower than that reported initially by a majority of the fuzzers. Overall, results indicate that existing seed corpora remain a limiting factor in the continued effectiveness of \wasm{} fuzzing, highlighting the need for further research on generating effective seed corpora from new sources.}
+
+\added[id=giorgi]{With the goal of evaluating the performance of \wasm{} fuzzers on three established seed corpora from the literature, we conducted a preliminary investigation involving three \wasm{} runtimes and \fuzzercount{} fuzzers. Each fuzzing campaign was executed for 24 hours and repeated five times. The results revealed that the number of newly found bugs is substantially lower than that reported initially by these fuzzers on the same corpora. This pattern reflects the well-documented ``saturation effect'' in fuzzing~\cite{groce2020saturation, liyanage2023reachable}: as targets mature, fixed seed corpora reveal fewer new bugs. A similar dynamic appears in compiler fuzzing, where bug discovery spikes after major version transitions and then declines~\cite{yang2011finding,le2014compiler,livinskii2020random}. These observations motivated us to examine alternate sources of seeds that might be more resilient to saturation.}
+
+
+Bugs in software systems tend to concentrate according to the Pareto distribution \cite{huang2013evaluation}, which is why repeated bug fixes are usually spatially localized \cite{yue2017characterization}. Intuitively, regression tests (\ie{}, that previously revealed bugs) are rich in features, they have high potential to reveal new bugs. Based on this conjecture, \textbf{this paper presents a large-scale empirical study on how regression tests can be used to reveal new bugs in \wasm{} runtimes}. Specifically, we examine the effectiveness of two complementary approaches leveraging regression tests to find bugs in \wasm{} runtimes: (1)~\emph{test transplantation}, where regression tests are executed across different runtimes, and (2)~\emph{fuzzing} with a seed corpus of regression tests. Although regression tests have been used before for test generation \cite{plein2024automatic, rabin2021configuring}, we are the first to systematically study the effectiveness of regression tests to find new bugs in the WebAssembly domain using both test transplantation and fuzzing. 
+\added[id=ishrak]{We hypothesize that historical regression tests are particularly valuable in the WebAssembly ecosystem because independent runtimes adopt new specification proposals asynchronously, allowing semantic corner cases captured in one implementation to remain effective in exposing analogous defects in others.}
+
+
+To support our study, we introduce \rtbench{}, a dataset of 584 WebAssembly regression tests collected from multiple runtimes that we use for transplantation and as seeds for fuzzing. Our results show that the two bug-finding mechanisms we employ 
+% regression test transplantation and fuzzing with regression tests as seeds 
+are complementary in revealing bugs in \wasm{} runtimes. Transplanting regression tests uncovered \textbf{\TransplantationBugsCount{}} previously unknown bugs which is a modest but significant number, when compared to the 10 bugs found by the dedicated fuzzer \wapplique{} after several hours of fuzzing. Using \rtbench{} as a seed corpus markedly improved fuzzing effectiveness: fuzzers achieved higher coverage and exposed \textbf{\FuzzingBugsCount{}} additional bugs compared to three existing seed corpora used in the literature. Importantly, none of the bugs discovered through transplantation overlapped with those found by fuzzing, highlighting their complementary nature. The detected issues spanned compilation and runtime failures, including crashes and output mismatches. Notably, the most effective seeds originated from regression tests created two to three years ago, coinciding with the transition from WebAssembly version 1 to 2, while older tests, though less useful for fuzzing, continued to reveal unique issues through transplantation.
+
+This paper makes the following contributions:
+
+
+\begin{packed_itemize}
+  % \item[\Contrib] \deleted[id=giorgi]{A formative study demonstrating the ineffectiveness of existing \wasm{} fuzzers to reveal bugs in popular runtimes using existing seed corpora from the literature;}
+  % \item[\Contrib] \deleted[id=giorgi]{An in-depth study on the effectiveness of using regression tests from existing \wasm{} runtimes to identify bugs on them, using test transplantation and fuzzing as complementary bug-finding techniques;}
+  % \item[\Contrib] \added[id=giorgi]{An in-depth study on the effectiveness of using regression tests from existing \wasm{} runtimes to identify bugs in them, using test transplantation and fuzzing as complementary bug-finding techniques. As part of this study, we benchmark three established seed corpora from the literature as a baseline for comparison;}
+  \item[\Contrib] \added[id=giorgi]{An in-depth empirical study of using regression tests from existing \wasm{} runtimes to identify bugs through complementary test transplantation and fuzzing;}
+  \item[\Contrib] \added[id=giorgi]{A benchmark study of three established \wasm{} seed corpora from the literature as a baseline for comparison;}
+  \item[\Contrib] \rtbench{} - a dataset of over five hundred real-world WebAssembly regression tests collected from the issue trackers and regression suites of major runtimes: Wasmtime~\cite{wasmtime}, Wasmer~\cite{wasmer}, WAMR~\cite{wamr}, and  WasmEdge~\cite{wasmedge}.
+  \item[\Contrib] \textbf{\TotalBugs{}} total bugs found across \BuggyRuntimeCount{} \wasm{} runtimes, out of which,  \textbf{\ReportedBugs{}} were newly reported. Our results are publicly available at \RepoURL{}.
+\end{packed_itemize}
+
+
+
+\section{Background}
+\label{sec:background}
+
+This section outlines background for the rest of the paper.
+
+\subsection{WebAssembly Module}
+\label{sec:background_module}
+
+WebAssembly (\wasm{}) is a virtual instruction set architecture that is often used as a compilation target for various high-level languages. A \wasm{} module is the fundamental unit of deployment and execution; it is a platform-independent binary containing functions, type definitions, and data. WebAssembly Text (WAT) format~\cite{spec_wat} is a textual representation of a \wasm{} file. Decompilers from \wasm{} to WAT exist \cite{wasm_to_wat, wasm_tools}. 
+
+% \newpage
+Figure~\ref{ex:background_ex1} shows a recursive version of the factorial function implemented in C and its corresponding WAT code.
+% Figure \ref{ex:background_ex1} demonstrates the conversion of C code to WAT code and elaborates on different aspects of the WAT code. 
+The code snippet defines a standard recursive factorial routine which is compiled to an equivalent \wasm{} module using the \CodeIn{clang} compiler. Figure \ref{ex:background_ex1}(b) shows the different sections in the WAT format: the \CodeIn{Type} section defines type signatures (parameter and result types) on line 2;
+% \CodeIn{Function} lists functions and links each one to a signature by type index;
+\CodeIn{Code} section contains the function bodies (locals and instructions) on line 3; and \CodeIn{Export} section assigns a public name `\CodeIn{factorial}' to the function on line 14, so that it can be externally invoked.
+% Similarly to prior work, in our study, we do not include any custom section\Mar{what is a custom section}\Ishrak{shown in Table \ref{tab:wasm_sections}} since it doesn't affect the execution semantics and can be ignored by a runtime implementation~\cite{spec}\Mar{what is a runtime implementation? (still not introduced)}\Ishrak{We talk about the runtimes, in the following section}. 
+The \wasm{} code section is of particular importance to fuzzing as it contains the function bodies that collectively determine module behavior.
+% \Mar{I don't understand why talking only about code section}\Ishrak{because the fuzzing usually happens in the code section.} 
+% (Table~\ref{tab:wasm_sections}) contains the function bodies which consist of instruction sequences. 
+Each instruction in WebAssembly consists of an opcode accompanied by zero or more parameters and operands. Given that a WASM module is executed within a stack-based virtual machine, instructions operate on an implicit operand stack rather than explicit registers.
+\input{examples/background_ex1}
+The execution of each instruction modifies the stack state according to its defined semantics, ensuring that the side effects and resulting values conform to the instruction’s type signature and parameter specification.
+
+\subsection{WebAssembly Runtimes}
+\label{sec:background_runtimes}
+A WebAssembly runtime is a stack-based virtual machine that provides an execution model to load, instantiate, and run programs that have been compiled as WASM binary modules~\cite{zhang2024research}. A WASM runtime processes a module in three stages: (1) decoding, (2) validation, and (3) execution. Similar to a compiler, decoding converts the binary into an intermediate representation or directly into machine code. Validation ensures consistency of the types and the operand stack \cite{spec_concepts}. Execution takes place by directly invoking the \CodeIn{start} function, if the module defines one, 
+or by loading the module, possibly from a different programming language or from the Command Line Interface (\CodeIn{CLI}) and calling exported functions.
+
+A WebAssembly runtime maintains three stacks: an operand stack to track instruction operands, a control stack to track control flow, and an initialization stack to track local variables of a function \cite{spec_algo}. There are two ways to execute a \wasm{} module: (1) by executing directly on standalone WebAssembly runtimes that run on an Operating System \cite{zhang2024research} and (2) by embedding a \wasm{} module inside a host application (e.g. a browser) with the necessary glue code and programmatic API access to the WebAssembly runtimes. This paper focuses on the standalone versions of the WebAssembly runtimes where we directly use their \CodeIn{CLI} to execute \wasm{} modules.
+
+\subsection{Mutational Fuzzing of WASM Runtimes}
+\label{sec:background_fuzzers}
+
+Several domain-specific fuzzers have recently been proposed to assess the robustness and security of WASM runtimes~\cite{wasmsmith, zhou2023wadiff, zhao2024wapplique, cao2024wasmaker, zhou2025lwdiff}. Most of these fuzzers are \emph{mutational}~\cite{zhou2023wadiff, zhao2024wapplique, cao2024wasmaker, zhou2025lwdiff}, \ie{}, they generate new inputs through systematic mutations of existing inputs as opposed to creating new inputs. Typically, a mutational fuzzer initializes a population with a \emph{seed corpus} and iteratively applies mutation operators to individuals from the population. In WASM mutational fuzzing, mutation operators can be applied at a low- or high-level data representation. More precisely, mutation operators can either modify WASM binary files or their corresponding abstract syntax trees (ASTs). For determining test outcomes, fuzzers typically rely on oracles that identify crashes or differential output among multiple runtimes.
+
+As observed across multiple software domains, the quality and diversity of the seed corpus play a crucial role in determining the effectiveness of fuzzing~\cite{miller1990empirical,xu2020krace,lyu2018smartseed,bohme2017markov,manes2019survey}. 
+
+
+\input{figures/workflow}
+
+
+% ============================================================
+% DELETED for R1.Q4: Preliminary Study section removed.
+% Motivation moved to Introduction (Change 1).
+% Experimental data will move to RQ2 (Changes 5 + 6).
+% ============================================================
+% \input{unused_preliminary}
+
+%\section{\tname{}}
+\section{Workflow}
+\label{sec:study_design}
+\noindent Figure~\ref{fig:workflow} illustrates the workflow that we use to find bugs in \wasm{} runtimes. First, we extract (1) WASM test cases from GitHub issues of different runtime repositories and add them into \rtbench{} (2). These mined test cases are then transplanted (3a) across runtimes (4) and also used separately as seeds for fuzzing (3b). All \CodeIn{.wasm} test cases (5) are then evaluated using differential testing (6) to identify behavioral inconsistencies across runtimes. Detected anomalies are filtered (6) to remove false positives and duplicates, then triaged (7) to produce bug reports (8).
+
+
+\subsection{\tname{}}
+\label{sec:rtbench}
+
+We propose \tname{}, a seed corpus of \wasm{} files mined from bug histories and regression tests. To construct our corpus, we collected seeds from real-world bug reports spanning a five-year period from 2020 to 2025. We mined the public GitHub issue trackers and regression testsuites of the four major WebAssembly runtimes, namely \wasmtime{}~\cite{wasmtime}, \wasmer{}~\cite{wasmer}, \wamr{}~\cite{wamr}, and \wasmedge{}~\cite{wasmedge} to collect \rtbenchseedcount{} \wasm{} files. The distribution of the collected seed testcases are shown in Table \ref{tab:seed_distribution}.
+
+\input{tables/rtbench_distribution}
+
+We focus on issues that refer to either crashing inputs or the ones leading to differential output. For each candidate, we first identify the buggy runtime version from the issue report. We then execute the test case on that version to confirm bug reproducibility. Importantly, we also verify that none of these seeds reproduce crashes on the latest versions of the corresponding runtimes at the time of our study, confirming that the underlying bugs have been fixed. This approach provided us with a seed corpus grounded in actual historical bugs while ensuring they had indeed been buggy in the reported versions and that they no longer manifest in current releases. These checks help to form a realistic and reliable seed corpus for subsequent fuzzing and cross-runtime differential testing.
+
+When collecting test cases from the runtime testsuites, we only select the \CodeIn{.wasm} files since the fuzzers expect only \CodeIn{.wasm} files as seeds (\textsection{}\ref{sec:background_fuzzers}). For testcases collected from issues, we only keep the ones related to \CodeIn{CLI} bugs of the runtimes (\textsection{}\ref{sec:background_runtimes}). For testcases collected from both issues and testsuites, we filter out duplicates and non-deterministic cases.
+
+
+\subsection{Fuzzer Provenance Logging}
+\label{sec:provenance_logging}
+
+For any large-scale fuzzing campaign, it is essential not only to generate diverse test cases but also to maintain a clear record of how those test cases were derived. As discussed at Section~\ref{sec:background_fuzzers}, the two mutation-based fuzzers used in our study, \wapplique{}~\cite{zhao2024wapplique} and \wasmaker{}~\cite{cao2024wasmaker}, generate new \wasm{} modules by splicing one or more existing \wasm{} modules. To ensure reproducibility and accountability across this process, we extended both fuzzers with a lightweight provenance logging mechanism that records the original seeds, the fragments used, and the mutation operations applied.
+
+In \wasmaker{}~\cite{cao2024wasmaker}, seed \wasm{} binaries are parsed into per-function abstract syntax trees (ASTs), analyzed at the opcode level, and then mutated to form new inputs. We integrated provenance logging at the AST generation stage.
+Similarly, \wapplique{}~\cite{zhao2024wapplique} decomposes real \wasm{} seeds into reusable code fragments from function bodies, which are then recombined and slightly mutated to synthesize new test cases. 
+To ensure that these instrumentation changes did not alter fuzzer correctness or efficiency, we validated the modified fuzzers against their original behavior. Both fuzzers produced the same ratio of valid to invalid test cases as their uninstrumented versions. The overhead of provenance logging was negligible 
+This validation confirmed that our logging mechanism maintained functional equivalence while adding transparent, low-cost traceability to our fuzzing campaigns.
+
+\input{tables/seeds_description}
+
+\subsection{Differential testing}
+\label{sec:diff_testing}
+To systematically uncover inconsistencies across WebAssembly runtimes, we developed a large-scale differential testing framework that executes the same input \wasm{} file under multiple runtime configurations and compares their outcomes. When running each input \wasm{} file, we invoke all of the exported functions on different modes of the runtimes.
+
+\subsubsection{Runtime Modes.} Our differential testing framework supports a variety of execution and compilation modes across the tested runtimes. For \wasmtime{}, both direct interpretation and execution of precompiled (\CodeIn{.cwasm}) artifacts are tested. \wasmer{} is evaluated under its \CodeIn{Cranelift} and \CodeIn{LLVM} backends. \wamr{} is exercised through its ahead-of-time compiler \CodeIn{wamrc}, native execution in AOT mode, interpreter, and JIT mode using the \CodeIn{iwasm} application. \wasmedge{} is tested in JIT mode and interpreter mode with the \CodeIn{wasmedge} application, and compiled mode with \CodeIn{wasmedgec} compiler. Each run is wrapped within a 10-second timeout to detect hangs, ensuring the module can capture various types of runtime behaviors while avoiding indefinite stalls. This layered design provides a robust methodology for discovering cross-runtime semantic mismatches and exposing previously unknown bugs.
+
+\subsubsection{Output Normalization.} To minimize false positives and capture semantic output differences instead of just cosmetic divergences, we have developed a postprocessing layer which normalizes runtime outputs and maps diverse error messages to standardized categories. Each runtime (\wasmtime{}, \wasmer{}, \wamr{}, and \wasmedge{}) has a dedicated postprocessor function that detects recurring failure modes such as \CodeIn{out\_of\_bounds}, \CodeIn{integer\_divide\_by\_zero}, \CodeIn{invalid\_func\_nargs}, or \CodeIn{unsupported}. Outputs that involve floating-point are normalized into consistent mantissa–exponent representations, and +/- `NaN'/`nan' literals are standardized to ensure comparability. By filtering away runtime-specific warnings, trimming extraneous logs, and unifying divergent error messages, the module isolates semantically meaningful differences. This guarantees that any observed discrepancies across runtimes reflect true semantic divergences rather than cosmetic variations in error reporting.
+
+
+\subsection{Triaging}
+After identifying likely anomalies, we triage these cases by deduplication and simplification which are elaborated below.
+\label{sec:triaging}
+\subsubsection{Deduplication} To efficiently triage recurring crashes across WebAssembly runtimes, we implemented a crash stack trace deduplication module that couples a Python callback in LLDB \cite{lldb} with a Bash wrapper for automated execution. The wrapper script launches the program under LLDB in batch mode, installs a custom crash hook, and configures signal handling for \CodeIn{SIGSEGV} and \CodeIn{SIGABRT}. For Rust-based runtimes, we configured the panic mode to abort. When such abnormal terminations occur, the Python hook records the top five frames of the crashing thread, including function names and source file locations, filtered by a configurable path pattern. These frames are appended to a trace file and act as a concise fingerprint of the failure. By grouping test cases with identical top-frame sequences, the module coarsely clusters crashes that share the same underlying defect while avoiding over-fragmentation due to deeper stack variations. This design reduces redundant triage effort by collapsing large sets of failing test cases into representative clusters that can be more thoroughly inspected.
+
+To triage differential outputs observed across runtimes, we built an execution tracing module that conditions on the divergent output itself. The module leverages LLDB to perform instruction-level tracing of a target program until a specified output string appears on stdout. When a mismatch is detected between runtimes, the expected differential output is supplied as the tracing target, and execution halts as soon as this output is observed. At each step, the tracer records the current function, file, and line number, producing a detailed trace of the program’s execution path leading to the discrepancy. Since such traces can be verbose and include incidental logging, we focus on the most recent fifteen frames preceding the divergent output as a fingerprint for deduplication. By comparing these condensed trace signatures, the module distinguishes whether two test cases that generate the same output pattern actually expose the same underlying bug or separate issues. This approach improves the efficiency of triaging differential outputs.
+
+\subsubsection{Test Reduction} Before reporting bugs, we apply automated test case reduction to minimize failing inputs while preserving the triggering behavior. This is handled through a reducer module built around the \CodeIn{wasm-tools~shrink} utility, which iteratively simplifies WebAssembly binaries under the guidance of a custom predicate. The predicate runs the reduced module through our differential test engine and deduplication pipeline, compares the produced outputs against the reference failing outputs, and accepts the minimized candidate only if the failure is preserved. This ensures that irrelevant instructions and sections are pruned away, leaving behind the smallest input that still reproduces the crash or differential output. The module produces both a minimized \CodeIn{.wasm} file and a corresponding textual \CodeIn{.wat} representation for inspection.
+
+By combining various deduplication strategies with a systematic reduction, we prepared the final list of bugs and test cases for reporting to the corresponding runtime issue trackers.
+
+\section{Objects and Questions}
+\label{sec:experiment}
+
+We elaborate the objects we use in the study and the research questions we pose in the following.
+
+\subsection{Objects}
+
+\noindent\textbf{Seed corpora.}
+\label{sec:seed_corpora}
+Table~\ref{tab:seed_corpora} provides a high-level comparison of the seed corpora used in our evaluation. We evaluate three input corpora
+in addition to our regression-based corpus (\rtbench{}):~\llvmbench{}~\cite{zhao2024wapplique},  \wasmbench{}~\cite{hilbig2021empirical, cao2024wasmaker}, and \specbench{}~\cite{zhou2023wadiff}.
+% \cite{zhao2024wapplique}, \cite{hilbig2021empirical}, \cite{zhou2023wadiff} 
+The other three corpora are publicly-available \wasm{} datasets used in prior research.
+
+In Table~\ref{tab:seed_corpora}, we show the mean testcase size and control-flow nesting depth as proxy metrics for testcase complexity. We note that \specbench{} seeds have the lowest size and nesting depth because they are simple and focused seeds derived from the \wasm{} specification \cite{zhou2023wadiff}. In contrast, \llvmbench{}, \wasmbench{}, and \rtbench{} are relatively more complex and diverse corpora in terms of size and depth. \rtbench{} has fewer seeds than most and they exhibit the highest standard deviation in both size and nesting depth, indicating that \rtbench{} is highly diverse. Additionally, we observe that \rtbench{} achieves higher initial coverage compared to the other corpora. 
+
+\noindent\textbf{\wasm{} runtimes.}
+We target three runtimes:
+\wasmer{}~(20K$\star$)(v5.0.6)~\cite{wasmer}, 
+\wasmedge{}~(10K$\star$)(v0.15.0)~\cite{wasmedge}, 
+and \wamr{}~(6K$\star$)(v2.4.1)~\cite{wamr}, which are under active development and are highly popular. We also ran all the experiments on \wasmtime{} runtime, but since we did not find any bugs in it, we exclude it from the tables related to bug counts.
+
+\noindent{}\textbf{\wasm{} fuzzers.} We use \fuzzercount{} mutational \wasm{} fuzzers: \wadiff{}~\cite{zhou2023wadiff}, \wasmaker{}~\cite{cao2024wasmaker}, \wapplique{}~\cite{zhao2024wapplique}, and \lwdiff{}~\cite{zhou2025lwdiff}. We did not consider general-purpose fuzzers, as libFuzzer \cite{libFuzzer} or AFL++ \cite{aflplusplus}, because prior work has shown that customized fuzzers are significantly more effective in the \wasm{} domain compared to general-purpose fuzzers \cite{cao2024wasmaker, zhao2024wapplique, zhang2025waltzz}. We also have not considered purely generative fuzzers like \wasmsmith{}~\cite{wasmsmith} since it does not need a seed corpora.
+
+Following the standard for campaign-durations \cite{metzman2021fuzzbench, li2021unifuzz}, we ran each fuzzing campaign for 24 clock-hours. For a fair comparison, we ran each campaign with the same resources on an x86\_64 AMD EPYC 9684X server to ensure that our cpu-hours would exceed that of the prior work on \wasm{} fuzzing  \cite{zhao2024wapplique, cao2024wasmaker, zhou2023wadiff}. Moreover, to account for randomness, we repeated each campaign five times. We have used the \CodeIn{llvm-cov} tool to measure coverage across all the runtimes.
+
+
+\subsection{Research Questions}
+\label{sec:rqs}
+We pose the following research questions related to \tname{}:
+
+\begin{enumerate}
+  \item \textbf{RQ1: \rqone{}}
+  \item \textbf{RQ2: \rqtwo{}}
+  \item \textbf{RQ3: \rqthree{}}
+  \item \textbf{RQ4: \rqfour{}}
+  \item \textbf{RQ5: \rqfive{}}
+\end{enumerate}
+
+The first question checks how well fuzzing finds new bugs when using different seed corpora and how seed choice affects coverage and bug discovery.
+%
+The second question tests whether regression tests from one runtime can directly find bugs in others, showing how readily reusable these tests are across runtimes.
+%
+The third question compares transplantation and fuzzing with respect to bug-finding ability.
+% to see which finds more or different bugs. 
+%
+The fourth question examines what kinds of bugs appear and what parts of the runtimes they affect. 
+%
+Finally, the fifth question looks at when the effective seeds were created to learn whether older or newer tests are more useful for finding bugs today.
+
+
+\section{Evaluation}
+\label{sec:eval}
+To answer the research questions, we evaluate the bug counts and characterize a selected number of the bugs found. Additionally, we measure coverage and analyze the origination timeline of seeds.
+
+\subsection{\textbf{RQ1: \rqone{}}}
+\label{sec:rqone}
+
+\input{tables/fuzz_bugs_unified}
+
+% \deleted[id=giorgi]{Figure \ref{fig:seed_corpora_venn} shows a Venn diagram highlighting the number of common and unique bugs detected by all fuzzers using different seed corpora. Fuzzing on the \tname{} corpus revealed \tnameUniqueFuzzBugs{} unique bugs, which is substantially higher compared to fuzzing on the other seed corpora.}
+
+\added[id=giorgi]{We compare four seed corpora across \fuzzercount{} fuzzers and three runtimes: three established baselines from prior \wasm{} fuzzing work~\cite{zhao2024wapplique, cao2024wasmaker, zhou2023wadiff}: \llvmbench{}, \wasmbench{}, and \specbench{}. The fourth corpus is \tname{}, our regression-derived corpus.}
+
+\input{figures/bugs_by_seeds}
+
+\added[id=giorgi]{Table~\ref{tab:fuzz_bugs_unified} reports the unique bug counts for each corpus, fuzzer, and runtime combination. The three established corpora reveal \OtherSeedTotalBugs{} unique bugs combined. This is substantially lower than the numbers reported in their original publications. For example, \wapplique{} originally reported \WappliquePaperBugCount{} bugs with \llvmbench{}~\cite{zhao2024wapplique}, and \wasmaker{} originally reported \WasmakerPaperBugCount{} bugs with \wasmbench{}~\cite{cao2024wasmaker}. This decline is consistent with the saturation effect discussed in Section~\ref{sec:intro}.}
+
+\input{figures/coverage_progress}
+
+\added[id=giorgi]{In contrast, \tname{} alone reveals \tnameUniqueFuzzBugs{} unique bugs~(ref. Figure \ref{fig:seed_corpora_venn})  . This is more than any individual established corpus, and also more than the three established corpora combined. Figure~\ref{fig:seed_corpora_venn} shows this as a Venn diagram of bug overlap across corpora. Table~\ref{tab:fuzz_bugs_unified} shows the breakdown of bug counts across all corpora, fuzzers, and runtimes. The same pattern holds across runtimes. Only \wasmaker{}, \wapplique{}, and \lwdiff{} were effective with \tname{}. \wasmaker{} and \wapplique{} found a comparable number of bugs. \wadiff{} did not yield bugs when paired with \tname{}. We discuss this fuzzer-corpus mismatch in Section~\ref{sec:lessons}.}
+
+\input{figures/transplantation_heatmap}
+\input{examples/rq2_ex1}
+
+Figure \ref{fig:coverage_progress} shows the coverage progress across all runtimes when using different fuzzers with all four seed corpora at 4 hour intervals. The shaded bands represent $\pm 1$ std. dev. around the mean. We observe that fuzzing improves overall coverage compared to the coverage achieved prior to fuzzing (i.e. at timestep 0) by \CoverageImprovementOverall{}. While \wasmedge{} and \wamr{} runtimes achieved relatively higher coverage, \wasmtime{} had the lowest coverage for all seed corpora. We also note that for all runtimes, fuzzing with \rtbench{} consistently achieved higher coverage compared to the other seed corpora. Narrow bands around the mean depict an overall stable coverage measurement. Also, most fuzzers plateau around 12 hours, which aligns well with findings from prior work \cite{gao2023beyond}. 
+
+\begin{tcolorbox}[rqbox]
+\emph{\textbf{Summary of RQ1.}}~
+Using \tname{} as a seed corpus significantly improved fuzzing results. The fuzzers we analyzed revealed \FuzzingBugsCount{} crashes/inconsistencies and achieved higher coverage when using \rtbench{} compared to other corpora.
+\end{tcolorbox}
+
+\subsection{\textbf{RQ2: \rqtwo{}}}
+\label{sec:rqtwo}
+
+\input{figures/transplantation_timeline}
+
+This question examines the baseline effects of \tname, that is, the benefits of using \tname\ directly on each runtime. We first analyze the impact of directly executing regression tests from one runtime on another, a process we refer to as ``test transplantation'' (\textsection~\ref{sec:rqtwo-partone}). We then present a longitudinal study of the tests that revealed bugs (\textsection~\ref{sec:rqtwo-parttwo}).
+
+\subsubsection{\label{sec:rqtwo-partone}RQ2.1: Can regression tests from one runtime directly reveal bugs in a different runtime?}~Figure~\ref{fig:transplantation_heatmap} 
+shows a heatmap matrix to illustrate the results of running regression test cases across runtimes. The matrix represents the effects of running regression test cases from an origin runtime (y-axis) in a target runtime (x-axis). 
+% h, \ie{}. transplanting bug-revealing seeds from one runtime to others using the \tname{} corpus
+
+We observe that regression tests from all runtimes except \wasmer{}, could reveal new bugs in the other runtimes, but the effect is uneven. For example, \wamr{}-derived seeds were particularly cross-fertile, triggering 3 bugs in \wasmer{} and 3 bugs in \wasmedge{}. This case is highlighted with 2 yellow-colored squares in the row labeled ``\wamr{}''. 
+Overall, these results indicate that test transplantation is capable of uncovering previously-hidden bugs in runtimes.
+
+Figure \ref{ex:rq2_ex1} shows one such bug found in the \wasmedge{} runtime by transplanting the test \href{https://github.com/bytecodealliance/wasm-micro-runtime/issues/3391}{WAMR\#3391}. We have reduced the corresponding regression test for debugging and eventually reporting. Figure \ref{ex:rq2_ex1}(a) shows the reduced code. The WAT code declares an \CodeIn{externref~local} and immediately reads it with \CodeIn{local.get~0}, producing undefined data instead of a valid reference. During execution, the null value is interpreted, triggering a crash. To confirm whether this bug is indeed due to a lack of the necessary default initialization, we show a counterexample in Figure \ref{ex:rq2_ex1}(b), where a similar WAT code that explicitly initializes \CodeIn{ref.null} does not trigger a crash. The WebAssembly Core Specification 4.2.1 requires that \CodeIn{externref} variables are initialized to \CodeIn{ref.null}~\cite{spec_default_values}. Thus, the user is not responsible for explicitly initializing \CodeIn{externref} variables to \CodeIn{ref.null}. Hence, the absence of default initialization in \wasmedge{} risked an eventual null pointer dereference. This bug was fixed by the pull request (\href{https://github.com/WasmEdge/WasmEdge/pull/4329}{PR\#4329}) shortly after reporting.
+
+\subsubsection{\label{sec:rqtwo-parttwo}RQ2.2: When do bugs found by transplantation originate in the buggy runtimes?}
+Figure \ref{fig:transplantation_timeline} shows the timelines of bugs revealed with transplantation as pairs of the form $\langle{}(\alpha, x, R_a), (\beta, x, R_b)\rangle{}$, where $\alpha$ denotes a point in time where a test case $x$ \emph{appears} in a bug report from runtime $R_a$ and $\beta$ denotes a point in time where $x$ \emph{reveals} a bug in runtime $R_b$. We report data quarterly to facilitate visualization. We use a binary search-like approach, similar to \CodeIn{git\!-\!bisect}, to identify the version of the buggy runtime that reveals the symptom for the first time.
+
+The top-four horizontal lines from Figure \ref{fig:transplantation_timeline} indicate the timelines associated with the origin of the test cases whereas the bottom-four horizontal lines indicate the timelines for revealing a bug with transplantation, \ie{}, the time a bug would be revealed for the first time in a different runtime. The boxes at both ends of each arrow show the ids of the test cases; the direction of the arrow (left or right) indicate if a bug existed in a runtime before it was reported in a different runtime.
+As we did not find any bugs on the \wasmtime{} runtime, the revelation bar of \wasmtime{} has been grayed out. 
+
+The visualization reveals two patterns. 
+First, \TransplantationPreExistingCount{} of \TransplantationBugsCount{} bugs (i.e. \TransplantationPreExistingPercentage{}) existed long before their official reports (i.e., T1, T3, T7-10, and T13).
+Second, another \TransplantationPostExistingCount{} bugs (i.e. \TransplantationPostExistingPercentage{}) would only emerge in the observed runtimes long after they were originally reported elsewhere (e.g., T2, T4-6, T11-12).
+These patterns show that transplantation bugs exhibit substantial latency across runtimes: some bugs already exist, and other bugs will exist in the future. In both cases, transplantation of regression tests across runtimes is beneficial. The benefit would be immediate in the first case and would be delayed in the latter.
+Figure \ref{fig:transplantation_timeline} also shows that most transplantation bugs cluster around 2022--2024, which was a period coinciding with major WebAssembly specification updates \cite{changelog1, changelog2}.
+
+\begin{tcolorbox}[rqbox]
+\emph{\textbf{Summary of RQ2.}}~
+Regression test transplantation revealed a modest but important number of bugs in WASM runtimes: \textbf{\TransplantationBugsCount{}}, overall. For reference, the fuzzer \wapplique{} needed several hours of fuzzing to reveal 10 bugs in WASM runtimes. 
+\end{tcolorbox}
+
+
+
+\subsection{\textbf{RQ3: \rqthree{}{}}}
+\label{sec:rqthree}
+\input{tables/bug_status}
+\input{tables/testcase_error_conditions}
+
+Table \ref{tab:bug_status} summarizes the status of bugs discovered by \rtbench{}, divided into transplantation bugs, fuzz bugs, and their combined totals across four major WebAssembly runtimes: \wasmtime{}, \wasmer{}, \wamr{}, and \wasmedge{}. Several important observations emerge. First, fuzzing produced a substantially higher number of reported bugs compared to transplantation, indicating that fuzzing remains the more prolific bug-finding strategy overall. However, transplantation still uncovered unique bugs, particularly in \wamr{} and \wasmedge{}. Second, \wasmer{} had the largest number of total reported and confirmed bugs. Third, \wasmedge{} and \wasmer{} are the only runtimes with fixed bugs.
+
+\deleted[id=ishrak]{Another key observation is that the bugs discovered through transplantation and those uncovered by fuzzing effectively do not overlap. In cases where a fuzzing campaign appeared to expose the same bug as transplantation, we checked our fuzzing provenance logs to trace the original seeds that led to that bug-triggering test case. We note that even when a bug initially seemed to be found by both transplantation and fuzzing, in all such cases, these bugs were attributable to transplantation alone. Hence, every one of the \TransplantationBugsCount{} bugs identified through transplantation was uniquely discovered by transplantation, with no additional contribution from any fuzzer.}
+
+\added[id=ishrak]{Since every fuzzing campaign begins by executing the seed corpus, bugs directly exposed by regression tests are naturally observed before mutation. To determine whether mutation independently rediscovered these bugs, we analyzed the provenance logs of every fuzz-generated test case that reproduced a transplantation bug. In every case, the bug-triggering lineage contained the same regression test that had already exposed the bug through direct transplantation. We found no instance in which the same underlying bug was rediscovered through a lineage originating from a different seed. Thus, while mutation generated many additional bugs, the transplantation bugs remained attributable to the original transplanted regression tests.}
+
+\begin{tcolorbox}[rqbox]
+\emph{\textbf{Summary of RQ3.}}~
+Fuzzing generally found more total bugs, but transplantation found different ones. None of the bugs from transplantation overlapped with those from fuzzing. Transplantation complements fuzzing.
+\end{tcolorbox}
+
+\input{examples/ex13_11_14}
+\input{tables/proposal_technique}
+
+\subsection{\textbf{RQ4: \rqfour{}{}}}
+\label{sec:rqfour}
+
+Table \ref{tab:error_conditions} characterizes representative bugs revealed with \tname{} as the seed corpus. These bugs are categorized by using terminology consistent with prior WASM testing work \cite{zhao2024wapplique}, \cite{cao2024wasmaker}. We group them into two main categories: \CodeIn{runtime~failure} and  \CodeIn{compilation~failure}. Runtime failures refer to crashes that occur during execution, which we further distinguish by the type of exception. A compilation failure occurs when a Wasm binary cannot be successfully compiled or instantiated, \ie{} it fails before execution begins.
+
+We further categorize bugs based on their symptoms. Each testcase’s output was analyzed to determine whether it belongs to the \CodeIn{Crash} or \CodeIn{Output-difference} category. If a testcase triggers a runtime crash (e.g., \CodeIn{segfault} or \CodeIn{aborted}), it is placed under the crash category; if it produces inconsistent outputs across runtimes, it is classified as an output-difference bug. The categorization process begins by minimizing each testcase with \CodeIn{wasm-tools~shrink} to its smallest reproducible form, then identifying the specific code segment responsible for the behavior. To validate our classification, we modified and relocated the identified code segments to confirm that they consistently reproduced the observed behavior. Finally, the structure of each minimized code pattern guided its placement into the most relevant category.
+
+For instance, one representative runtime failure (Row 5) involves a recursive call inside a vector-returning function that never terminates and is eventually followed by an \CodeIn{unreachable} instruction, leading the runtime into an infinite loop before crashing. Another case (Row 11) represents a compilation failure where the compiler miscomputes lane extraction as an \CodeIn{i32} address and then incorrectly uses this address as the base for a SIMD load \CodeIn{v128.load8\_splat}, triggering a validation error during instantiation.
+
+The following examples illustrate \deleted[id=ishrak]{two test cases that demonstrate a compilation failure and a runtime failure, respectively} \added[id=ishrak]{three test cases related to different kinds of failures}. Each case highlights the key instruction patterns and runtime behaviors that led to the observed failures.
+
+Figure~\ref{example:bug_examples}(a) reveals a crash pattern linked to incorrect handling of multi-value function returns involving SIMD vector types. 
+The critical lines are \CodeIn{(type~(func~(result~i32~i32~v128)))} and the instruction sequence \CodeIn{i32.const~0} $\rightarrow$ \CodeIn{i32.const~0} $\rightarrow$ \CodeIn{v128.const~i32x4~0~0~0~0}. 
+Here, the function is declared to return two \CodeIn{i32} values followed by a \CodeIn{v128} vector. 
+While this is a valid multi-value return signature under the WebAssembly SIMD and multi-value proposals, certain runtimes, particularly LLVM-based JIT backends mishandle the lowering of mixed scalar and SIMD return values. 
+During compilation, the LLVM backend emits mismatched IR types between the declared function signature and the actual return instruction (e.g., returning \CodeIn{i64,~i128} instead of the expected multi-value tuple), leading to an internal assertion failure ``\texttt{Function return type does not match operand type of return inst}''. 
+This results in a compiler abort rather than a clean trap. 
+Therefore, the failure is classified as a \CodeIn{Compilation~Failure~type-mismatch~bug}, specifically triggered by the combination of multi-value returns and SIMD vector types that cause inconsistencies in function return type lowering during LLVM IR generation.
+
+Figure~\ref{example:bug_examples}(b) demonstrates a runtime crash caused by incorrect handling of typed references within control-flow boundaries. 
+The instruction sequence \CodeIn{br 0} $\rightarrow$ \CodeIn{ref.null 0} is responsible for triggering the failure. 
+The \CodeIn{br 0} instruction transfers control to the nearest enclosing block, rendering subsequent code unreachable, yet the engine must still correctly validate or lower it. 
+Immediately following this, the instruction \CodeIn{ref.null 0} attempts to create a null reference of heap type index~\CodeIn{0}, which corresponds to the first function type defined in the module~(\CodeIn{type (func)}). 
+While this construct is syntactically valid under the reference-types proposal, certain runtimes particularly JIT-based ones mishandle the combination of an unreachable code region with a typed reference operand, leading to inconsistent type-state tracking or invalid IR generation during lowering. 
+This results in a runtime failure, specifically in the runtime’s implementation of reference-type validation and unreachable-block handling.
+
+\textcolor{orange}{Figure~\ref{example:bug_examples}(c) shows a core execution bug during runtime. The test case module has a 1-page memory (max 2) and an active data segment with empty contents at offset 896340315, far beyond the memory’s size. Under bulk-memory semantics, an out-of-bounds active segment should result in a handled trap at instantiation even when empty. But in this case this test case resulted in an unhandled segmentation fault.}
+
+\added[id=mohsen]{In Table~\ref{tab:proposal_technique}, we characterized all reported bugs by proposal and by discovery technique. Two patterns stand out. All Reference-Types and GC bugs (3 of 3) were found only through transplantation. These bugs share a common cause: runtimes omit an implicit specification obligation, such as default-initializing an \CodeIn{externref} to \CodeIn{ref.null}, validating a typed-reference operand, or rejecting an illegal \CodeIn{ref eq} type constructor. A fuzzer's mutation operators rarely construct these cases, since the bug lies in an absent or misused construct rather than an executable instruction pattern. Conversely, all 6 bugs tied to the core execution engine rather than a specific proposal, including call-stack depth limits, trap and signal handling, and parser edge cases, were found only through fuzzing. SIMD is the largest category overall (14 bugs) but leans heavily toward fuzzing, which found 12 of them versus 2 from transplantation. WASI/host-interface bugs (5) were split between the techniques. These results show that transplantation and fuzzing (\textsection{}\ref{sec:rqthree}); target different classes of bugs.}
+
+
+\begin{tcolorbox}[rqbox]
+\emph{\textbf{Summary of RQ4.}}~SIMD/Multi-value accounts for the largest share of bugs found with \tname{} (14 of \TotalBugs{}), predominantly via fuzzing (12 of 14). Reference-Types/GC bugs (3) were found exclusively through transplantation, while core-execution-engine bugs (6) were found exclusively through fuzzing, evidence that the two techniques target structurally different classes of bugs.
+
+\end{tcolorbox}
+
+\input{figures/testcase_lineage}
+
+\subsection{\textbf{RQ5: \rqfive{}}}
+\label{sec:rqfive}
+
+Figure \ref{fig:testcase_lineage} highlights several important patterns in bug propagation from seeds to new test cases across different WebAssembly runtimes. First, seeds from \wasmtime{} and \wamr{} dominate the flow, producing a substantial number of downstream bugs, whereas \wasmer{} and \wasmedge{} appear more frequently as buggy runtimes than as primary seed sources.
+
+Second, 90\% of the impactful seeds are concentrated between the 12-month and 36-month age bands, a period that coincides with major implementation upgrades from WebAssembly specification version 1 to 2 \cite{changelog1, changelog2}. 14.63\% of the seeds from this period (12-36 months old) were useful for finding bugs. In contrast, very recent seeds that are younger than 12 months, contribute less overall.
+
+Third, the oldest seeds (48 and 72 months) were only effective when used with transplantation, underscoring that transplantation provides a unique pathway to reactivating older seeds that fuzzing alone cannot exploit. Only 6.86\% of the seeds that were either \textless 12 months or \textgreater 36 months old were useful in bug finding.
+
+\begin{tcolorbox}[rqbox]
+\emph{\textbf{Summary of RQ5.}}~90\% of the useful seeds came from regression tests that were 2–3 years old, aligning with the period when WebAssembly’s specification evolved from version 1 to 2. Older seeds, while less effective for fuzzing, still exposed new issues through transplantation.
+\end{tcolorbox}
+
+% \newpage
+\section{Discussion}
+\label{sec:discussion}
+
+This section presents lessons learned and threats to validity.
+
+\subsection{Lessons Learned}
+\label{sec:lessons}
+
+We summarize key lessons learned as a set of observations and corresponding recommendations.
+
+\begin{enumerate}[
+    itemsep=0pt,
+    parsep=0pt,
+    topsep=2pt,
+    partopsep=0pt
+]
+
+\item \added[id=ishrak]{\textbf{Reuse Regression Tests Directly on Asynchronously Evolving Implementations}~Although WebAssembly specifies standardized semantics, major language proposals (e.g., Reference Types, SIMD, Exception Handling, Memory64, and GC) are implemented by runtimes at different times depending on implementation priorities and available resources. Consequently, regression tests that expose corner cases in an early adopter frequently remain effective for revealing analogous implementation defects in later adopters. This asynchronous proposal-adoption dynamic explains why historical regression tests remain valuable across independently developed runtimes and motivates the use of cross-runtime regression-test transplantation.} \added[id=mohsen]{This is borne out empirically: every Reference-Types/GC bug in our study was found through transplantation and none through fuzzing (\textsection{}\ref{sec:rqfour}), directly supporting this asynchronous-adoption hypothesis.}
+
+\item \textbf{Monitor all runtimes and integrate new regression tests.}~Our study shows that regression tests from one runtime can directly reveal bugs in others without additional overhead and also serve as effective seeds for fuzzing (\textsection{}\ref{sec:rqone} \& \ref{sec:rqtwo}). Moreover, \TransplantationPreExistingPercentage{} of the bugs found by transplantation existed long before in the observed runtimes (\textsection{}\ref{sec:rqone}). So, we recommend the integration of regression tests as soon as they are updated.
+
+\item \textbf{Prioritize regression tests created during major specification upgrades.}~We observed that 90\% of the useful transplanted tests and fuzzing seeds originated during major specification upgrades from version 1 to 2 (\textsection{}\ref{sec:rqone} \& \ref{sec:rqfive}) \cite{changelog1, changelog2}. Specification upgrades are routine and version 3 has been recently finalized \cite{changelog3}. Therefore, as implementations for version 3 start rolling out, we recommend automated test generation from the spec updates similar to prior work on spec-based test generation \cite{rao2024diffspec}.
+
+\item \textbf{Continuously update and maintain \tname{}.}~The long-term utility of \tname{} depends on both its evolution and its curation. As new regression tests are introduced to fix bugs or cover new specification features, they should be promptly incorporated into \tname{} to capture up-to-date runtime behavior. We also found that older seeds were largely ineffective for both transplantation and fuzzing (\textsection{}\ref{sec:rqfive}). So, older seeds exercising stable features or redundant paths should be periodically retired for the efficiency of \tname{} seed corpora \cite{li2025improving, rebert2014optimizing, herrera2021seed}.
+
+\item \textbf{Adjust mutation strategy based on seed complexity.}
+Our results indicate that mutation effectiveness of \wasm{} fuzzers is tied to seed complexity. We observed that \wadiff{}'s havoc mutations are effective on only \specbench{} corpora (\textsection{}\ref{sec:rqtwo}). It is worth noting that \specbench{} contains simple and focused seeds (\textsection{}\ref{sec:seed_corpora}). In contrast, \wasmaker{} and \wapplique{}’s splicing mutations perform well only when applied to complex and diverse seed corpora such as \rtbench{}~(\textsection{}\ref{sec:rqtwo}, \textsection{}\ref{sec:seed_corpora}). Based on our observations, we recommend a seed-complexity aware mutation strategy i.e. to apply havoc mutations on simple seeds and splicing on complex ones for \wasm{} fuzzing.
+\end{enumerate}
+
+\subsection{Case study: Why does \rtbench{} overcome saturation?}
+\label{sec:overcoming_saturation}
+\added[id=ishrak]{To better understand why \rtbench{} is able to overcome the saturation observed with existing seed corpora, we compared the line-level coverage of \rtbench{} and \wasmbench{} on the \wasmer{} runtime. We selected this case because \rtbench{} exhibits one of the largest initial coverage advantage over \wasmbench{} in Table \ref{tab:seed_corpora}. The comparison reveals that the additional coverage is not concentrated in simply instruction execution alone, but in runtime infrastructure responsible for instance management, VM context handling, memory management, trap handling, and runtime library calls. In particular, \rtbench{} uniquely exercises code for memory initialization, copy, fill, growth, table initialization, data segment operations, imported and local memory resolution, and VM context manipulation, many of which remain completely uncovered when fuzzing starts from \wasmbench{}.}
+
+\added[id=ishrak]{These results suggest that \rtbench{}'s advantage stems from exposing fuzzing to diverse instructions and a broader set of runtime states and execution contexts, enabling mutations to continue exploring previously unreachable behaviors after conventional seed corpora have saturated.}
+
+\subsection{Threats to Validity}
+\label{sec:threats}
+
+\added[id=mohsen]{\noindent \textbf{Construct.}~A potential threat concerns how we define and count bugs. Some anomalies could stem from undefined runtime behaviors. Although our differential testing module normalizes outputs, nondeterministic effects may still yield spurious mismatches. To mitigate this, we identified patterns of known undefined behaviors and semi-automatically filtered such cases. Our proposal-level classification of the reported bugs (\textsection{}\ref{sec:rqfour}) was performed manually against each bug's minimized test case and error output; a second author independently reviewed the classification to reduce subjectivity, with disagreements resolved by discussion.} 
+\noindent \textbf{Internal.}~Fuzzing inherently involves randomness, which can affect coverage and bug counts. To mitigate randomness bias, we executed each fuzzing campaign five times under fixed time budgets and identical configurations, then aggregated unique bug outcomes across runs. \textcolor{orange}{Additionally, we evaluate the corpus as a whole without showing exactly what properties of a seed drive gains. We partially mitigate this threat with a post-hoc mapping of bugs to WebAssembly proposals (Table \ref{tab:proposal_technique}). In both transplantation and fuzzing, we found that the presence of proposal-specific instructions is associated with effective seeds. We will analyze other seeds properties and their interaction in future work.}
+\noindent \textbf{External.}~Another threat relates to the representativeness of our objects of study i.e. runtimes, fuzzers, and seed corpora. We focused on four mature and \fuzzercount{} widely used mutational fuzzers, which may not generalize to emerging engines or generative fuzzers. Similarly, the \tname{} corpus was derived from regression tests of these four runtimes and may underrepresent other WebAssembly ecosystems. We mitigate this by selecting the most widely used runtimes, fuzzers, and seed corpora from prior work, and by releasing \tname{} to enable extension in future studies.
+
+\section{Related Work}
+
+\label{sec:relatedwork}
+\input{related}
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+This paper presents \tname{}, a dataset of real-world \wasm{} regression tests, and reports on an in-depth evaluation of two complementary strategies (namely, test transplantation and regression-seeded fuzzing) for uncovering bugs in WASM runtimes. Across three major runtimes, we discovered \TotalBugs{} bugs, with transplantation and fuzzing revealing distinct and non-overlapping issues. Our results show that regression tests remain valuable long after their creation to assist bug-fixes, especially those created during major specification updates.
+%
+Overall, results indicate that the use of project metadata, such as issues and release notes, is a promising direction to improve effectiveness of WASM fuzzers.
+
+% \onecolumn \begin{multicols}{2}
+
+% \bibliographystyle{ACM-Reference-Format}
+
+%%% this will split last column at the reference number
+\IEEEtriggeratref{46}   % put this anywhere before \bibliography
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+% \end{multicols}
+
+\end{document}

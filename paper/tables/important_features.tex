@@ -1,0 +1,22 @@
+\begin{table*}[ht!]
+\scriptsize
+\centering
+\begin{tabular}{l|l|l|l|l|l}
+\hline
+\textbf{12 months} & \textbf{24 months} & \textbf{36 months} & \textbf{48 months} & \textbf{72 months} & \textbf{Buggy seeds} \\ \hline
+is\_mem\_shared\_false & I32Eq|I32Or & LocalGet|CallIndirect & I64ShrU|I64Add & instr\_entropy & I32Const|LocalSet \\
+local\_int\_constants & Unreachable|End & I32Sub|LocalSet & Call|I32Sub & I32Sub|I32Eqz & I64Shl|I64Or \\
+mem\_min & LocalGet|CallIndirect & I32GeS & I64Add|I64Sub & variable & LocalSet|I32Const \\
+data\_lengths & I32GeS|BrIf & I64Shl|LocalSet & F64Store|Br & func\_instrs\_count & func\_instrs\_count \\
+total\_section\_count & Memory & I32Sub|I32Load8u & Call|GlobalGet & I32Or|Br & float\_instr\_count \\
+I64Const|I64Const & alignments & table\_max & I32Shl|I32Add & I64Add|I64Const & F64Const|F64Add \\
+is\_mem64 & control & I32Const|I32GeS & I32Shl|I32And & Call|Drop & local\_float\_constants \\
+Data & mem\_max & local\_float\_constants & Call|I32Add & local\_const\_count & F64Const \\
+Memory & I64And|I64Const & Export & I64Sub|LocalGet & max\_nesting\_depths & BrIf \\
+float\_instr\_count & I32Xor|LocalGet & LocalGet|I32Load & I32Load8u|Select & mem\_max & I32Sub \\
+\hline
+\end{tabular}
+\caption{\Fix{Divide the tables. One for age groups. One for buggy/nonbuggy.} Top-10 most important structural features across different age bins and buggy seeds.}
+
+\label{tab:top_features}
+\end{table*}

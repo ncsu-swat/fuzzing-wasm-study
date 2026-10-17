@@ -1,0 +1,29 @@
+\begin{table}[t]
+    \caption{\label{tab:prelim_bugs}Number of bugs that fuzzers reveal with different existing seed corpora. Column ``$\Sigma$'' aggregates all bugs found for each seed corpus across fuzzers and runtimes over five 24h fuzzing campaigns.} 
+    \footnotesize
+    \centering
+    \setlength{\tabcolsep}{2.8pt}
+    \begin{tabular}{llccccr}
+        \toprule
+        \textbf{Seed Corpus} & \textbf{Fuzzer} & \textbf{\wasmer{}} & \textbf{\wamr{}} & \textbf{\wasmedge{}} & \textbf{$\Sigma$} \\ 
+        \midrule
+        \multirow{3}{*}{\llvmbench{}} 
+            & \wadiff{}    & - & - & - & \multirow{3}{*}{9} \\
+            & \wasmaker{}  & 1 & 2 & - &  \\
+            & \wapplique{} & 2 & 3 & 1 &  \\ 
+        \midrule
+        \multirow{3}{*}{\wasmbench{}} 
+            & \wadiff{}    & - & - & - & \multirow{3}{*}{5} \\
+            & \wasmaker{}  & 2 & 1 & - &  \\
+            & \wapplique{} & - & 1 & 1 &  \\ 
+        \midrule
+        \multirow{3}{*}{\specbench{}} 
+            & \wadiff{}    & 2 & 2 & 5 & \multirow{3}{*}{9} \\
+            & \wasmaker{}  & - & - & - &  \\
+            & \wapplique{} & - & - & - &  \\ 
+        \midrule
+        Total & & 5 & 5 & 6 & \textbf{16} \\
+        \bottomrule
+    \end{tabular}   
+    \vspace{-5ex}
+\end{table}

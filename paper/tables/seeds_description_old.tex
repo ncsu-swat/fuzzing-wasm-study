@@ -1,0 +1,23 @@
+\begin{table*}[t]
+	\centering
+	\small
+        \setlength{\tabcolsep}{10pt}   
+        %% caption on tables should appear at top -Marcelo
+        \caption{Seed corpora used in our evaluation, their count, size statistics, and baseline coverage achieved across four WebAssembly runtimes when replayed directly without fuzzing.}
+	\label{tab:seed_corpora} 
+	\begin{tabular}{@{}p{2cm} l r r r r r r r r r}
+		\toprule
+		\multirow{2}{*}{\textbf{Seed Corpus}} & 
+		\multirow{2}{*}{\textbf{Count $\uparrow$}} & 
+		\multicolumn{5}{c}{\textbf{Size Statistics (bytes)}} & 
+		\multicolumn{4}{c}{\textbf{Branch Coverage (\%)}} \\ 
+		\cmidrule(lr){3-7} \cmidrule(lr){8-11}
+		                     &            & Min & Max & Median & Mean & SD & Wasmtime & Wasmer & WAMR & WasmEdge \\
+		\midrule
+        \llvmbench{}              & 228   & 2K  & 69K & 12K  & 15K  & 8.8K   & 11.02 & 12.02 & 14.39 & 27.53 \\
+        \textbf{\tname{}}         & 584   & 8   & 54M & 6K   & 584K & 3.9M   & 13.73 & 16.12 & 18.23 & 28.57 \\
+		\wasmbench{}              & 8.5K  & 41  & 75M & 37K  & 700K & 3.2M   & 12.31 & 11.97 & 17.71 & 27.67 \\
+		  \specbench{}              & 200K  & 45  & 384 & 348  & 270  & 133    & 10.89 & 10.01 & 15.32 & 19.81 \\
+		\bottomrule
+	\end{tabular}
+\end{table*}

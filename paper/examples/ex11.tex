@@ -1,0 +1,51 @@
+
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  captionpos=b,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,             % reduce space between numbers and code
+  frame=lines,               % only top and bottom borders
+  rulecolor=\color{black},
+  framesep=0pt,
+  xleftmargin=0pt,           % remove extra indentation
+  framexleftmargin=0pt,      % align code with numbers
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false
+}
+% --- Example WAT code listing with hyperlink caption ---
+\begin{lstlisting}[
+  style=watpaper,
+  caption={\textbf{(Runtime bug related to GC/RefTypes.)} (\href{https://github.com/bytecodealliance/wasm-micro-runtime/issues/4480}{WAMR\#4480})},
+  label={example:ex11}
+]
+(module
+  (type (;0;) (func))...
+   (func (;0;)
+     br 0
+     ref.null 0
+     unreachable
+   )
+)
+\end{lstlisting}
+
+    

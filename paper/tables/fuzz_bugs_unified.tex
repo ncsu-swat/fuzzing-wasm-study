@@ -1,0 +1,49 @@
+\begin{table}[t]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{6pt}
+    \renewcommand{\arraystretch}{1}
+    \setlength{\aboverulesep}{1pt}
+    \setlength{\belowrulesep}{1pt}
+    \caption{Number of unique bugs revealed by each combination of seed corpus, fuzzer, and runtime, aggregated over five 24-hour fuzzing campaigns. Column $\Sigma$ aggregates unique bugs per corpus across fuzzers and runtimes. Bottom row aggregates per runtime across corpora and fuzzers. \wasmtime{} is excluded since no technique found a bug in it.}
+    \label{tab:fuzz_bugs_unified}
+    \begin{tabular}{@{}llcccc@{}}
+        \toprule
+        \textbf{Seed Corpus} & \textbf{Fuzzer} &
+        \textbf{\wasmer{}} & \textbf{\wamr{}} &
+        \textbf{\wasmedge{}} & $\Sigma$ \\
+        \midrule
+        \multirow{4}{*}{\llvmbench{}}
+         & \wadiff{}    & - & - & - & \multirow{4}{*}{7} \\
+         & \wasmaker{}  & 1 & 2 & - & \\
+         & \wapplique{} & 2 & 3 & - & \\
+         & \added[id=ishrak]{\lwdiff{}}
+         & \added[id=ishrak]{-} & \added[id=ishrak]{-}
+         & \added[id=ishrak]{-} & \\
+        \midrule
+        \multirow{4}{*}{\wasmbench{}}
+         & \wadiff{}    & - & - & - & \multirow{4}{*}{6} \\
+         & \wasmaker{}  & 2 & 1 & - & \\
+         & \wapplique{} & - & 1 & 1 & \\
+         & \added[id=ishrak]{\lwdiff{}}
+         & \added[id=ishrak]{-} & \added[id=ishrak]{1}
+         & \added[id=ishrak]{1} & \\
+        \midrule
+        \multirow{4}{*}{\specbench{}}
+         & \wadiff{}    & 2 & 2 & 5 & \multirow{4}{*}{9} \\
+         & \wasmaker{}  & - & - & - & \\
+         & \wapplique{} & - & - & - & \\
+         & \added[id=ishrak]{\lwdiff{}}
+         & \added[id=ishrak]{1} & \added[id=ishrak]{1}
+         & \added[id=ishrak]{-} & \\
+        \midrule
+        \multirow{4}{*}{\textbf{\rtbench{}}}
+         & \wadiff{}    & - & - & - & \multirow{4}{*}{\FuzzingBugsCount{}} \\
+         & \wasmaker{}  & \rtbenchWasmakerWasmer{} & \rtbenchWasmakerWAMR{} & \rtbenchWasmakerWasmEdge{} & \\
+         & \wapplique{} & \rtbenchWappliqueWasmer{} & \rtbenchWappliqueWAMR{} & \rtbenchWappliqueWasmEdge{} & \\
+         & \added[id=ishrak]{\lwdiff{}}
+         & \added[id=ishrak]{4} & \added[id=ishrak]{2}
+         & \added[id=ishrak]{1} & \\
+        \bottomrule
+    \end{tabular}
+\end{table}

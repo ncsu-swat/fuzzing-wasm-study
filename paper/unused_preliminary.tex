@@ -1,0 +1,22 @@
+\section{Preliminary Study}
+% \label{sec:prelim}
+% \input{tables/prelim_bugs}
+
+We conducted a preliminary study to evaluate the effectiveness of existing mutational fuzzers for WebAssembly runtimes. Specifically, we aim to evaluate if these fuzzers can continue to discover bugs in recent versions of major runtimes when using existing seed corpora. We selected three representative mutational fuzzers namely~\wadiff{}~\cite{zhou2023wadiff}, \wasmaker{}~\cite{cao2024wasmaker}, and \wapplique{}~\cite{zhao2024wapplique}, along with three publicly available seed corpora commonly used in prior studies: \llvmbench{}~\cite{zhao2024wapplique}, \wasmbench{}~\cite{cao2024wasmaker}, and \specbench{}~\cite{zhou2023wadiff}.
+
+% We selected the four most popular runtimes that were commonly evaluated across a majority of the prior work \cite{zhao2024wapplique, cao2024wasmaker, zhou2023wadiff}. We ran each fuzzer–seed combination on the following four prominent \wasm{} runtimes namely~\wasmtime{}, \wasmer{}, \wamr{}, and \wasmedge{} for 24 hours, following a common time budget used in fuzzing research. To mitigate the stochastic nature of fuzzing, we repeated each experiment five times. Table~\ref{tab:prelim_bugs} reports the aggregated number of unique bugs discovered across runs. Since no technique found any bug in the \wasmtime{} runtime, we exclude it from Table~\ref{tab:prelim_bugs}. Results indicate the following:
+
+% \begin{packed_itemize}
+%     \item Our fuzzing campaigns reveal a relatively small number of bugs for \llvmbench{} and \wasmbench{} corpora compared to those reported in prior work. For example, \wapplique{} reported \WappliquePaperBugCount{} bugs with \llvmbench{} \cite{zhao2024wapplique}, and \wasmaker{} reported \WasmakerPaperBugCount{} bugs with \wasmbench{} \cite{cao2024wasmaker}. Although these corpora previously found bugs successfully, they lost effectiveness for continued fuzzing on recent runtime versions.
+    
+%     This contrasts with the results reported in prior work. For example, \wadiff{} reported \WadiffPaperBugCount{} bugs with \specbench{} \cite{zhou2023wadiff}.
+    
+%     \Fix{@Ishrak, you need to provide number to (compare these results and) substantiate this claim. How many bugs each fuzzer finds on some of these runtimes with some of the corpora?};
+    
+%     \item\sloppy \specbench{}, which is a large seed corpus with simple and focused seeds, is only effective with \wadiff{}. \specbench{} retained relative bug finding effectiveness over time with respect to the common target runtimes. It is worth noting that \specbench{} is created by the \wadiff{} toolset.
+
+% \end{packed_itemize}
+
+% \begin{tcolorbox}[rqbox]
+% % \emph{\textbf{Summary:}}~\emph{Our preliminary study indicates that the effectiveness of our fuzzing campaigns was lower than what has been reported in prior work. A possible explanation is that existing seed corpora exhibit diminishing returns as runtimes become more robust, a phenomenon recently described as the ``saturation effect''~\cite{groce2020saturation, liyanage2023reachable}. Therefore, further work is needed to improve the effectiveness of \wasm{} seed corpora.}
+% \end{tcolorbox}

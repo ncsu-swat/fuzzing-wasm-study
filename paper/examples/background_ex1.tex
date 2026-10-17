@@ -1,0 +1,155 @@
+
+% --- WAT language definition and style ---
+\lstdefinelanguage{WAT}{
+  morekeywords={
+    module,type,func,param,result,export,import,local,global,data,
+    i32,i64,f32,f64,v128,const,set,get,load,store,unreachable,
+    block,loop,if,else,br,br_if,call,offset,align,externref,ref,null
+  },
+  sensitive=true,
+  alsoletter={.,_},
+  comment=[l]{;;}
+}
+
+\lstdefinestyle{watpaper}{
+  language=WAT,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,
+  frame=lines,
+  rulecolor=\color{black},
+  framesep=6pt,
+  xleftmargin=0pt,
+  framexleftmargin=0pt,
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false,
+  escapeinside={(*@}{@*)},
+}
+
+% A generic code style (same look as watpaper) usable with any language via [language=...]
+\lstdefinestyle{codepaper}{
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\itshape\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{black},
+  stepnumber=1,
+  numbersep=2pt,
+  frame=lines,
+  rulecolor=\color{black},
+  framesep=6pt,
+  xleftmargin=0pt,
+  framexleftmargin=0pt,
+  showstringspaces=false,
+  keepspaces=true,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false,
+  escapeinside={(*@}{@*)},
+}
+% --- helper macro: tight colorbox ---
+% \newcommand{\tightbox}[2]{\begingroup\fboxsep=0pt\colorbox{#1}{#2}\endgroup}
+
+\begin{wrapfigure}[27]{r}{0.46\columnwidth}
+% \vspace{-3ex}
+\centering
+\lstset{style=codepaper}
+\begin{lstlisting}[language=C]
+// Factorial in C
+long long factorial(long long n) {
+  if (n == 0) {
+    return 1;
+  } else {
+    return n * factorial(n - 1);
+  }
+}
+\end{lstlisting}
+\centering\footnotesize{(a) C code.}
+\vspace{4pt}
+\lstset{style=codepaper}
+\begin{lstlisting}[language=WAT]
+(module
+  (type (func (param i64) (result i64))) ;; Type section
+  (func (type 0) (param i64) (result i64)
+    local.get 0
+    i64.eqz
+    if (result i64) (i64.const 1) else
+      local.get 0
+      local.get 0
+      i64.const 1
+      i64.sub
+      call 0
+      i64.mul
+    end)
+  (export "factorial" (func 0)) ;; Export section
+)
+\end{lstlisting}
+\centering\footnotesize{(b) Corresponding WAT code.}
+\caption{Factorial example.}
+\label{ex:background_ex1}
+\end{wrapfigure}
+
+% \begin{figure}[t]
+% \centering
+% % ----------- TOP ROW (2 columns) -----------
+% \begin{minipage}[t]{0.48\linewidth}
+% \lstset{style=codepaper}
+% \begin{lstlisting}[language=C]
+% // Factorial in C
+
+
+% long long factorial(long long n) {
+
+
+%   if (n == 0) 
+%   {
+%     return 1;
+%   } 
+    
+%   else 
+%   {
+  
+%    return n * factorial(n - 1);
+
+%   }
+
+% }
+% \end{lstlisting}
+% \centering\footnotesize{(a) C code to compute Factorial}
+% \end{minipage}\hfill
+% \begin{minipage}[t]{0.48\linewidth}
+% \lstset{style=codepaper}
+% \begin{lstlisting}[language=WAT]
+% (module
+%   (type (func (param i64) (result i64))) ;; -> Type section
+%   (func (type 0) (param i64) (result i64) ;; -> Function + Code sections
+%     local.get 0
+%     i64.eqz
+%     if (result i64) (i64.const 1) else
+%       local.get 0
+%       local.get 0
+%       i64.const 1
+%       i64.sub
+%       call 0
+%       i64.mul
+%     end)
+%   (export "factorial" (func 0))           ;; -> Export section
+% )
+% \end{lstlisting}
+% \centering\footnotesize{(b) Corresponding WAT code}
+% \end{minipage}
+
+% \vspace{6pt}
+% \caption{\textbf{Example of the factorial computation in C (a) and in WebAssembly Text (WAT) format (b) \cite{wiki_wasm}}
+% }
+% \label{ex:background_ex1}
+% \end{figure}

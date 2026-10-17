@@ -1,0 +1,22 @@
+\begin{figure}[!t]
+    \centering
+    \begin{lstlisting}
+    (module
+      (import "wasi_snapshot_preview1" "fd_renumber" (func (;0;)))
+      (import "wasi_snapshot_preview1" "proc_exit" (func (;1;)))
+      (memory (;0;) 2)
+      (export "memory" (memory 0))
+      (export "_start" (func 2))
+      (func (;2;)
+        i32.const 3
+        i32.const 3
+        call 0
+        call 1
+      )
+    ) 
+    \end{lstlisting}
+    \caption{Example 5 (WAMR Issue\#4539) (Regression case)}
+    \label{example:ex5}
+\end{figure}
+
+%regression

@@ -1,0 +1,44 @@
+\begin{figure}[!t]
+    \centering
+    \begin{lstlisting}
+(module
+  (type (;0;) (func (result v128)))
+  ...
+  (memory (;0;) 65536 65536)
+  (export "main" (func 1))
+
+  (func (;0;) (type 0) (result v128)
+    unreachable)
+
+  (func (;1;) (type 0) (result v128)
+    (local v128)
+    ...
+    block
+      loop
+        ...
+        v128.const i32x4 0 0 0 0
+        local.set 0
+        local.get 0
+        local.get 0
+        f32x4.div
+        local.set 0
+        local.get 0
+        i16x8.extract_lane_s 1
+        v128.load8x8_u offset=9759 align=1   ;; crash-prone load
+        local.set 0
+        ...
+        br 0
+      end
+    end
+    call 0  ;; callee is `unreachable`
+    ...
+    local.get 0
+    return
+  )
+)
+    \end{lstlisting}
+    \caption{Example 4 (WAMR Issue\#4544) (Regression case)}
+    \label{example:ex4}
+\end{figure}
+
+%regression

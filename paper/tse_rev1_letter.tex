@@ -1,0 +1,375 @@
+% =============================================================
+%  Response Letter Template — IEEE TSE Major Revision
+%  Drop this file into the SAME Overleaf project directory as
+%  your main paper. It is fully self-contained and does not
+%  \input or \include anything from the paper itself.
+% =============================================================
+\documentclass[11pt]{article}
+\include{macros}
+
+% ---------- Page geometry ----------
+\usepackage[letterpaper,margin=1in]{geometry}
+
+% ---------- Core packages ----------
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+\usepackage{amsmath}
+\usepackage{parskip}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    citecolor=blue!60!black,
+    urlcolor=blue!60!black
+}
+
+% ---------- Colors ----------
+\definecolor{commentbg}{RGB}{245,245,245}
+\definecolor{commentborder}{RGB}{180,180,180}
+\definecolor{tseblue}{RGB}{0,51,102}
+
+% ---------- Section styling ----------
+\titleformat{\section}{\Large\bfseries\color{tseblue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{tseblue}}{\thesubsection}{1em}{}
+
+% ---------- Reviewer comment / response environments ----------
+% Usage:
+%   \begin{revcomment}[label]
+%     Original reviewer text goes here.
+%   \end{revcomment}
+%   \begin{response}
+%     Your response goes here.
+%   \end{response}
+\newtcolorbox{revcomment}[1][]{
+    breakable,
+    colback=commentbg,
+    colframe=commentborder,
+    boxrule=0.5pt,
+    arc=2pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    fonttitle=\bfseries,
+    title={#1},
+    before skip=10pt, after skip=4pt
+}
+
+\newenvironment{response}{%
+    \par\vspace{10pt}
+    \par\noindent\textbf{\color{tseblue}Response:}\par\nobreak\ignorespaces
+}{%
+    \par\vspace{15pt}
+}
+
+% ---------- Sequential "Reviewer N, Comment M" numbering ----------
+% \newreviewer increments the reviewer number and resets the comment
+% counter back to 0. Call it once at the start of each reviewer's
+% section (before the first \begin{rcomment} in that section).
+\newcounter{reviewernum}
+\newcounter{cmtcounter}[reviewernum]
+\newcommand{\newreviewer}{\stepcounter{reviewernum}\setcounter{cmtcounter}{0}}
+ 
+\newenvironment{rcomment}{%
+    \stepcounter{cmtcounter}%
+    \begin{revcomment}[R\thereviewernum{}.C\thecmtcounter{}.~Reviewer~\thereviewernum{}, Comment~\thecmtcounter]
+}{%
+    \end{revcomment}
+}
+
+% ---------- Manuscript metadata — EDIT THESE ----------
+\newcommand{\manuscriptID}{TSE-2026-01-0053}
+\newcommand{\authorList}{Ishrak Hayet, Mohsen EsfandyariDoulabi, Giorgi Merabishvili, and Marcelo d'Amorim}
+\newcommand{\aeName}{Associate Editor}
+
+\begin{document}
+
+% =============================================================
+% Title block
+% =============================================================
+\begin{center}
+    {\LARGE\bfseries Response to Reviewers}\\[10pt]
+    {\Large \PaperTitle{}}\\[8pt]
+    {\large Manuscript \manuscriptID{}}\\[8pt]
+    \authorList\\[6pt]
+    \textsc{07-18-2026}
+\end{center}
+
+\vspace{1em}
+\hrule
+\vspace{1.5em}
+
+% =============================================================
+% Letter to the Associate Editor
+% =============================================================
+\section*{Letter to the Associate Editor}
+
+Dear \aeName{},
+
+We sincerely thank you and the reviewers for your careful evaluation of our manuscript and for the constructive feedback. We appreciate your summary highlighting the need to strengthen the framing of our contributions, provide deeper WebAssembly-specific insights, improve the positioning with respect to related work, and expand the empirical analysis. We have substantially revised the manuscript to address these concerns.
+
+The revised paper now more clearly positions our contribution as an empirical study of regression test reuse in the WebAssembly ecosystem rather than a claim of novelty for seed quality or fuzzing methodology in general. We explain why WebAssembly presents a particularly suitable setting for regression test reuse by showing how independently developed runtimes asynchronously adopt standardized language proposals, allowing regression tests from early adopters to remain effective in exposing analogous defects in later adopters. We further discuss the WebAssembly-specific validity and configuration constraints that distinguish this setting from general mutation-based testing. We also revisited the status of every reported bug by rechecking developer responses. This resulted in numerous additional confirmed and fixed bugs, while only a very small number of previously reported issues were ultimately rejected. We updated all reported statistics and discussions accordingly.
+
+Following Reviewer 1's suggestions, we have reorganized the research questions and merged the preliminary study to RQ1. We have also updated the Related Work section to clarify prior work and distinguish them clearly from our contributions. Importantly, we have strengthened the positioning of our contributions by clarifying that our findings go beyond showing that \rtbench{} outperforms existing seed corpora. Instead, we explain why historical regression tests are an especially effective source of fuzzing seeds in the asynchronously evolving WebAssembly ecosystem.
+
+According to Reviewer 2's suggestions, we significantly deepened the empirical analysis of the discovered bugs and added coverage analysis to show relation of missing path executions to seed corpus saturation. We added a proposal-level characterization relating reported bugs to individual WebAssembly proposals and to show that transplantation is particularly effective at exposing defects associated with asynchronously adopted proposals such as Reference Types and GC. We also added a detailed coverage case study comparing \rtbench{} with \wasmbench{}. The analysis reveals that existing seed corpora entirely miss execution paths associated with several proposal-specific runtime components, providing evidence that saturation is not merely a consequence of limited instruction diversity but also of failing to exercise proposal-specific runtime behaviors and execution states.
+
+Following Reviewer 3's suggestion, we substantially expanded the experimental evaluation by including \lwdiff{}~\cite{zhou2025lwdiff} as a new baseline. Using \lwdiff{}, we mined LLM-generated mutation operators described in the original paper and evaluated them using all four seed corpora under the same experimental settings as the other fuzzers. This new evaluation demonstrates that our central findings generalize beyond the originally evaluated fuzzers: \rtbench{} consistently improves the effectiveness of \lwdiff{} as well. Additionally, we have elaborately discussed the contrast and complementarity of LLM-based WebAssembly fuzzers like \lwdiff{}~\cite{zhou2025lwdiff} and \textsc{DrWASI}~\cite{zhang2025drwasi} with \rtbench{}.
+
+We believe these revisions have substantially strengthened the manuscript and addressed the concerns raised by both you and the reviewers. We are grateful for the opportunity to revise our work and hope the revised manuscript meets the expectations of the editorial committee for publication in \emph{IEEE Transactions on Software Engineering}.
+
+\vspace{1em}
+Sincerely,\\
+\authorList
+
+\clearpage
+
+% =============================================================
+% Summary of Major Changes
+% =============================================================
+\section{Summary of Major Changes}
+
+\begin{table*}[!h]
+\centering
+\footnotesize
+\caption{Summary of Major Changes}
+\label{tab:summary_changes}
+\begin{tabular}{|>{\raggedright\arraybackslash}m{2.7cm}|>{\centering\arraybackslash}m{2.2cm}|>{\raggedright\arraybackslash}m{10cm}|}
+\hline
+\textbf{Change} & \textbf{Location} & \textbf{Description} \\
+\hline
+
+Abstract rewritten &
+Abstract &
+Clarified the positioning of the paper around seed corpora saturation. Briefly stated our observations and findings on reusing regression tests in the WebAssembly domain where asynchronous implementation of proposals is a widespread practice among different runtimes. \\
+\hline
+
+Motivation reframed as preliminary investigation &
+\S~I &
+Replaced the ``formative study'' language with a ``preliminary investigation,'' and explicitly connected the observed decline in fuzzer effectiveness to the known saturation effect in fuzzing and to analogous patterns in compiler testing after version transitions. \\
+\hline
+
+WebAssembly specific insight &
+\S~I, \S~VI, \S~VIII &
+Added an explicit hypothesis: independently developed runtimes adopt WebAssembly specification proposals asynchronously, so semantic corner cases exposed in one runtime remain effective for finding analogous defects in others. Threaded through the Introduction, RQ4, and Discussion. \\
+\hline
+
+Contributions list split &
+\S~I (contributions) &
+Divided the single contribution bullet describing the empirical study into two: (1) the transplantation/fuzzing empirical study, and (2) a dedicated benchmark study of the three baseline seed corpora. \\
+\hline
+
+Merged preliminary study with RQ1 &
+\S~V.(A) &
+We have removed the preliminary study section. We have merged our findings from the preliminary study section into RQ1. Table 3 now shows the number of discovered crashes/inconsistencies using four fuzzers on three runtimes using all seed corpora. \\
+\hline
+
+RQ1 expanded with baseline comparison &
+\S~V.(A) &
+Added explicit discussion of the three baseline seed corpora, quantitative comparison against originally published fuzzer results (\wapplique{}~\cite{zhao2024wapplique}, \wasmaker{}~\cite{cao2024wasmaker}), and framing of the decline as consistent with the saturation effect; clarified that \rtbench{} alone outperforms all three baselines combined. \\
+\hline
+
+Added comparison with \lwdiff{} &
+\S~V.(A) &
+Added experiment on fuzzing with a new fuzzer \lwdiff{}~\cite{zhou2025lwdiff} in RQ1. \rtbench{} consistently improves the bug finding ability of \lwdiff{}, similar to other fuzzers. \\
+\hline
+
+Explained tautological claim in RQ3 &
+\S~V.(C) &
+Rephrased the tautological claim that transplantation and fuzzing bugs never overlap with a provenance-log-based analysis tracing fuzz-generated test-case lineage back to the originating regression test. \\
+\hline
+
+New RQ4 analysis by proposal and technique &
+\S~V.(D) &
+Added a new paragraph and table characterizing bugs by WebAssembly proposal (Reference-Types/GC, SIMD, core execution engine, WASI) versus discovery technique; updated the RQ4 summary box with quantified findings. \\
+\hline
+
+New lesson-learned item &
+\S~VI.(A) &
+Added a lesson on directly reusing regression tests across asynchronously evolving implementations, supported by the RQ4 finding that all Reference-Types/GC bugs were found only through transplantation. \\
+\hline
+
+New case study to explain saturation &
+\S~VI.(B) &
+Added ``Why does \rtbench{} overcome saturation?'', a coverage-based case study (\wasmer{} runtime, \rtbench{} vs.\ \wasmbench{}) showing the advantage comes from a combination of diverse instructions, interactions among module resources, and exercising previously unexplored runtime states and infrastructure. \\
+\hline
+
+New construct-validity threat &
+\S~VI.(C) &
+Added a paragraph addressing how bugs were defined and counted, how undefined-behavior-induced false positives were filtered, and how the bug classification was manually validated via independent review. \\
+\hline
+
+Related Work reorganized and expanded &
+\S~VII &
+Condensed the transplantation and fuzzing-seed paragraphs with concrete comparison and contrast; added a new subsection on differential testing of WebAssembly runtimes; restructured ``Other Related Works'' to relate each prior technique to this paper's contribution. \\
+\hline
+
+\end{tabular}
+\end{table*}
+
+\clearpage
+
+% =============================================================
+% Reviewer 1
+% =============================================================
+\section{Response to Reviewer 1}
+\newreviewer
+
+\begin{rcomment}
+    It is well-known that fuzz testing performance varies quite a bit with the seed corpus provided, so that result is also not surprising. I think that result is quite strongly replicated by now, so the advancement to knowledge is a little less on this point.
+\end{rcomment}
+\begin{response}
+    The influence of seed corpus quality on fuzzing effectiveness has been well established in prior work. Our intention was not to claim novelty in that general observation. We have revised the paper to make this point explicit and to reposition our contribution. Rather than showing that "better seeds improve fuzzing," our contribution is to demonstrate that historical WebAssembly regression tests constitute a particularly effective seed source for mature WebAssembly runtimes, and to explain why. Specifically, we show that regression tests mined from previous runtime bugs expose semantic corner cases associated with evolving WebAssembly proposals that are underrepresented in existing seed corpora. We have revised the Introduction (§.I), Discussion (§.VI), and Conclusion (§.VIII) sections to emphasize this more precise contribution and to avoid overstating the generality of the seed-quality observation.
+\end{response}
+
+\begin{rcomment}
+    For RQ3, the conclusion is that all bugs found by transplantation and fuzzing were actually found by transplantation alone. If the transplantation tests were used as seeds for fuzzing, isn't this conclusion simply true by construction?
+\end{rcomment}
+\begin{response}
+    We agree that the regression tests are executed before mutation begins, so a bug directly exposed by a regression test is naturally observed at the start of a fuzzing campaign. However, our conclusion is not based solely on this execution order. As part of our provenance analysis, we traced the ancestry of every fuzz-generated test case that appeared to reproduce a transplantation bug to determine whether mutation had independently rediscovered that bug. In every such case, the provenance logs identified the same regression test that had already exposed the bug through direct transplantation as the originating seed in the lineage. We found no instance in which the same underlying bug was rediscovered through a lineage originating from a different seed. We have clarified this point in RQ3 (§.V.(C)) to avoid the impression that our conclusion follows solely from executing the seeds before mutation.
+\end{response}
+
+\newpage
+
+\begin{rcomment}
+    A point not addressed in the paper but which the data in Table V suggest: it appears that bugs revealed by transplantation are more likely to be confirmed and fixed than those revealed by fuzzing. The numbers are small, so perhaps it is noise. But, if there are any additional comments from the developers or datapoints that suggest it may not be noise, this would be a useful thing to point out.
+\end{rcomment}
+\begin{response}
+    We revisited the updated bug status in Table IV (§.V.(C)), after incorporating the latest confirmations and fixes from the runtime developers. While transplantation bugs currently exhibit a slightly higher fix rate, the confirmation rates are comparable between transplantation and fuzzing.
+\end{response}
+
+\begin{rcomment}
+    The preliminary study can be merged into the main results. It might make more sense to write it as such, to highlight how the bug-finding power of the fuzzers differs based on the seed corpora that are used to start the fuzzing. The fact that much fewer bugs are found in the preliminary study than in the original fuzzers papers aligns with previous results, as the manuscript points out. This is consistent with e.g. the results in CSmith, which show a spike in bug discovery when a new major version comes out, followed by decreased bug discovery with new minor versions that comes out.
+\end{rcomment}
+\begin{response}
+    First, we have switched the ordering of RQ1 and RQ2 such that now RQ1 answers the question related to the effectiveness of seed corpora for fuzzing. We have merged the preliminary study into RQ1 ((§.V.(A)). Specifically, we removed the standalone preliminary study section and restructured the paper as follows. The motivation for evaluating existing seed corpora now appears in the Introduction (§.I), where we also cite the saturation effect and the CSmith observation that bug discovery spikes when a new major version comes out and then declines. The experimental results of the preliminary study have been folded into RQ1 ((§.V.(A)), which we reframed from "Is \rtbench{} a good seed corpus for fuzzing?" to "How does seed corpus choice affect fuzzing effectiveness across WASM runtimes?". RQ1 now presents a unified comparison of all four seed corpora (\llvmbench{}~\cite{zhao2024wapplique}, \wasmbench{}~\cite{hilbig2021empirical}, \specbench{}~\cite{zhou2023wadiff}, and \rtbench{}) across four fuzzers and three runtimes in a single table (Table III), which replaces the two previously separate tables. The text in RQ1 leads with the comparative finding: the three established corpora reveal substantially fewer bugs than reported in their original publications, consistent with the saturation effect, while \rtbench{} reveals more bugs than the three established corpora combined. The contributions list was updated accordingly to present the benchmark of established corpora as a baseline within the main study rather than a separate formative study.
+\end{response}
+
+\begin{rcomment}
+    The related work session cites many papers, but discusses them on a rather surface level. It would be better if the related work spent a little more space comparing and contrasting with those papers that are most related, or whose results do/don't align with the results of this manuscript.
+\end{rcomment}
+\begin{response}
+    We have restructured the Related Work section (§.VII) to replace broad enumeration with focused comparison against the most closely related works. For test transplantation, we now discuss the two closest analogues individually: transplantation of regression tests across JavaScript engines and reuse of a single test suite across SQLite, PostgreSQL, and DuckDB. We also clarify a key contrast with these settings: WebAssembly is portable by design, so \rtbench{} runs the same test cases on every runtime without any adaptation. For fuzzing, we now explicitly connect prior results to ours: \wapplique{}~\cite{zhao2024wapplique} and \wasmaker{}~\cite{cao2024wasmaker} originally reported 20 and 33 bugs on their respective corpora, whereas the same fuzzers on the same corpora now reveal far fewer bugs, consistent with the saturation effect; this alignment with seed selection studies is now stated directly. We added a new subsection on differential testing of WebAssembly runtimes that discusses \lwdiff{}~\cite{zhou2025lwdiff} and \textsc{DrWASI}~\cite{zhang2025drwasi} and positions them relative to our work (see also our response to R3.C1 below). Finally, each remaining cluster of related work (structure-guided generation, static analysis, formal verification, and evaluation methodology) now ends with an explicit statement of how it relates to or differs from our approach.
+\end{response}
+
+% Add more rcomment / response pairs as needed.
+
+\clearpage
+
+% =============================================================
+% Reviewer 2
+% =============================================================
+\section{Response to Reviewer 2}
+\newreviewer
+
+\begin{rcomment}
+    The paper provides a solid empirical foundation, however, the authors should address the disconnect between the generalized testing strategy and the WASM domain.
+\end{rcomment}
+\begin{response}
+    We agree that the original manuscript did not sufficiently explain why regression test reuse is particularly effective in the WebAssembly domain. We have substantially revised the paper to better articulate the domain-specific characteristics that motivate our approach.
+    
+    Specifically, in the discussion section (§.VI.(1)) we now discuss how WebAssembly runtimes evolve asynchronously as they adopt new specification proposals (e.g., SIMD, Reference Types, Exception Handling, GC, and other post-MVP features). Although these proposals are standardized, independent runtime implementations often adopt them at different times and encounter similar implementation challenges. Consequently, regression tests that expose corner cases in an early adopter frequently remain effective for revealing analogous defects in later adopters. This asynchronous adoption dynamic makes regression tests especially reusable across WebAssembly runtimes.
+Finally, we strengthened the text throughout the paper to emphasize that our contribution is not merely the application of an existing testing methodology, but rather the empirical characterization of why historical regression tests constitute an effective testing resource for independently and asynchronously developed WebAssembly runtimes.
+
+\end{response}
+
+\begin{rcomment}
+    The authors should also articulate how the unique semantics of WASM influence the success of regression test reuse. For example, during mutation, how does the fuzzer maintain the "stack-invariant" properties that are specific to WASM? If the methodology is generic, the authors must demonstrate that WASM presents unique challenges that require specific adaptations.
+\end{rcomment}
+\begin{response}
+    We also expanded the discussion of WebAssembly-specific validity constraints. Unlike many mutation-based testing domains, WebAssembly modules must satisfy strict validation rules, including stack-type consistency and structured control-flow constraints. The fuzzers used in our study preserve these invariants through their existing WebAssembly-aware mutation mechanisms, allowing them to generate valid modules while exploring new behaviors. We have clarified this point in the background and discussion sections.
+
+    We also note that, when executing transplanted regression tests, we configured each target runtime with the appropriate proposal-specific flags required by the test case. Because different runtimes expose different options for enabling or controlling WebAssembly proposals, the same test cannot always be executed with identical command-line arguments across runtimes. Ensuring equivalent feature configurations was therefore an important practical consideration for successful cross-runtime regression test reuse, especially in the WebAssembly domain.
+
+\end{response}
+
+\begin{rcomment}
+    Beyond reporting bug counts, the authors should provide a deeper analysis of the bugs. Are these bugs triggered by specific WASM proposals (e.g., SIMD, Reference Types, Multi-value)? Is there a common misinterpretation of the WASM specification that transplantation uniquely exposes?
+\end{rcomment}
+\begin{response}
+    We have added a proposal-level characterization of all the reported bugs, cross-tabulated against discovery techniques (transplantation vs. fuzzing), in RQ4 (§.V.(D)) and summarized in a new Table VI.
+
+    To answer the first part of the question directly: yes, the bugs are strongly associated with specific WASM proposals, and the distribution is uneven. SIMD/Multi-value accounts for the largest share (14 of 34), predominantly surfaced through fuzzing (12 of 14), largely via lane-extraction and cross-width type-confusion patterns. Reference Types and GC-related bugs (3) were found exclusively through transplantation. WASI/host-interface bugs (5) and bugs tied to the core execution engine rather than any specific proposal (6, e.g., call-stack depth limits, trap/signal handling) round out the remaining categories, with the latter found exclusively through fuzzing.
+
+    On the second part of the question: yes, we find a consistent pattern in what transplantation uniquely exposes. Every Reference-Types/GC bug in our study stems from runtimes omitting an implicit specification obligation, e.g., failing to default-initialize an externref to ref.null, failing to validate a typed-reference operand, or failing to reject an illegal ref eq type constructor. These are cases where the defect lies in an absent or misused construct rather than an explicit, executable instruction pattern, which is why fuzzers' mutation operators rarely construct them; they arise naturally in regression tests written by someone who already encountered the omission. We have added this observation in (§.V.(D)). We were able to connect this to our observation on bugs surfacing from asynchronous adoption of proposals, in the Discussion (§.VI.(1)). A related highlight of our findings was that every Reference-Types/GC bug in our study was found through transplantation and none through fuzzing, which is direct empirical support for our observation regarding asynchronous adoption since different runtimes adopted the Reference-types/GC proposal at different times.
+
+    We also note a limitation in the Threats to Validity (§.VI.(B)): this proposal-level classification was performed manually against each bug's minimized test case and error output, with a second author independently reviewing the classification to reduce subjectivity.
+
+\end{response}
+
+\newpage
+
+\begin{rcomment}
+    The authors claim existing corpora are saturated. Is this saturation due to a lack of instruction variety or a failure to exercise complex state transitions in the WASM operand stack?
+\end{rcomment}
+\begin{response}
+    Our analysis suggests that the observed saturation cannot be explained by instruction diversity or operand-stack behavior alone. Rather, it arises from a combination of instruction diversity and, more importantly, the ability of the seed corpus to exercise diverse runtime states and interactions among module resources (e.g., memories, tables, VM contexts, exception handling, and traps). Existing seed corpora cover many individual WebAssembly instructions but rarely expose fuzzing to these richer execution contexts, causing fuzzing to plateau earlier.
+
+    According to Groce and Regehr (Embedded in Academia, 2020)~\cite{groce2020saturation}, we consider a seed corpus to be saturated if its bug finding ability drops over time. Extrinsically, we first observe and confirm saturation as a reduced rate of new bug discovery when using the existing seed corpora. Intrinsically, to understand why this kind of saturation might occur, we conducted an additional case study by analyzing coverage differences between \rtbench{} and \wasmbench{} in greater depth. We have added the findings of our analysis to the discussion section in (§.VI.(B)),. This analysis is not intended as a redefinition of saturation, but as a way to explain how certain coverage behavior might lead to saturation. 
+
+    \begin{table}[t]
+        \centering
+        \small
+        \caption{Source files in \wasmer{} with the largest line-coverage improvements when using \rtbench{} instead of \wasmbench{}. Coverage is measured before fuzzing to show the initial baseline.}
+        \label{tab:wasmer_rtbench_coverage}
+        \begin{tabular}{l r}
+        \toprule
+        \textbf{Source file} & \textbf{Coverage increase (+percentage points)} \\
+        \midrule
+        \texttt{trap/trap.rs} & +43.40 \\
+        \texttt{trap/traphandlers.rs} & +36.87 \\
+        \texttt{libcalls.rs} & +19.70 \\
+        \texttt{vmcontext.rs} & +19.60 \\
+        \texttt{instance/mod.rs} & +15.61 \\
+        \texttt{memory.rs} & +14.02 \\
+        \texttt{threadconditions.rs} & +13.10 \\
+        \midrule
+        \textbf{Overall \wasmer{} line coverage} & \textbf{32.48\% $\rightarrow$ 46.71\% (+14.23 pp)} \\
+        \bottomrule
+        \end{tabular}
+    \end{table}
+    
+    To investigate this, we performed a line-by-line coverage comparison between \rtbench{} and \wasmbench{} on the \wasmer{} runtime, where \rtbench{} shows the largest initial coverage improvement (Table 2). Although both corpora execute many common instructions, \rtbench{} reaches substantially more runtime infrastructure. We summarize the amount of coverage increase by \wasmer{} source files in Table~\ref{tab:wasmer_rtbench_coverage}. Overall, line coverage increases from 32.48\% to 46.71\% when using \rtbench{} compared to \wasmbench{}.
+    
+    Examining the coverage differences further shows that \rtbench{} uniquely exercises code responsible for instance creation, VM context manipulation, imported and local memory resolution, bulk-memory operations (e.g., memory.init, memory.copy, memory.fill, data.drop), table initialization, and trap generation and handling, while many of these paths remain entirely unexplored with \wasmbench{}.
+    
+    These observations indicate that the limiting factor is neither instruction diversity nor operand-stack behavior alone. Rather, saturation arises because conventional seed corpora fail to exercise sufficiently diverse combinations of module resources, runtime state, and execution contexts. Consequently, many components of the runtime remain unexplored, limiting the effectiveness of subsequent mutations. By reusing regression tests accumulated during runtime evolution, \rtbench{} begins fuzzing from a broader set of semantically meaningful runtime states, enabling mutations to continue reaching new execution paths long after existing corpora plateau.
+
+\end{response}
+
+\clearpage
+
+% =============================================================
+% Reviewer 3
+% =============================================================
+\section{Response to Reviewer 3}
+\newreviewer
+
+\begin{rcomment}
+    The manuscript must be entirely revised to integrate, contrast, and distinguish its contributions from the following critical works. \textsc{DrWASI} (ACM TOSEM, 2026) operates explicitly within the WebAssembly domain and relies heavily on test transplantation. \lwdiff{} (ICSE, 2025) utilized Large Language Models to assist in the differential oracle generation. The authors must discuss \lwdiff{} in their Related Work section and provide a comparative analysis of their respective bug yields.
+\end{rcomment}
+\begin{response}
+    We have revised the Related Work section (§.VII) to include discussions of both \lwdiff{}~\cite{zhou2025lwdiff} and \textsc{DrWASI}~\cite{zhang2025drwasi}. However, after carefully reviewing these two papers, we would like to highlight that although both of these fuzzers are mutational, neither approach transplants regression tests.
+    
+    \textsc{DrWASI} targets the WebAssembly System Interface (WASI) rather than the core WebAssembly execution engine. It uses LLMs to generate initial C test programs from the WASI specification and corresponding POSIX APIs, and subsequently applies parameter and environment mutations to produce additional test cases~\cite{zhang2025drwasi}. Since our work focuses on testing the core WebAssembly runtime rather than the WASI library interface, we consider \textsc{DrWASI} to address a different testing problem and therefore outside the scope of a direct experimental comparison. We have nevertheless expanded the related work section to clarify this distinction.
+    
+    \lwdiff{}, on the other hand, targets WebAssembly runtimes directly and is therefore a relevant baseline. Rather than transplanting regression tests, \lwdiff{} uses LLMs to extract knowledge from the WebAssembly specification and automatically generate specification-guided mutation operators, which are then used to mutate existing seed test cases~\cite{zhou2025lwdiff}. Accordingly, we added a new experimental evaluation using \lwdiff{}. Following the original paper, we first used the same LLM-based mutator generation procedure to construct the mutation operators via the OpenAI API. We then generated test cases from each of the evaluated seed corpora, including \rtbench{}. We will add the \lwdiff{} mutators to our artifact repository.
+    
+    Because the objective of our paper is to evaluate the effectiveness of different seed corpora rather than compare fuzzing algorithms, we do not emphasize a head-to-head comparison between \lwdiff{} and the other fuzzers. Instead, Table III in RQ1 (§.V.(A)) now shows that \rtbench{} consistently enables \lwdiff{} to discover more bugs than the other evaluated seed corpora, which is aligned to our findings on the other fuzzers. For fairness and consistency, all generated test cases were executed on the same runtime versions specified in the Object and Questions section (§.IV.(A)). Our original evaluations on the other fuzzers were also conducted on these same runtime versions. Most crashes exposed by \lwdiff{} overlapped with those previously discovered by the other fuzzers. Only 2 crashes in the \wamr{} runtime were uniquely discovered by \lwdiff{} when fuzzed with the \rtbench{} corpus. But these 2 crashes are fixed on the latest versions. So, we did not report these crashes as new bugs with the \wamr{} runtime.
+
+\end{response}
+
+\begin{rcomment}
+    Figure 7 should be updated to display the variance across the five independent runs. The line graphs plotting cumulative coverage should include shaded confidence bands representing the standard deviation or the minimum and maximum coverage values achieved at each temporal milestone (4h, 8h, 12h, etc.). If \rtbench{} consistently outperforms \llvmbench{} across all five runs with minimal overlap in their confidence intervals, the authors' claims are significantly strengthened. If the variance is extremely high, this volatility must be documented and discussed.
+\end{rcomment}
+\begin{response}
+    We have updated Figure 7 in RQ1 (§.V.(A)) to aggregate results from five independent fuzzing runs per seed corpus. The revised figure now shows the mean cumulative branch coverage with shaded bands representing ±1 standard deviation at each measurement point. Across all four runtimes, the relative ordering of the seed corpora remains consistent across runs: \rtbench{} achieves the highest coverage. The observed variability across runs is modest, with relatively narrow standard deviation bands.
+\end{response}
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+\end{document}

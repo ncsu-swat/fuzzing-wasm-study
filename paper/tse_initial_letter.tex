@@ -1,0 +1,52 @@
+\documentclass{letter}
+\makeatletter
+
+\input{macros}
+
+\newcommand\newblock{\hskip .11em\@plus.33em\@minus.07em}
+\makeatother
+
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{xspace}
+\usepackage{MnSymbol,wasysym}
+\usepackage{tcolorbox}
+\usepackage{natbib}
+
+\newcommand{\rev}[1]{\emph{#1}}
+\newcommand{\resp}[1]{{\color{blue}\emph{#1}}}
+\newcommand{\respp}[1]{{\color{red}\emph{#1}}}
+
+\begin{document}
+
+Department of Computer Science\\
+North Carolina State University\\
+Raleigh, NC-27695, USA\\
+\vspace{2pt}\\
+Jan 15, 2026
+
+\vspace{10pt}
+Dear IEEE TSE Editors-in-Chief
+
+  We ask you to consider our paper for publication at TSE as a journal-first paper. In this paper, we evaluate the existing seed corpora used by several representative WebAssembly runtime fuzzers \cite{zhao2024wapplique, cao2024wasmaker, zhou2023wadiff}. We note that outdated seed corpora suffer from seed saturation effect and result in sub-optimal performance on the recent runtime versions. Based on this observation, we propose a new source of seeds from the regression tests of these WebAssembly runtimes and call this corpora \rtbench{}.
+  
+  We found that \rtbench{} seed corpora is more diverse and effective than the existing seed corpora. We showed two impactful use cases of \rtbench{}. First, we directly tested one runtime with regression tests from other runtimes in an effort of test transplantation. Second, we used \rtbench{} as a seed corpus with existing well-known mutational fuzzers. 
+  
+  We present our detailed methodology, analysis, evaluation, and concrete recommendations regarding the impact of different seed corpora on the effectivenss of different mutational WebAssembly runtime fuzzers. We look forward to receiving feedback from the reviewers.  
+  
+
+  \vspace{10pt}
+  Yours Sincerely,
+  
+  Ishrak, Mohsen, Giorgi, and Marcelo
+
+\vspace{15pt}
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+\end{document}
+
+
+
+
