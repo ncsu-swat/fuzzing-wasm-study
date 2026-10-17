@@ -12,7 +12,6 @@
 \usepackage{multicol}
 \usepackage{enumitem}
 \usepackage{color}
-\usepackage{minted}
 \usepackage{graphicx}
 \usepackage{rotate}
 \usepackage{url}
@@ -83,7 +82,8 @@
   breaklines=true
 }
 
-\usepackage[final]{changes}
+\usepackage[final,commandnameprefix=ifneeded]{changes}
+% \usepackage[final]{changes}
 % \usepackage{changes}
 \definechangesauthor[name={Giorgi}, color=violet]{giorgi}
 \definechangesauthor[name={Ishrak}, color=blue]{ishrak}
