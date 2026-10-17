@@ -1,2 +1,0 @@
-wamrc -o <testcase>.aot <testcase>
-iwasm --heap-size=0  -f main <testcase>.aot

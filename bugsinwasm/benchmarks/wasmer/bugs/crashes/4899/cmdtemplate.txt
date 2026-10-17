@@ -1,1 +1,0 @@
-wasmer run --enable-all --mapdir /dir:. <testcase>

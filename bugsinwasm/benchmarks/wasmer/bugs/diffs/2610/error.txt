@@ -1,1 +1,0 @@
-Error while importing "wasi_snapshot_preview1"."fd_write": unknown import. Expected Function(FunctionType { params: [I32, I32, I32, I32], results: [I32] })

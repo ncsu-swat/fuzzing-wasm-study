@@ -1,1 +1,0 @@
-wasmedge --reactor /bugs/2745/memory.grow_WasmEdge_aboriton.wasm to_test

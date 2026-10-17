@@ -1,1 +1,0 @@
-iwasm --heap-size=0 -f main /bugs/2677/filea8.aot

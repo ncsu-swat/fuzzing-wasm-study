@@ -1,2 +1,0 @@
-wamrc --bounds-checks=1 <testcase>.aot <testcase>
-iwasm --heap-size=0 -f main <testcase>.aot

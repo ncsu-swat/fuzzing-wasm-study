@@ -1,2 +1,0 @@
-wasmedge compile filea21.wasm filea21.aot
-wasmedge --reactor filea21.aot main

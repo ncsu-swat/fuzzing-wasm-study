@@ -1,1 +1,0 @@
-iwasm --heap-size=0 -f to_test /bugs/2402/select_ast_5563_15_16832024511914527.wasm

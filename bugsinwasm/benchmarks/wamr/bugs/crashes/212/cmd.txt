@@ -1,1 +1,0 @@
-iwasm --stack-size=160000 -f main /bugs/212/main4.wasm 0 0

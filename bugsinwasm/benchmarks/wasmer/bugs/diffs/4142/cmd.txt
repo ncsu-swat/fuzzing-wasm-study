@@ -1,1 +1,0 @@
-wasmer wasm_file_1.wasm 

@@ -1,2 +1,0 @@
-wasmtime -W all-proposals=y --invoke f global.wasm
-wasmtime -W all-proposals=y --invoke f table.wasm

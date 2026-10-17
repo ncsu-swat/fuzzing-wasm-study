@@ -1,1 +1,0 @@
-wasmtime -W=all-proposals=y /bugs/10182/localfunction.wasm

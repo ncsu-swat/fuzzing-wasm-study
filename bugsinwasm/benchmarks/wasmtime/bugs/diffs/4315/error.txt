@@ -1,2 +1,0 @@
-Size: 400x400
-ojph error 0x000300A1 at ojph_codestream.cpp:4067: Error decoding a codeblock

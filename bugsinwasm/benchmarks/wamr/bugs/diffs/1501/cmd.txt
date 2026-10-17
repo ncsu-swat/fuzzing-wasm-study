@@ -1,1 +1,0 @@
-iwasm --heap-size=0 -f _start /bugs/1501/cp907_b5g.wasm

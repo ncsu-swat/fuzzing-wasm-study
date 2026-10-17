@@ -1,5 +1,0 @@
-Error: failed to run main module `test.wasm`
-
-Caused by:
-    0: failed to instantiate "test.wasm"
-    1: shared memory can only be built from a static memory allocation

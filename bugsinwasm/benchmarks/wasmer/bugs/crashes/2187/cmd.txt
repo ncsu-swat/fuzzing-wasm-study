@@ -1,1 +1,0 @@
-wasmer /bugs/2187/test.wasm

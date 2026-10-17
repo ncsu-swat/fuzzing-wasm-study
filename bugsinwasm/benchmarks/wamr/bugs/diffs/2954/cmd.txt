@@ -1,1 +1,0 @@
-iwasm --heap-size=0 --llvm-jit -f to_test iwasm_jit_unexpected_exception_stack_underflow.wasm 

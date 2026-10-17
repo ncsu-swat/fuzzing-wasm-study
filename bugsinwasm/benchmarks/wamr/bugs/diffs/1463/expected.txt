@@ -1,1 +1,0 @@
-WASM module load failed: unsupported opcode 0xc5

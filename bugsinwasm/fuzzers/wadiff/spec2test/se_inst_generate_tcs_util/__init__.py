@@ -1,2 +1,0 @@
-from .generate_tcs_util import generate_tcs_from_result_pairs
-

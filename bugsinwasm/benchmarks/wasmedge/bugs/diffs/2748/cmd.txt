@@ -1,1 +1,0 @@
-wasmedge --reactor file4.wasm main

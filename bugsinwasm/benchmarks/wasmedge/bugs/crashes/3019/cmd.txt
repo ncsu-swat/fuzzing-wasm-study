@@ -1,1 +1,0 @@
-wasmedge --reactor filea58.aot main

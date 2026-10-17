@@ -1,1 +1,0 @@
-wasmedge mutated_file.wasm
