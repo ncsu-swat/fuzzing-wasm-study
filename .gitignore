@@ -216,3 +216,17 @@ bugsinwasm/**/*.su
 
 # Ignore wasi-sdk
 bugsinwasm/benchmarks-no-repro/**/wasi-sdk-16.0
+
+# LaTeX build outputs
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.loc
+paper/*.log
+paper/*.out
+paper/*.pdf
+paper/*.soc
+paper/*.synctex.gz
+paper/*.toc
